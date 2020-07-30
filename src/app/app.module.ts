@@ -20,13 +20,15 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { SettingsComponent } from './ViewModel/settings/settings.component';
 import { AppRoutingModule } from './ViewModel/app-routing/app-routing.module';
+import { GroupSelectionComponent } from './ViewModel/group-selection/group-selection.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     NavigationMenuComponent,
-    SettingsComponent
+    SettingsComponent,
+    GroupSelectionComponent
   ],
   imports: [
     BrowserModule,

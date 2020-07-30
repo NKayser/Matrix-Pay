@@ -1,15 +1,15 @@
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav" fixedInViewport
+  <mat-sidenav #drawer class="sidenav"
       [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
       [mode]="(isHandset$ | async) ? 'over' : 'side'"
       [opened]="(isHandset$ | async) === false">
-    <mat-toolbar>Menu</mat-toolbar>
-    <mat-nav-list>
-      <!--Add new SubMenus here-->
-      <a mat-list-item routerLink="/groups">Groups</a>
-      <a mat-list-item routerLink="/settings">Settings</a>
-    </mat-nav-list>
+    <mat-toolbar>Group Menu</mat-toolbar>
+    <mat-action-list>
+      <!--Iterate through all groups and bind the index correctly to the function-->
+      <a mat-list-item *ngFor="let group of groups, index as i" (click)="selectGroup(i)">{{group}}</a>
+    </mat-action-list>
   </mat-sidenav>
+
   <mat-sidenav-content>
     <mat-toolbar color="primary">
       <button
@@ -20,10 +20,16 @@
         *ngIf="isHandset$ | async">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
-      <span>Matrix Pay</span>
-      <button mat-raised-button class = "logout">Logout</button>
+      <mat-label>{{groupName}}</mat-label>
+      <div class="buttonDiv">
+        <button mat-raised-button class = "groupButtons">Leave Group</button>
+        <button mat-raised-button class = "groupButtons">Add Group</button>
+        <button mat-raised-button class = "groupButtons">Add User to Group</button>
+      </div>
+
     </mat-toolbar>
     <!--Display selected Menu here-->
     <router-outlet></router-outlet>
   </mat-sidenav-content>
+
 </mat-sidenav-container>
