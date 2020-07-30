@@ -1,22 +1,37 @@
-<div>
-  <mat-card>
+<div class = "baseDiv">
+  <mat-card class = "center">
 
-    <mat-label>Matrix Pay</mat-label>
+    <!--contains the Title text-->
+    <div class = "centerText">
+      <mat-label>Matrix Pay</mat-label>
+    </div>
 
-    <mat-form-field appearance="fill">
-      <mat-label>Matrix ID</mat-label>
-      <input matInput [(ngModel)]="matrixUrl">
-    </mat-form-field>
+    <!--contains input box for userName-->
+    <div class = "row">
+      <mat-form-field appearance="fill" class = "full-width">
+        <mat-label>Matrix ID</mat-label>
+        <input matInput [formControl]="matrixUrlControl">
+        <mat-error *ngIf="matrixUrlControl.invalid">{{getMatrixUrlErrorMessage()}}</mat-error>
+      </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="fill">
-      <mat-label>Enter your password</mat-label>
-      <input matInput [(ngModel)]="password" [type]="hide ? 'password' : 'text'" >
-      <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-        <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-      </button>
-    </mat-form-field>
+    <!--contains Password box-->
+    <div class = "row">
+      <mat-form-field appearance="fill" class = "full-width">
+        <mat-label>Enter your password</mat-label>
+        <input matInput [type]="hide ? 'password' : 'text'" [formControl]="passwordControl">
+        <mat-error *ngIf="passwordControl.invalid">{{getPasswordErrorMessage()}}</mat-error>
+        <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
 
-    <button mat-raised-button (click) = 'login()'>Login</button>
+    <!--contains Login button-->
+    <div class = "row">
+      <button mat-raised-button (click) = 'login()' class = "row" color="primary" [disabled]="passwordControl.invalid || matrixUrlControl.invalid">Login</button>
+    </div>
+
 
   </mat-card>
 

@@ -1,0 +1,36 @@
+
+/*places the card that contains all elements in the center*/
+.center {
+
+  margin: auto;
+  width: 20%;
+  padding: 20px;
+
+}
+
+/*Places all elements vertically under each other*/
+.row {
+  display: flex;
+  flex-direction: row;
+  margin: auto;
+}
+
+/*makes the input boxes full length*/
+.full-width {
+  width: 100%;
+}
+
+/* centers the title and configures it*/
+.centerText {
+  text-align: center;
+  font-size: 300%;
+  padding: 30px;
+}
+
+/*Makes the div cover the hole screen and colors it
+TODO Remove scroll that is caused by the height:100% parameter*/
+.baseDiv {
+  padding-top: 150px;
+  background-color: lightblue;
+  height: 100%;
+}
