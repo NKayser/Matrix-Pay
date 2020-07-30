@@ -1,0 +1,7 @@
+build:
+    script:
+        - ng build matrix-pay
+
+test:
+    script:
+        - ng test matrix-pay
