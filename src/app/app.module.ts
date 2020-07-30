@@ -7,6 +7,8 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatDialogModule} from '@angular/material/dialog';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -21,6 +23,9 @@ import { MatListModule } from '@angular/material/list';
 import { SettingsComponent } from './ViewModel/settings/settings.component';
 import { AppRoutingModule } from './ViewModel/app-routing/app-routing.module';
 import { GroupSelectionComponent } from './ViewModel/group-selection/group-selection.component';
+import { GroupTransactionComponent } from './ViewModel/group-transaction/group-transaction.component';
+import { GroupBalanceComponent } from './ViewModel/group-balance/group-balance.component';
+import { PaymentModalComponent } from './ViewModel/payment-modal/payment-modal.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +33,10 @@ import { GroupSelectionComponent } from './ViewModel/group-selection/group-selec
     LoginComponent,
     NavigationMenuComponent,
     SettingsComponent,
-    GroupSelectionComponent
+    GroupSelectionComponent,
+    GroupTransactionComponent,
+    GroupBalanceComponent,
+    PaymentModalComponent
   ],
   imports: [
     BrowserModule,
@@ -46,6 +54,8 @@ import { GroupSelectionComponent } from './ViewModel/group-selection/group-selec
     MatToolbarModule,
     MatSidenavModule,
     MatListModule,
+    MatTabsModule,
+    MatDialogModule,
     AppRoutingModule
   ],
   providers: [],

@@ -1,0 +1,29 @@
+<h1>{{data.modalTitle}}</h1>
+<div mat-dialog-content>
+
+  <!--TODO implement that you can add multiple amounts and recipients-->
+  <mat-form-field>
+    <mat-label>Description</mat-label>
+    <input matInput [(ngModel)]="data.description" placeholder="Insert Description" value="">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Payer</mat-label>
+    <input matInput [(ngModel)]="data.payerId" placeholder="Insert Payer" value="">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Recipients</mat-label>
+    <input matInput [(ngModel)]="data.recipientsId" placeholder="Insert Recipients" value="">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Amount</mat-label>
+    <input matInput [(ngModel)]="data.amount" placeholder="Insert Amounts" value="">
+  </mat-form-field>
+
+  <!--Cancel and ave buttons-->
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button [mat-dialog-close]="data" >Save</button>
+
+</div>

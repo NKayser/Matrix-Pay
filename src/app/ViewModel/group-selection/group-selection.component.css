@@ -1,5 +1,6 @@
 .sidenav-container {
   height: 100%;
+  /*TODO make it so that this view isn't scrollable anymore*/
 }
 
 .sidenav {
