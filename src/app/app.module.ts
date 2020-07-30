@@ -6,18 +6,27 @@ import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
+import {MatSelectModule} from '@angular/material/select';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoginComponent } from './ViewModel/login/login.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
+import { NavigationMenuComponent } from './ViewModel/navigation-menu/navigation-menu.component';
+import { LayoutModule } from '@angular/cdk/layout';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { SettingsComponent } from './ViewModel/settings/settings.component';
+import { AppRoutingModule } from './ViewModel/app-routing/app-routing.module';
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent
+    LoginComponent,
+    NavigationMenuComponent,
+    SettingsComponent
   ],
   imports: [
     BrowserModule,
@@ -30,7 +39,12 @@ import { MatRadioModule } from '@angular/material/radio';
     MatButtonModule,
     MatSelectModule,
     MatRadioModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LayoutModule,
+    MatToolbarModule,
+    MatSidenavModule,
+    MatListModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]

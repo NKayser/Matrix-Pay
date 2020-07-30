@@ -1,0 +1,26 @@
+
+<div>
+  <mat-label>Language</mat-label>
+
+  <mat-form-field appearance="fill">
+    <mat-select [(value)]="selectedLanguage" (selectionChange)="languageChanged()">
+      <mat-option value="english">English</mat-option>
+      <mat-option value="german">German</mat-option>
+      <mat-option value="french">French</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div>
+  <mat-label>Currency</mat-label>
+
+  <mat-form-field appearance="fill">
+    <mat-select [(value)]="selectedCurrency" (selectionChange)="currencyChanged()">
+      <mat-option value="euro">Euro (€)</mat-option>
+      <mat-option value="pound">Pound (£)</mat-option>
+      <mat-option value="dollar">Dollar ($)</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+
