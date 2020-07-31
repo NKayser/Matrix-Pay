@@ -1,0 +1,38 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav"
+      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+      [mode]="(isHandset$ | async) ? 'over' : 'side'"
+      [opened]="(isHandset$ | async) === false">
+    <mat-toolbar>Group Menu</mat-toolbar>
+    <mat-action-list>
+      <!--Iterate through all groups and bind the index correctly to the function-->
+      <a mat-list-item *ngFor="let group of groups, index as i" (click)="selectGroup(i)">{{group}}</a>
+    </mat-action-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="isHandset$ | async">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+      <mat-label>{{groupName}}</mat-label>
+      <div class="buttonDiv">
+        <button mat-raised-button class = "groupButtons">Leave Group</button>
+        <button mat-raised-button class = "groupButtons">Add Group</button>
+        <button mat-raised-button class = "groupButtons">Add User to Group</button>
+      </div>
+
+    </mat-toolbar>
+    <!--tabs for balance and transactions-->
+    <mat-tab-group animationDuration = "0ms">
+      <mat-tab label="Transactions"><app-group-transaction></app-group-transaction></mat-tab>
+      <mat-tab label="Balances"><app-group-balance></app-group-balance></mat-tab>
+    </mat-tab-group>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>
