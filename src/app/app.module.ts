@@ -27,6 +27,8 @@ import { GroupTransactionComponent } from './ViewModel/group-transaction/group-t
 import { GroupBalanceComponent } from './ViewModel/group-balance/group-balance.component';
 import { PaymentModalComponent } from './ViewModel/payment-modal/payment-modal.component';
 import { HistoryComponent } from './ViewModel/history/history.component';
+import { HomeComponent } from './ViewModel/home/home.component';
+import { PageNotFoundComponent } from './ViewModel/page-not-found/page-not-found.component';
 
 
 
@@ -40,7 +42,9 @@ import { HistoryComponent } from './ViewModel/history/history.component';
     GroupTransactionComponent,
     GroupBalanceComponent,
     PaymentModalComponent,
-    HistoryComponent
+    HistoryComponent,
+    HomeComponent,
+    PageNotFoundComponent
   ],
   imports: [
     BrowserModule,
