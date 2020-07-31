@@ -7,7 +7,22 @@ import { Component, OnInit } from '@angular/core';
 })
 export class GroupBalanceComponent implements OnInit {
 
-  constructor() { }
+  data = [{name: 'Alice', value: 15}, {name: 'Bob', value: -5}, {name: 'Eve', value: -10}];
+
+  getCustomColor = (name) => {
+    for (const entry of this.data){
+      if (entry.name === name){
+        if (entry.value >= 0){
+          return 'green';
+        } else{
+          return 'red';
+        }
+      }
+    }
+  }
+
+  constructor() {
+  }
 
   ngOnInit(): void {
   }

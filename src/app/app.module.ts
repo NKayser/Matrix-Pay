@@ -29,7 +29,7 @@ import { PaymentModalComponent } from './ViewModel/payment-modal/payment-modal.c
 import { HistoryComponent } from './ViewModel/history/history.component';
 import { HomeComponent } from './ViewModel/home/home.component';
 import { PageNotFoundComponent } from './ViewModel/page-not-found/page-not-found.component';
-
+import {NgxChartsModule} from '@swimlane/ngx-charts';
 
 
 @NgModule({
@@ -64,7 +64,8 @@ import { PageNotFoundComponent } from './ViewModel/page-not-found/page-not-found
     MatListModule,
     MatTabsModule,
     MatDialogModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NgxChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
