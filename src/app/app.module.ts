@@ -9,23 +9,26 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatDialogModule} from '@angular/material/dialog';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoginComponent } from './ViewModel/login/login.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { MatRadioModule } from '@angular/material/radio';
 import { NavigationMenuComponent } from './ViewModel/navigation-menu/navigation-menu.component';
 import { LayoutModule } from '@angular/cdk/layout';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
 import { SettingsComponent } from './ViewModel/settings/settings.component';
 import { AppRoutingModule } from './ViewModel/app-routing/app-routing.module';
 import { GroupSelectionComponent } from './ViewModel/group-selection/group-selection.component';
 import { GroupTransactionComponent } from './ViewModel/group-transaction/group-transaction.component';
 import { GroupBalanceComponent } from './ViewModel/group-balance/group-balance.component';
 import { PaymentModalComponent } from './ViewModel/payment-modal/payment-modal.component';
+import { HistoryComponent } from './ViewModel/history/history.component';
+
+
 
 @NgModule({
   declarations: [
@@ -36,7 +39,8 @@ import { PaymentModalComponent } from './ViewModel/payment-modal/payment-modal.c
     GroupSelectionComponent,
     GroupTransactionComponent,
     GroupBalanceComponent,
-    PaymentModalComponent
+    PaymentModalComponent,
+    HistoryComponent
   ],
   imports: [
     BrowserModule,
