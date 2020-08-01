@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { MatrixEmergentDataServiceService } from './matrix-emergent-data-service.service';
+import { MatrixEmergentDataService } from './matrix-emergent-data.service';
 
 describe('MatrixEmergentDataServiceService', () => {
-  let service: MatrixEmergentDataServiceService;
+  let service: MatrixEmergentDataService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(MatrixEmergentDataServiceService);
+    service = TestBed.inject(MatrixEmergentDataService);
   });
 
   it('should be created', () => {
