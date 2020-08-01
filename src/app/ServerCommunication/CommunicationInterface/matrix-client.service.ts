@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
-import {MatrixClient, AutoDiscovery, createClient} from 'matrix-js-sdk';
+import { createClient } from 'matrix-js-sdk';
+import { AutoDiscovery } from 'matrix-js-sdk/src/autodiscovery';
+import { MatrixClient } from 'matrix-js-sdk/src/client';
+
 import { ServerResponse } from '../Response/ServerResponse';
+import { ClientInterface } from './ClientInterface';
 
 @Injectable({
   providedIn: 'root'
 })
-export class MatrixClientService {
+export class MatrixClientService implements ClientInterface {
   private matrixClient: MatrixClient;
   private serverAddress: string;
   private accessToken: string;
@@ -21,7 +25,7 @@ export class MatrixClientService {
       .then((val) => {
         this.serverAddress = val;
       }).catch((reason) => {
-        return ServerResponse(false, 'homeserver not discoverable from user_id. Reason: ' + reason);
+        return new ServerResponse(false, 'homeserver not discoverable from user_id. Reason: ' + reason);
       });
 
     // Create a Client
@@ -33,7 +37,7 @@ export class MatrixClientService {
         this.accessToken = response.access_token;
       })
       .catch((reason) => {
-        return ServerResponse(false, reason);
+        return new ServerResponse(false, reason);
       });
 
     // Start the Client, set loggedIn to true
@@ -48,7 +52,7 @@ export class MatrixClientService {
 
     // TODO: Initialization of Data
 
-    return ServerResponse(true);
+    return new ServerResponse(true);
   }
 
   public logout(): ServerResponse {

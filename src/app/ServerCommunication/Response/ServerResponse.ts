@@ -1,4 +1,4 @@
-class ServerResponse {
+export class ServerResponse {
   private successful: boolean;
   private errorType: string;
 

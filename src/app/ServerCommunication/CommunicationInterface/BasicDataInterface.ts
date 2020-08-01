@@ -4,7 +4,7 @@ import { ServerResponse } from '../Response/ServerResponse';
 interface Currency {}
 interface Language {}
 
-interface BasicDataInterface {
+export interface BasicDataInterface {
     // Erstelle eine neue Gruppe mit dem Name name und der Währung currency.
     groupCreate(name: string, currency: Currency): ServerResponse;
 
