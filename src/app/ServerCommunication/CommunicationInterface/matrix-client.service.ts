@@ -17,7 +17,7 @@ export class MatrixClientService implements ClientInterface {
 
   private static readonly ACCOUNT_SEPARATOR = ':';
 
-  login(account: string, password: string): ServerResponse {
+  public login(account: string, password: string): ServerResponse {
     // Discover Homeserver Address from account
     let autodiscovery = new AutoDiscovery();
     let domain = account.split(MatrixClientService.ACCOUNT_SEPARATOR)[1];

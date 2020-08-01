@@ -9,11 +9,11 @@ export class MatrixEmergentDataService implements EmergentDataInterface {
 
   constructor() { }
 
-  setBalances(groupId: string, balances: number[], contactsIds: string[]): ServerResponse {
+  public setBalances(groupId: string, balances: number[], contactsIds: string[]): ServerResponse {
     return undefined;
   }
 
-  setRecommendations(groupId: string, amounts: number[], payerIds: string[], recipientIds: string[]): ServerResponse {
+  public setRecommendations(groupId: string, amounts: number[], payerIds: string[], recipientIds: string[]): ServerResponse {
     return undefined;
   }
 }
