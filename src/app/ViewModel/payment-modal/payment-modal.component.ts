@@ -1,4 +1,4 @@
-import { Component, Inject} from '@angular/core';
+import {Component, Inject} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
 export interface DialogData {
@@ -8,6 +8,7 @@ export interface DialogData {
   payerId: string;
   recipientsId: string[];
   amount: number[];
+  isAdded: boolean[];
 }
 
 @Component({
@@ -15,11 +16,15 @@ export interface DialogData {
   templateUrl: './payment-modal.component.html',
   styleUrls: ['./payment-modal.component.css']
 })
-export class PaymentModalComponent {
+export class PaymentModalComponent{
+
+  isAdvanced = false;
 
   constructor(
     public dialogRef: MatDialogRef<PaymentModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData) {}
+    @Inject(MAT_DIALOG_DATA) public data: DialogData) {
+
+  }
 
   // Close the dialog without saving
   onCancel(): void {

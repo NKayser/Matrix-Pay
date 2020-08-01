@@ -12,18 +12,19 @@
     <input matInput [(ngModel)]="data.payerId" placeholder="Insert Payer" value="">
   </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Recipients</mat-label>
-    <input matInput [(ngModel)]="data.recipientsId" placeholder="Insert Recipients" value="">
-  </mat-form-field>
+  <mat-slide-toggle [(ngModel)]="isAdvanced" >Advanced</mat-slide-toggle>
 
-  <mat-form-field>
-    <mat-label>Amount</mat-label>
-    <input matInput [(ngModel)]="data.amount" placeholder="Insert Amounts" value="">
-  </mat-form-field>
+  <mat-action-list>
+    <mat-list-item *ngFor="let recipient of data.recipientsId; let i = index">
+      <div><mat-checkbox [(ngModel)]="data.isAdded[i]"></mat-checkbox></div>
+      <mat-label>{{recipient}}</mat-label>
+      <input matInput type="number" [disabled]="isAdvanced" [(ngModel)]="data.amount[i]">
+      <mat-label>{{data.amount[i]}}</mat-label>
+    </mat-list-item>
+  </mat-action-list>
 
   <!--Cancel and ave buttons-->
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-button [mat-dialog-close]="data" >Save</button>
+  <button mat-raised-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button [mat-dialog-close]="data" >Save</button>
 
 </div>

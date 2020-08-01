@@ -1,0 +1,13 @@
+.center {
+
+  margin: auto;
+  width: 20%;
+  padding: 20px;
+
+}
+
+.baseDiv {
+  padding-top: 150px;
+  background-color: lightblue;
+  height: 100%;
+}

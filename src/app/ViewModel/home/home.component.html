@@ -1,12 +1,8 @@
 <div>
-  <ngx-charts-bar-horizontal
-  [results]="data"
-  [xAxis]="true"
-  [yAxis]="true"
-  [xAxisLabel]="true"
-  [customColors]="getCustomColor"
-  >
-  </ngx-charts-bar-horizontal>
+  <mat-card class="center">
+    <mat-label class="balance_label">Balance</mat-label>
+    <mat-label class="balance_number" [ngStyle]="{'color' : (balance >= 0) ? 'green' : 'red'}" >{{balance}}{{currencySymbol}}</mat-label>
+  </mat-card>
 </div>
 
 <mat-divider class="divider"></mat-divider>
@@ -17,6 +13,7 @@
       <mat-card>
         <div class="approve_div">
           <mat-label class="approve_person">Max Musterman</mat-label>
+          <mat-label class="approve_group">Group1</mat-label>
           <button mat-raised-button color="primary" class="approve_button">Approve Payback</button>
         </div>
         <mat-label class="approve_amount">52,34€</mat-label>
