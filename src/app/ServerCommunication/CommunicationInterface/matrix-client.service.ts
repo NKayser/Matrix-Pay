@@ -62,10 +62,12 @@ export class MatrixClientService {
   }
 
   public getClient(): MatrixClient {
-    if (this.matrixClient == null) {
-      return new ServerResponse(false, 'not logged in yet');
-    } else {
-      return this.matrixClient;
+    if (this.loggedIn == false) {
+      return new ServerResponse(false, 'not logged in yet')
+    } else if (this.matrixClient == null) {
+      return new ServerResponse(false, ServerResponse.UNKNOWN);
     }
+
+    return this.matrixClient;
   }
 }
