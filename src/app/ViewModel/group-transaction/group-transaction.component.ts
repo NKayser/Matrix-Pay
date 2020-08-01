@@ -12,8 +12,8 @@ export class GroupTransactionComponent {
   // the data that is used to create a transaction
   data: DialogData;
 
-  constructor(public dialog: MatDialog) { }
-
+  constructor(public dialog: MatDialog) {
+  }
 
   editTransaction(index: number): void{
   }
@@ -21,8 +21,8 @@ export class GroupTransactionComponent {
   // open a dialog window, when it gets closed check if you got data and save it accordingly
   createTransaction(): void {
     const dialogRef = this.dialog.open(PaymentModalComponent, {
-      width: '250px',
-      data: {modalTitle: 'Create Transaction'}
+      width: '350px',
+      data: {modalTitle: 'Create Transaction', recipientsId: ['Alice', 'Bob', 'Eve'], amount: [6, 10, 5], isAdded: [true, true, true]}
     });
 
     dialogRef.afterClosed().subscribe(result => {
