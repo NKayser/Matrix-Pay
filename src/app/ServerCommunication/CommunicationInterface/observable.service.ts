@@ -1,53 +1,38 @@
 import {Injectable} from '@angular/core';
 import {ObservableInterface} from './observableInterface';
 import {Observable} from 'rxjs';
+import {Subject} from 'rxjs'; // Subjects are multicast Observables
+import {GroupsType, BalancesType, GroupMemberType, RecommendationsType} from './parameterTypes';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ObservableService implements ObservableInterface {
+  private groupsObservable: Subject<GroupsType>;
+  private balancesObservable: Subject<BalancesType>;
+  private recommendationsObservable: Subject<RecommendationsType>;
 
   constructor() {
+    this.groupsObservable = new Subject();
+    this.balancesObservable = new Subject();
+    this.recommendationsObservable = new Subject();
+    this.listenToMatrix();
   }
 
-  // inside the Observable construction, listen to matrix events and pass the data via the string parameter of subscriber.next()
-  getGroupsObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
+  private listenToMatrix(): void {
+    // listen to Matrix Events, use next() on Subjects
+    // Bsp: this.groupsObservable.next(new GroupsType('abc', 'Unigruppe', ['a', 'b'], ['Karl', 'Sophie'], false));
   }
 
-  getBalancesObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
+  getGroupsObservable(): Observable<GroupsType> {
+    return this.groupsObservable;
   }
 
-  getRecommendationsObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
+  getBalancesObservable(): Observable<BalancesType> {
+    return this.balancesObservable;
   }
 
-  getGroupMembershipObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
-  }
-
-  getNewTransactionObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
-  }
-
-  getModifiedTransactionObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
-  }
-
-  getSettingsLanguageObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
-  }
-
-  getSettingsCurrencyObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
-  }
-
-  getOldTransactionsObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
-  }
-
-  getOldGroupCreationActivityObservable(): Observable<string> {
-    return new Observable(subscriber => subscriber.next('someString'));
+  getRecommendationsObservable(): Observable<RecommendationsType> {
+    return this.recommendationsObservable;
   }
 }
