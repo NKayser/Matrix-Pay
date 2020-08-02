@@ -23,38 +23,12 @@ export class SettingsService {
   }
 
   public changeCurrency(currency: string): ServerResponse {
-    let client = this.matrixClientService.getClient();
-
-    if (client.isLoggedIn != true) {
-      return new ServerResponse(false, ServerResponse.LOGGED_OUT);
-    }
-
-    client.setAccountData(SettingsService.CURRENCY_CONTENT_KEY, currency)
-      .then((val) => {
-        return new ServerResponse(true);
-      })
-      .catch((reason) => {
-        return new ServerResponse(false, reason);
-      });
-
-    return new ServerResponse(false, ServerResponse.UNKNOWN);
+    return ServerResponse.makeStandardRequest(
+      this.matrixClientService.getClient().setAccountData(SettingsService.CURRENCY_CONTENT_KEY, currency));
   }
 
   public changeLanguage(language: string): ServerResponse {
-    let client = this.matrixClientService.getClient();
-
-    if (client.isLoggedIn != true) {
-      return new ServerResponse(false, ServerResponse.LOGGED_OUT);
-    }
-
-    client.setAccountData(SettingsService.LANGUAGE_CONTENT_KEY, language)
-      .then((val) => {
-        return new ServerResponse(true);
-      })
-      .catch((reason) => {
-        return new ServerResponse(false, reason);
-      });
-
-    return new ServerResponse(false, ServerResponse.UNKNOWN);
+    return ServerResponse.makeStandardRequest(
+      this.matrixClientService.getClient().setAccountData(SettingsService.LANGUAGE_CONTENT_KEY, language));
   }
 }
