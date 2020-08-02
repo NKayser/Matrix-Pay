@@ -38,7 +38,7 @@ export class TransactionService {
       this.matrixClientService.getClient().sendEvent(groupId, messageType, content, ''));
   }
 
-  public modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string, recipientIds: string, amounts: number[]): ServerResponse {
+  public modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]): ServerResponse {
     let messageType = recipientIds.length == 1 ? TransactionService.MESSAGE_TYPE_PAYBACK : TransactionService.MESSAGE_TYPE_EXPENSE;
 
     // TODO: modifying events and listening to modified events not tested yet

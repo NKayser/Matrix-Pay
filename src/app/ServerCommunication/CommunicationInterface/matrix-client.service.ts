@@ -36,13 +36,13 @@ export class MatrixClientService implements ClientInterface {
 
     // Start the Client, set loggedIn to true
     this.matrixClient.startClient();
-    this.loggedIn = true;
 
-    /*
+    // TODO: call Observable Service
+
+    // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', (state, prevState, res) => {
-      console.log(state); // state will be 'PREPARED' when the client is ready to use
-      this.loggedIn = (state === 'PREPARED');
-    });*/
+      this.loggedIn = (state === 'PREPARED'); // state will be 'PREPARED' when the client is ready to use
+    });
 
     // TODO: Initialization of Data
 
