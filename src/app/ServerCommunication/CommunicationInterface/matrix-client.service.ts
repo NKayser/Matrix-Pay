@@ -58,6 +58,7 @@ export class MatrixClientService implements ClientInterface {
   public logout(): ServerResponse {
     if (this.loggedIn) {
       this.matrixClient.logout();
+      this.loggedIn = false;
       return new ServerResponse(true);
     }
 
@@ -73,5 +74,9 @@ export class MatrixClientService implements ClientInterface {
     }
 
     return this.matrixClient;
+  }
+
+  public isLoggedIn(): boolean {
+    return this.loggedIn;
   }
 }

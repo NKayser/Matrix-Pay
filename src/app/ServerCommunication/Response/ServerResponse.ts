@@ -3,6 +3,7 @@ export class ServerResponse {
   private errorType: string;
 
   public static readonly UNKNOWN = 'unknown';
+  public static readonly LOGGED_OUT: 'logged out';
 
   constructor(wasSuccessful: boolean, errorType?: string) {
     this.successful = wasSuccessful;
