@@ -1,4 +1,4 @@
-import { MatrixClient } from 'matrix-js-sdk';
+import { MatrixClient } from 'matrix-js-sdk/src/client';
 import { ServerResponse } from '../Response/ServerResponse';
 
 export interface ClientInterface {

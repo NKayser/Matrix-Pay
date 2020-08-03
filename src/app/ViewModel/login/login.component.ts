@@ -1,5 +1,6 @@
 import { Component} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
+import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +28,10 @@ export class LoginComponent {
 
       // check if any values are incorrect, if no pass them to the service
       if (!this.matrixUrlControl.invalid && !this.passwordControl.invalid){
+
+        // Make here the call to register the user in the clientInterface with this.matrixUrlControl.value and
+        // this.passwordControl.value
+
         console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
       }
   }
