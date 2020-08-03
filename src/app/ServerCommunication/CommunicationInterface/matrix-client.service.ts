@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { createClient } from 'matrix-js-sdk';
-import { AutoDiscovery } from 'matrix-js-sdk/src/autodiscovery';
-import { MatrixClient } from 'matrix-js-sdk/src/client';
+import * as sdk from 'matrix-js-sdk';
+//import { MatrixClient } from 'matrix-js-sdk/src/client';
+//import { AutoDiscovery } from 'matrix-js-sdk';
 
 import { ServerResponse } from '../Response/ServerResponse';
 import { ClientInterface } from './ClientInterface';
@@ -9,8 +9,8 @@ import { ClientInterface } from './ClientInterface';
 @Injectable({
   providedIn: 'root'
 })
-export class MatrixClientService implements ClientInterface {
-  private matrixClient: MatrixClient;
+export class MatrixClientService/* implements ClientInterface*/ {
+  private matrixClient: any; //MatrixClient;
   private serverAddress: string;
   private accessToken: string;
   private loggedIn: boolean = false;
@@ -21,16 +21,20 @@ export class MatrixClientService implements ClientInterface {
 
   public login(account: string, password: string): ServerResponse {
     // Discover Homeserver Address and return an Error if not successful
+    /*
     let autodiscovery = this.discoverServerAddress(account);
     if (!autodiscovery.wasSuccessful()) {
       return autodiscovery;
-    }
+    }*/
+
+    // TODO: use Auto discovery
+    this.serverAddress = 'dsn.tm.kit.edu';
 
     // Create a Client
-    this.matrixClient = createClient(this.serverAddress);
+    this.matrixClient = sdk.createClient(this.serverAddress);
 
     // Login and get Access Token
-    this.matrixClient.login('m.login.password', {user: account, password})
+    this.matrixClient.loginWithPassword(account, password)
       .then(response => this.accessToken = response.access_token,
             reason => {return new ServerResponse(false, reason)});
 
@@ -59,7 +63,7 @@ export class MatrixClientService implements ClientInterface {
     return new ServerResponse(true);
   }
 
-  public getClient(): MatrixClient {
+  public getClient(): any /*MatrixClient*/ {
     if (this.loggedIn == false) {
       return new ServerResponse(false, ServerResponse.LOGGED_OUT)
     } else if (this.matrixClient == null) {
@@ -68,7 +72,7 @@ export class MatrixClientService implements ClientInterface {
 
     return this.matrixClient;
   }
-
+/*
   private discoverServerAddress(account: string): ServerResponse {
     // Discover Homeserver Address from account
     let autodiscovery = new AutoDiscovery();
@@ -83,5 +87,5 @@ export class MatrixClientService implements ClientInterface {
     return ServerResponse.makeStandardRequest(autodiscovery.findClientConfig(domain),
       (val: string) => this.serverAddress = val,
       reason => MatrixClientService.ERROR_AUTODISCOVERY + reason);
-  }
+  }*/
 }

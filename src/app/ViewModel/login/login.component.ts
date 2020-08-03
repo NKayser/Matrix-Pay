@@ -1,6 +1,7 @@
 import { Component} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
+//import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
 
 @Component({
   selector: 'app-login',
@@ -8,6 +9,7 @@ import {MatrixClientService} from '../../ServerCommunication/CommunicationInterf
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+  //private clientService: ClientInterface;
 
   // Manages if the password is shown in the view
   hide = true;
@@ -16,7 +18,9 @@ export class LoginComponent {
   matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('.*')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor() { }
+  constructor(clientService: MatrixClientService) {
+    //this.clientService = clientService;
+  }
 
 
   // login the user with the current values if matrixUrl and password
@@ -31,6 +35,7 @@ export class LoginComponent {
 
         // Make here the call to register the user in the clientInterface with this.matrixUrlControl.value and
         // this.passwordControl.value
+        //this.clientService.login(this.matrixUrlControl.value, this.passwordControl.value);
 
         console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
       }
