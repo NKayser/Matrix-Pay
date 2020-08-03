@@ -1,5 +1,5 @@
-import {Group} from "./Group";
-import {AtomarChange} from "./AtomarChange";
+import {Group} from './Group';
+import {AtomarChange} from './AtomarChange';
 
 export class Recommendation {
   private readonly _group: Group;

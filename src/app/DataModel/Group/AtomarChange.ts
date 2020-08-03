@@ -1,4 +1,4 @@
-import {Contact} from "./Contact";
+import {Contact} from './Contact';
 
 export class AtomarChange {
   private readonly _contact: Contact;

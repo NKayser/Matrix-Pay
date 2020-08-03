@@ -1,9 +1,9 @@
-import {Contact} from "./Contact";
-import {Group} from "./Group";
+import {Contact} from './Contact';
+import {Group} from './Group';
 
 export class Groupmember {
-  private readonly _contact: Contact; //readonly instead of const
-  private readonly _group: Group; //readonly instead of const
+  private readonly _contact: Contact;
+  private readonly _group: Group;
   private _balance: number;
 
   public constructor(contact: Contact, group: Group) {
