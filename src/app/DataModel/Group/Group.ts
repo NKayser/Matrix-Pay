@@ -83,10 +83,10 @@ export class Group {
     this._recommendations = recommendations;
   }
 
-  public deleteRecommendation(payer: Groupmember, recipiant: Groupmember): void { /* TODO: implement it. DONE. Untested.
-  TODO: OPTIONAL: change argument to Id instead of object.*/
+  public deleteRecommendation(payerId: string, recipiantId: string): void { /* TODO: implement it. DONE. Untested.
+  TODO: OPTIONAL: change argument to Id instead of object. DONE*/
     this._recommendations.forEach( (item, index) => {
-      if (item.payer.contact.contactId === payer.contact.contactId && item.recipiant.contact.contactId === recipiant.contact.contactId) {
+      if (item.payer.contact.contactId === payerId && item.recipiant.contact.contactId === recipiantId) {
         this._recommendations.splice(index, 1); }
     });
   }
