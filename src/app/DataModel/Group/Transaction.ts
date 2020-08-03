@@ -1,7 +1,7 @@
-import {ActivityType} from "./ActivityType";
-import {Group} from "./Group";
-import {AtomarChange} from "./AtomarChange";
-import {Groupmember} from "./Groupmember";
+import {ActivityType} from './ActivityType';
+import {Group} from './Group';
+import {AtomarChange} from './AtomarChange';
+import {Groupmember} from './Groupmember';
 
 export class Transaction {
   private readonly _activityType: ActivityType;
@@ -38,6 +38,10 @@ export class Transaction {
     return this._name;
   }
 
+  set name(value: string) {
+    this._name = value;
+  }
+
   get creationDate(): Date {
     return this._creationDate;
   }
@@ -50,23 +54,19 @@ export class Transaction {
     return this._payer;
   }
 
-  get recipiants(): AtomarChange[] {
-    return this._recipiants;
-  }
-
-  get sender(): Groupmember {
-    return this._sender;
-  }
-
-  set name(value: string) {
-    this._name = value;
-  }
-
   set payer(value: AtomarChange) {
     this._payer = value;
   }
 
+  get recipiants(): AtomarChange[] {
+    return this._recipiants;
+  }
+
   set recipiants(value: AtomarChange[]) {
     this._recipiants = value;
+  }
+
+  get sender(): Groupmember {
+    return this._sender;
   }
 }

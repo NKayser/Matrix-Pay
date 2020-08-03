@@ -1,7 +1,7 @@
-import {ActivityType} from "./ActivityType";
-import {Transaction} from "./Transaction";
-import {Group} from "./Group";
-import {Contact} from "./Contact";
+import {ActivityType} from './ActivityType';
+import {Transaction} from './Transaction';
+import {Group} from './Group';
+import {Contact} from './Contact';
 
 export class Activity {
   private readonly _activityType: ActivityType;
