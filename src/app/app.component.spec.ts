@@ -28,4 +28,8 @@ describe('AppComponent', () => {
     const compiled = fixture.nativeElement;
     expect(compiled.querySelector('.content span').textContent).toContain('Angular-MatrixMicroPayments-App app is running!');
   });
+
+  it('should pass this test', () => {
+    expect(1).toEqual(1);
+  });
 });
