@@ -1,2 +1,4 @@
-enum TransactionType {
+export enum TransactionType {
+  EXPENSE,
+  PAYBACK
 }

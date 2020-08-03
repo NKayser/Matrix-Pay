@@ -1,2 +1,4 @@
-enum Currency {
+export enum Currency {
+  EUR,
+  USD
 }
