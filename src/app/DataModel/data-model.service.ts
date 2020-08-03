@@ -16,8 +16,8 @@ export class DataModelService {
     return this.user.groups;
   }
 
-  public getGroup(groupId: string): Group { // TODO: implement it.
-    return null;
+  public getGroup(groupId: string): Group { // TODO: implement it. DONE
+    return this.user.getGroup(groupId);
   }
 
   public getStatus(): Status {

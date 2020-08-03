@@ -5,7 +5,7 @@ export class Status {
     return this._responses;
   }
 
-  public newResponse(response: Response) { //TODO: sort Array maybe
+  public newResponse(response: Response): void { // TODO: OPTIONAL: sort Array maybe
     this.responses.push(response);
   }
 }

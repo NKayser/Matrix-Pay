@@ -1,8 +1,8 @@
-import {Contact} from "../Group/Contact";
-import {Currency} from "../Utils/Currency";
-import {Language} from "../Utils/Language";
-import {Group} from "../Group/Group";
-import {Groupmember} from "../Group/Groupmember";
+import {Contact} from '../Group/Contact';
+import {Currency} from '../Utils/Currency';
+import {Language} from '../Utils/Language';
+import {Group} from '../Group/Group';
+import {Groupmember} from '../Group/Groupmember';
 
 export class User {
   private static readonly _singleUser: User;
@@ -29,30 +29,33 @@ export class User {
     return this._currency;
   }
 
+  set currency(value: Currency) {
+    this._currency = value;
+  }
+
   get language(): Language {
     return this._language;
+  }
+
+  set language(value: Language) {
+    this._language = value;
   }
 
   get groups(): Group[] {
     return this._groups;
   }
 
-  public getGroup(groupId: string): Group { //TODO: implement it.
+  public getGroup(groupId: string): Group { // TODO: implement it. DONE
+    for (const group of this.groups) {
+      if (group.groupId === groupId) {return group; }
+    }
     return null;
-  };
+  }
 
   public createGroup(groupId: string, name: string, currency: Currency): Group {
-    let group: Group = new Group(groupId, name, currency);
+    const group: Group = new Group(groupId, name, currency);
     this._groups.push(group);
     group.addGroupmember(new Groupmember(this._contact, group));
     return group;
-  }
-
-  set currency(value: Currency) {
-    this._currency = value;
-  }
-
-  set language(value: Language) {
-    this._language = value;
   }
 }

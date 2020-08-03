@@ -1,8 +1,8 @@
 export class Contact {
-  private _contactId: string; //not yet const
+  private readonly _contactId: string;
   private _name: string;
 
-  public constructor (contactId: string, name: string) {
+  public constructor(contactId: string, name: string) {
     this._contactId = contactId;
     this._name = name;
   }
