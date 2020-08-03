@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import * as sdk from 'matrix-js-sdk';
-//import { MatrixClient } from 'matrix-js-sdk/src/client';
-//import { AutoDiscovery } from 'matrix-js-sdk';
+import {createClient} from 'matrix-js-sdk';
+import { MatrixClient } from 'matrix-js-sdk/src/client';
+
+import axios, {AxiosResponse} from 'axios';
 
 import { ServerResponse } from '../Response/ServerResponse';
 import { ClientInterface } from './ClientInterface';
@@ -9,8 +10,8 @@ import { ClientInterface } from './ClientInterface';
 @Injectable({
   providedIn: 'root'
 })
-export class MatrixClientService/* implements ClientInterface*/ {
-  private matrixClient: any; //MatrixClient;
+export class MatrixClientService implements ClientInterface {
+  private matrixClient: MatrixClient;
   private serverAddress: string;
   private accessToken: string;
   private loggedIn: boolean = false;
@@ -19,24 +20,28 @@ export class MatrixClientService/* implements ClientInterface*/ {
   private static readonly ERROR_AUTODISCOVERY = 'homeserver not discoverable from user_id. Reason: ';
   private static readonly ERROR_INVALID_ACCOUNT = 'user_id not in the right format';
 
-  public login(account: string, password: string): ServerResponse {
+  public async login(account: string, password: string) {
     // Discover Homeserver Address and return an Error if not successful
-    /*
-    let autodiscovery = this.discoverServerAddress(account);
-    if (!autodiscovery.wasSuccessful()) {
-      return autodiscovery;
-    }*/
+    let seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
+
+    if (seperatedAccount.length != 2) {
+      return new ServerResponse(false, MatrixClientService.ERROR_INVALID_ACCOUNT);
+    }
+
+    let domain = seperatedAccount[1];
+    let requestUrl: string = 'https://' + domain + '/.well-known/matrix/client';
+    let json = await axios.get(requestUrl);
+    this.serverAddress = json["data"]["m.homeserver"]["base_url"];
+
+    console.log("Discovered: " + this.serverAddress);
 
     // TODO: use Auto discovery
-    this.serverAddress = 'dsn.tm.kit.edu';
 
     // Create a Client
-    this.matrixClient = sdk.createClient(this.serverAddress);
+    this.matrixClient = await createClient(this.serverAddress);
 
     // Login and get Access Token
-    this.matrixClient.loginWithPassword(account, password)
-      .then(response => this.accessToken = response.access_token,
-            reason => {return new ServerResponse(false, reason)});
+    this.accessToken = await this.matrixClient.loginWithPassword(account, password);
 
     // Start the Client, set loggedIn to true
     this.matrixClient.startClient();
@@ -46,11 +51,10 @@ export class MatrixClientService/* implements ClientInterface*/ {
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', (state, prevState, res) => {
       this.loggedIn = (state === 'PREPARED'); // state will be 'PREPARED' when the client is ready to use
+      return new ServerResponse(true);
     });
 
     // TODO: Initialization of Data
-
-    return new ServerResponse(true);
   }
 
   public logout(): ServerResponse {
@@ -63,7 +67,7 @@ export class MatrixClientService/* implements ClientInterface*/ {
     return new ServerResponse(true);
   }
 
-  public getClient(): any /*MatrixClient*/ {
+  public getClient(): MatrixClient {
     if (this.loggedIn == false) {
       return new ServerResponse(false, ServerResponse.LOGGED_OUT)
     } else if (this.matrixClient == null) {
@@ -72,20 +76,13 @@ export class MatrixClientService/* implements ClientInterface*/ {
 
     return this.matrixClient;
   }
-/*
-  private discoverServerAddress(account: string): ServerResponse {
-    // Discover Homeserver Address from account
-    let autodiscovery = new AutoDiscovery();
-    let seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
+}
 
-    if (seperatedAccount.length != 2) {
-      return new ServerResponse(false, MatrixClient.ERROR_INVALID_ACCOUNT);
-    }
-
-    let domain = seperatedAccount[1];
-
-    return ServerResponse.makeStandardRequest(autodiscovery.findClientConfig(domain),
-      (val: string) => this.serverAddress = val,
-      reason => MatrixClientService.ERROR_AUTODISCOVERY + reason);
-  }*/
+interface DiscoveredClientConfig {
+  "m.homeserver": {
+    "base_url": string,
+  },
+  "m.identity_server": {
+    "base_url": string,
+  }
 }

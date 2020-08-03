@@ -8,6 +8,10 @@ export class ServerResponse {
   constructor(wasSuccessful: boolean, errorType?: string) {
     this.successful = wasSuccessful;
     this.errorType = errorType;
+
+    if (!wasSuccessful) {
+      console.log("Unsuccessful ServerResponse with Reason: " + errorType);
+    }
   }
 
   public wasSuccessful(): boolean {
@@ -22,6 +26,8 @@ export class ServerResponse {
     return this.errorType;
   }
 
+
+  // not done !!!! Asynchronicity has not been resolved yet
   /**
    * Make a Request to the Server that gives back a promise, but return a synchronous ServerResponse and call the
    * callback functions.
@@ -30,9 +36,9 @@ export class ServerResponse {
    * @param fulfilledCallback: Optional. To be executed when the promise made by the Server was fulfilled.
    * @param rejectedCallback: Optional. To be executed when the promise made by the Server was rejected.
    */
-  public static makeStandardRequest<T>(promise: Promise<T>,
+  public static async makeStandardRequest<T>(promise: Promise<T>,
                                        fulfilledCallback: (value: T) => void = (value: T) => {},
-                                       rejectedCallback: (reason: string) => string = (reason: string) => reason): ServerResponse {
+                                       rejectedCallback: (reason: string) => string = (reason: string) => reason) {
     promise.then(
       (value: T) => {
         fulfilledCallback(value);
@@ -41,7 +47,5 @@ export class ServerResponse {
       (reason: string) => {
         return new ServerResponse(false, rejectedCallback(reason));
       });
-
-    return new ServerResponse(false, ServerResponse.UNKNOWN);
   }
 }

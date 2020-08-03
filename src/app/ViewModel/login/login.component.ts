@@ -1,7 +1,8 @@
 import { Component} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
-//import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
+import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
+import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse";
 
 @Component({
   selector: 'app-login',
@@ -9,7 +10,7 @@ import {MatrixClientService} from '../../ServerCommunication/CommunicationInterf
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  //private clientService: ClientInterface;
+  private clientService: ClientInterface;
 
   // Manages if the password is shown in the view
   hide = true;
@@ -19,7 +20,7 @@ export class LoginComponent {
   passwordControl = new FormControl('', [Validators.required]);
 
   constructor(clientService: MatrixClientService) {
-    //this.clientService = clientService;
+    this.clientService = clientService;
   }
 
 
@@ -35,7 +36,8 @@ export class LoginComponent {
 
         // Make here the call to register the user in the clientInterface with this.matrixUrlControl.value and
         // this.passwordControl.value
-        //this.clientService.login(this.matrixUrlControl.value, this.passwordControl.value);
+        this.clientService.login(this.matrixUrlControl.value, this.passwordControl.value)
+          .then(val => console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'));
 
         console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
       }
