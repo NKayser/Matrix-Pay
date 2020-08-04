@@ -14,4 +14,8 @@ export class ProblemInstance {
   getBalanceForUser(index: number): number {
     return this.balances[index];
   }
+
+  getBalances(): number[] {
+    return this.balances;
+  }
 }
