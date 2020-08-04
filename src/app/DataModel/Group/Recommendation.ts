@@ -4,12 +4,12 @@ import {AtomarChange} from './AtomarChange';
 export class Recommendation {
   private readonly _group: Group;
   private readonly _payer: AtomarChange;
-  private readonly _recipiant: AtomarChange;
+  private readonly _recipient: AtomarChange;
 
-  public constructor(group: Group, payer: AtomarChange, recipiant: AtomarChange) {
+  public constructor(group: Group, payer: AtomarChange, recipient: AtomarChange) {
     this._group = group;
     this._payer = payer;
-    this._recipiant = recipiant;
+    this._recipient = recipient;
   }
 
   get group(): Group {
@@ -20,7 +20,7 @@ export class Recommendation {
     return this._payer;
   }
 
-  get recipiant(): AtomarChange {
-    return this._recipiant;
+  get recipient(): AtomarChange {
+    return this._recipient;
   }
 }

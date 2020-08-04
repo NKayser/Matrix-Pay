@@ -1,19 +1,25 @@
 // as soon available import Recommendation from DataModel
 // import {Recommendation} from './DataModel/Recommendation';
 export class SolutionInstance {
-  // private recommendations: Recommendation;
-  private latestTransaction: string;
+  private payerIds: string[];
+  private recipientIds: string[];
+  private amounts: number[];
 
-  constructor(/*recommendations: Recommendation,*/ latestTransaction: string) {
-    // this.recommendations = recommendations;
-    this.latestTransaction = latestTransaction;
+  constructor(payerIds: string[], recipientIds: string[], amounts: number[]) {
+    this.payerIds = payerIds;
+    this.recipientIds = recipientIds;
+    this.amounts = amounts;
   }
 
-  /*getRecommendations(): Recommendation {
-    return this.recommendations;
-  }*/
+  getPayerIds(): string[] {
+    return this.payerIds;
+  }
 
-  getLatestTransaction(): string {
-    return this.latestTransaction;
+  getRecipientIds(): string[] {
+    return this.recipientIds;
+  }
+
+  getAmounts(): number[] {
+    return this.amounts;
   }
 }

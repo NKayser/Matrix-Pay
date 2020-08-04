@@ -1,11 +1,13 @@
-export class Status {
-  private _responses: Response[];
+import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
 
-  public get responses(): Response[] {
+export class Status {
+  private _responses: ServerResponse[];
+
+  public get responses(): ServerResponse[] {
     return this._responses;
   }
 
-  public newResponse(response: Response): void { // TODO: OPTIONAL: sort Array maybe
+  public newResponse(response: ServerResponse): void { // TODO: OPTIONAL: sort Array maybe
     this.responses.push(response);
   }
 }
