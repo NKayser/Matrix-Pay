@@ -47,7 +47,7 @@ export class DataModelService {
     else {
       const solution = this.greedyOptimisation.calculateOptimisation(problem);
       const response2 = this.matrixEmergentData.setRecommendations(groupId, solution.getAmounts(), solution.getPayerIds(),
-        solution.getRecipiantIds(), lastTransactionId);
+        solution.getRecipientIds(), lastTransactionId);
       this.status.newResponse(response2);
       if (!response2.wasSuccessful()) {
         // Do some Error stuff

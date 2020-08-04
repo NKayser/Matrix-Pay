@@ -10,18 +10,18 @@ export class Transaction {
   private readonly _creationDate: Date;
   private readonly _group: Group;
   private _payer: AtomarChange;
-  private _recipiants: AtomarChange[];
+  private _recipients: AtomarChange[];
   private readonly _sender: Groupmember;
 
   constructor(activityType: ActivityType, transactionId: string, name: string, creationDate: Date, group: Group,
-              payer: AtomarChange, recipiants: AtomarChange[], sender: Groupmember) {
+              payer: AtomarChange, recipients: AtomarChange[], sender: Groupmember) {
     this._activityType = activityType;
     this._transactionId = transactionId;
     this._name = name;
     this._creationDate = creationDate;
     this._group = group;
     this._payer = payer;
-    this._recipiants = recipiants;
+    this._recipients = recipients;
     this._sender = sender;
   }
 
@@ -58,12 +58,12 @@ export class Transaction {
     this._payer = value;
   }
 
-  get recipiants(): AtomarChange[] {
-    return this._recipiants;
+  get recipients(): AtomarChange[] {
+    return this._recipients;
   }
 
-  set recipiants(value: AtomarChange[]) {
-    this._recipiants = value;
+  set recipients(value: AtomarChange[]) {
+    this._recipients = value;
   }
 
   get sender(): Groupmember {

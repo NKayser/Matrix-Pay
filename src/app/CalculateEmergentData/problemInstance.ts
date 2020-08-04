@@ -1,21 +1,21 @@
 export class ProblemInstance {
-  private users: string[];
-  private balances: number[];
+  private contactIds: string[];
+  private amounts: number[];
 
-  constructor(users: string[], balances: number[]) {
-    this.users = users;
-    this.balances = balances;
+  constructor(contactIds: string[], amounts: number[]) {
+    this.contactIds = contactIds;
+    this.amounts = amounts;
   }
 
   getUsers(): string[] {
-    return this.users;
+    return this.contactIds;
   }
 
   getBalanceForUser(index: number): number {
-    return this.balances[index];
+    return this.amounts[index];
   }
 
   getBalances(): number[] {
-    return this.balances;
+    return this.amounts;
   }
 }

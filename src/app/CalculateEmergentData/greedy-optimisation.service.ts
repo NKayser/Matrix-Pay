@@ -29,7 +29,7 @@ export class GreedyOptimisationService implements OptimisationInterface{
   // to be implemented: optimisation algorithm
   calculateOptimisation(problem: ProblemInstance): SolutionInstance {
     const solutionPayers: string[] = [];
-    const solutionRecipiants: string[] = [];
+    const solutionRecipients: string[] = [];
     const solutionAmounts: number[] = [];
     while (true) {
       const balances = problem.getBalances();
@@ -41,9 +41,9 @@ export class GreedyOptimisationService implements OptimisationInterface{
       balances[maxIndex] -= minAbsoluteValue;
       balances[minIndex] += minAbsoluteValue;
       solutionPayers.push(contactIds[minIndex]);
-      solutionRecipiants.push(contactIds[maxIndex]);
+      solutionRecipients.push(contactIds[maxIndex]);
       solutionAmounts.push(minAbsoluteValue);
     }
-    return new SolutionInstance(solutionPayers, solutionRecipiants, solutionAmounts);
+    return new SolutionInstance(solutionPayers, solutionRecipients, solutionAmounts);
   }
 }

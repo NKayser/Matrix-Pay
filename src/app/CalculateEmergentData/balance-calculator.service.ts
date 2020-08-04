@@ -19,9 +19,9 @@ export class BalanceCalculatorService {
       for (let i = 0; i < contactIds.length; i++) {
         if (contactIds[i] === id) {amounts[i] += amount; break; }
       }
-      for (const recipiant of transaction.recipiants) {
-        id = recipiant.contact.contactId;
-        amount = recipiant.amount;
+      for (const recipient of transaction.recipients) {
+        id = recipient.contact.contactId;
+        amount = recipient.amount;
         for (let i = 0; i < contactIds.length; i++) {
           if (contactIds[i] === id) {amounts[i] -= amount; break; }
         }

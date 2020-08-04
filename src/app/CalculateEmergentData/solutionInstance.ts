@@ -2,12 +2,12 @@
 // import {Recommendation} from './DataModel/Recommendation';
 export class SolutionInstance {
   private payerIds: string[];
-  private recipiantIds: string[];
+  private recipientIds: string[];
   private amounts: number[];
 
-  constructor(payerIds: string[], recipiantIds: string[], amounts: number[]) {
+  constructor(payerIds: string[], recipientIds: string[], amounts: number[]) {
     this.payerIds = payerIds;
-    this.recipiantIds = recipiantIds;
+    this.recipientIds = recipientIds;
     this.amounts = amounts;
   }
 
@@ -15,8 +15,8 @@ export class SolutionInstance {
     return this.payerIds;
   }
 
-  getRecipiantIds(): string[] {
-    return this.recipiantIds;
+  getRecipientIds(): string[] {
+    return this.recipientIds;
   }
 
   getAmounts(): number[] {
