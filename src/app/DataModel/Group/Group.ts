@@ -4,8 +4,6 @@ import {Transaction} from './Transaction';
 import {Recommendation} from './Recommendation';
 import {Activity} from './Activity';
 import {AtomarChange} from './AtomarChange';
-import {BalanceCalculatorService} from '../../CalculateEmergentData/balance-calculator.service';
-import {GreedyOptimisationService} from '../../CalculateEmergentData/greedy-optimisation.service';
 
 export class Group {
   private readonly _groupId: string;
@@ -97,18 +95,5 @@ export class Group {
     this._transactions.push(transaction);
   }
 
-  public calculateBalances(transactions: Transaction[]): void { // TODO: implement it when BalanceCalculatorService is implemented.
-    const Ids: string[] = [];
-    const amounts: number[] = [];
-    for (const groupmember of this.groupmembers) {
-      Ids.push(groupmember.contact.contactId);
-      amounts.push(groupmember.balance);
-    }
-    const balanceCalculator = new BalanceCalculatorService();
-    const problem = balanceCalculator.calculateBalances(Ids, amounts, transactions);
-    // TODO: send problem to ServerCommunication
-    const greedyOptimisation = new GreedyOptimisationService();
-    const solution = greedyOptimisation.calculateOptimisation(problem);
-    // TODO: send solution to ServerCommunication
-  }
+
 }
