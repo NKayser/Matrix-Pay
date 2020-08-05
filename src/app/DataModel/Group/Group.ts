@@ -18,6 +18,10 @@ export class Group {
     this._groupId = groupId;
     this._name = name;
     this._currency = currency;
+    this._groupmembers = [];
+    this._transactions = [];
+    this._recommendations = [];
+    this._activities = [];
   }
 
   public get groupId(): string {
@@ -91,9 +95,7 @@ export class Group {
     });
   }
 
-  public addActivity(transaction: Transaction): void { // TODO: OPTIONAL: sort array or insert in right position to ensure post-condition
-    this._transactions.push(transaction);
+  public addActivity(activity: Activity): void { // TODO: OPTIONAL: sort array or insert in right position to ensure post-condition
+    this._activities.push(activity);
   }
-
-
 }

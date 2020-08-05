@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {User} from './User/User';
 import {Status} from './Status/Status';
 import {Group} from './Group/Group';
@@ -6,6 +6,9 @@ import {Transaction} from './Group/Transaction';
 import {BalanceCalculatorService} from '../CalculateEmergentData/balance-calculator.service';
 import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimisation.service';
 import {MatrixEmergentDataService} from '../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
+import {Contact} from './Group/Contact';
+import {Currency} from './Utils/Currency';
+import {Language} from './Utils/Language';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +19,23 @@ export class DataModelService {
 
   constructor(private balanceCalculator: BalanceCalculatorService,
               private greedyOptimisation: GreedyOptimisationService,
-              private matrixEmergentData: MatrixEmergentDataService) { }
+              private matrixEmergentData: MatrixEmergentDataService) {
+
+  }
+
+  public initializeUserThisSession(userContactId: string, userName: string, currency: Currency, language: Language): User{
+    const contact = new Contact(userContactId, userName);
+    const user = new User(contact, currency, language);
+    this.user = user;
+    return user;
+  }
+
+  public initializeUserfirstTime(userContactId: string, userName: string): User{
+    const contact = new Contact(userContactId, userName);
+    const user = new User(contact, Currency.EUR, Language.GERMAN);
+    this.user = user;
+    return user;
+  }
 
   public getGroups(): Group[] {
     return this.user.groups;

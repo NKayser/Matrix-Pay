@@ -3,6 +3,10 @@ import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse'
 export class Status {
   private _responses: ServerResponse[];
 
+  constructor() {
+    this._responses = [];
+  }
+
   public get responses(): ServerResponse[] {
     return this._responses;
   }
