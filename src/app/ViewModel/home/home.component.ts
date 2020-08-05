@@ -21,7 +21,7 @@ export class HomeComponent implements OnInit {
   }
 
   // Calculate the total Balances of the User
-  getCurrentBalance(): number{
+  public getTotalBalance(): number{
     // TODO Remove this
     const total = 0;
     /*for (let i = 0; i < this.balance.length; i++){
@@ -29,6 +29,14 @@ export class HomeComponent implements OnInit {
     }*/
     return total;
     // TODO Add loop to calculate all Balances
+  }
+
+  public getRecommendations(): void{
+
+  }
+
+  public confirmPayback(payerId: string, recipientId: string, amount: number): void{
+
   }
 
 }

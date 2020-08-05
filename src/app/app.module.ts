@@ -34,7 +34,7 @@ import { PageNotFoundComponent } from './ViewModel/page-not-found/page-not-found
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import { LeaveGroupModalComponent } from './ViewModel/leave-group-modal/leave-group-modal.component';
 import { CreateGroupModalComponent } from './ViewModel/create-group-modal/create-group-modal.component';
-import { AddUserToGroupModalComponent } from './ViewModel/add-user-to-group-modal/add-user-to-group-modal.component';
+import { AddMemberToGroupModalComponent } from './ViewModel/add-user-to-group-modal/add-member-to-group-modal.component';
 
 
 @NgModule({
@@ -52,7 +52,7 @@ import { AddUserToGroupModalComponent } from './ViewModel/add-user-to-group-moda
     PageNotFoundComponent,
     LeaveGroupModalComponent,
     CreateGroupModalComponent,
-    AddUserToGroupModalComponent
+    AddMemberToGroupModalComponent
   ],
   imports: [
     BrowserModule,

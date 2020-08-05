@@ -5,7 +5,7 @@ import { map, shareReplay } from 'rxjs/operators';
 import {CreateGroupModalComponent, GroupCreateDialogData} from '../create-group-modal/create-group-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {LeaveGroupDialogData, LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
-import {AddUserToGroupDialogData, AddUserToGroupModalComponent} from '../add-user-to-group-modal/add-user-to-group-modal.component';
+import {AddMemberToGroupDialogData, AddMemberToGroupModalComponent} from '../add-user-to-group-modal/add-member-to-group-modal.component';
 
 @Component({
   selector: 'app-group-selection',
@@ -17,7 +17,7 @@ export class GroupSelectionComponent implements OnInit{
   currentGroup: string;
   createGroupData: GroupCreateDialogData;
   leaveGroupData: LeaveGroupDialogData;
-  addUserToGroupData: AddUserToGroupDialogData;
+  addUserToGroupData: AddMemberToGroupDialogData;
 
   // this is an array of group names, which gets displayed by the view
   // this should get read from the dataService
@@ -57,7 +57,8 @@ export class GroupSelectionComponent implements OnInit{
     });
   }
 
-  createGroup(): void {
+  // TODO currency selection is missing
+  addGroup(): void {
     const dialogRef = this.dialog.open(CreateGroupModalComponent, {
       width: '300px',
       data: {groupName: ''}
@@ -73,8 +74,8 @@ export class GroupSelectionComponent implements OnInit{
     });
   }
 
-  addUserToGroup(): void{
-    const dialogRef = this.dialog.open(AddUserToGroupModalComponent, {
+  addMemberToGroup(): void{
+    const dialogRef = this.dialog.open(AddMemberToGroupModalComponent, {
       width: '300px',
       data: {group: '', user: ''}
     });

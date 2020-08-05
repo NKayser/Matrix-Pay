@@ -30,4 +30,12 @@ export class GroupBalanceComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  confirmPayback(payerId: string, recipientId: string, amount: number): void {
+
+  }
+
+  getBalances(): void{
+
+  }
+
 }

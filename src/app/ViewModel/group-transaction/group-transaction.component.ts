@@ -20,11 +20,11 @@ export class GroupTransactionComponent {
   constructor(public dialog: MatDialog) {
   }
 
-  editTransaction(index: number): void{
+  editExpense(index: number): void{
   }
 
   // open a dialog window, when it gets closed check if you got data and save it accordingly
-  createTransaction(): void {
+  createExpense(): void {
     const dialogRef = this.dialog.open(PaymentModalComponent, {
       width: '350px',
       data: {modalTitle: 'Create Transaction', recipientsId: ['Alice', 'Bob', 'Eve'], amount: [6, 10, 5], isAdded: [true, true, true]}
@@ -38,6 +38,10 @@ export class GroupTransactionComponent {
       }
 
     });
+  }
+
+  fetchHistory(): void{
+
   }
 
 }

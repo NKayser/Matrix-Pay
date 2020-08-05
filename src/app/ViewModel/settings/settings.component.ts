@@ -28,6 +28,15 @@ export class SettingsComponent implements OnInit {
 
   }
 
+  public getCurrency(): void {
+
+  }
+
+  public getLanguage(): void {
+
+  }
+
+  // correspondes to the changeDefaultCurrency() and changeDefaultLanguage from the PhasenberichtEntwurf
   applySettings(): void{
     if (this.oldSelectedLanguage !== this.selectedLanguage){
       this.oldSelectedLanguage = this.selectedLanguage;

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AddUserToGroupModalComponent } from './add-user-to-group-modal.component';
+import { AddMemberToGroupModalComponent } from './add-member-to-group-modal.component';
 
 describe('AddUserToGroupModalComponent', () => {
-  let component: AddUserToGroupModalComponent;
-  let fixture: ComponentFixture<AddUserToGroupModalComponent>;
+  let component: AddMemberToGroupModalComponent;
+  let fixture: ComponentFixture<AddMemberToGroupModalComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddUserToGroupModalComponent ]
+      declarations: [ AddMemberToGroupModalComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AddUserToGroupModalComponent);
+    fixture = TestBed.createComponent(AddMemberToGroupModalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
