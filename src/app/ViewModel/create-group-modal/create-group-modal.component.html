@@ -3,7 +3,7 @@
 
   <mat-form-field>
     <mat-label>Group Name</mat-label>
-    <input matInput [formControl]="formControlGroupName" placeholder="Insert Description" value="">
+    <input matInput [formControl]="formControlGroupName" placeholder="Insert Group Name" value="">
     <mat-error *ngIf="formControlGroupName.invalid">{{getInvalidGroupNameErrorMessage()}}</mat-error>
   </mat-form-field>
 

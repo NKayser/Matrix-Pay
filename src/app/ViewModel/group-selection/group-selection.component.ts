@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import {CreateGroupModalComponent, GroupCreateDialogData} from '../create-group-modal/create-group-modal.component';
 import {MatDialog} from '@angular/material/dialog';
+import {LeaveGroupDialogData, LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
+import {AddUserToGroupDialogData, AddUserToGroupModalComponent} from '../add-user-to-group-modal/add-user-to-group-modal.component';
 
 @Component({
   selector: 'app-group-selection',
@@ -13,7 +15,9 @@ import {MatDialog} from '@angular/material/dialog';
 export class GroupSelectionComponent implements OnInit{
 
   currentGroup: string;
-  data: GroupCreateDialogData;
+  createGroupData: GroupCreateDialogData;
+  leaveGroupData: LeaveGroupDialogData;
+  addUserToGroupData: AddUserToGroupDialogData;
 
   // this is an array of group names, which gets displayed by the view
   // this should get read from the dataService
@@ -38,7 +42,19 @@ export class GroupSelectionComponent implements OnInit{
   }
 
   leaveGroup(): void{
+    const dialogRef = this.dialog.open(LeaveGroupModalComponent, {
+      width: '300px',
+      data: {group: '', leave: false}
+    });
 
+    dialogRef.afterClosed().subscribe(result => {
+      this.leaveGroupData = result;
+      if (this.leaveGroupData !== undefined){
+        // TODO Send Data to matrix here
+        console.log(this.leaveGroupData.leave);
+      }
+
+    });
   }
 
   createGroup(): void {
@@ -48,17 +64,29 @@ export class GroupSelectionComponent implements OnInit{
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      this.data = result;
-      if (this.data !== undefined){
+      this.createGroupData = result;
+      if (this.createGroupData !== undefined){
         // TODO Send Data to matrix here
-        console.log(this.data.groupName);
+        console.log(this.createGroupData.groupName);
       }
 
     });
   }
 
   addUserToGroup(): void{
+    const dialogRef = this.dialog.open(AddUserToGroupModalComponent, {
+      width: '300px',
+      data: {group: '', user: ''}
+    });
 
+    dialogRef.afterClosed().subscribe(result => {
+      this.addUserToGroupData = result;
+      if (this.addUserToGroupData !== undefined){
+        // TODO Send Data to matrix here
+        console.log(this.addUserToGroupData.user);
+      }
+
+    });
   }
 
 }
