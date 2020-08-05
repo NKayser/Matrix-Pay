@@ -75,12 +75,13 @@ export class Group {
     }
   }
 
-  private getTransaction(transactionId: string): Transaction { // TODO: OPTIONAL: make public maybe.
+  public getTransaction(transactionId: string): Transaction {
     for (const transaction of this._transactions) {
       if (transaction.transactionId === transactionId) {
         return transaction;
       }
     }
+    return null;
   }
 
   public setRecommendations(recommendations: Recommendation[]): void {

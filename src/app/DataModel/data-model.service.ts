@@ -30,11 +30,19 @@ export class DataModelService {
     return user;
   }
 
-  public initializeUserfirstTime(userContactId: string, userName: string): User{
+  public initializeUserFirstTime(userContactId: string, userName: string): User{
     const contact = new Contact(userContactId, userName);
     const user = new User(contact, Currency.EUR, Language.GERMAN);
     this.user = user;
     return user;
+  }
+
+  public getTransactions(groupId: string): Transaction[] {
+    return this.getGroup(groupId).transactions;
+  }
+
+  public getTransaction(groupId: string, transactionId: string): Transaction {
+    return this.getGroup(groupId).getTransaction(transactionId);
   }
 
   public getGroups(): Group[] {
