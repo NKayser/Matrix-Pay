@@ -1,0 +1,14 @@
+<h1>Create Group</h1>
+<div mat-dialog-content>
+
+  <mat-form-field>
+    <mat-label>Group Name</mat-label>
+    <input matInput [formControl]="formControlGroupName" placeholder="Insert Description" value="">
+    <mat-error *ngIf="formControlGroupName.invalid">{{getInvalidGroupNameErrorMessage()}}</mat-error>
+  </mat-form-field>
+
+  <button mat-raised-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button (click)="onSave()" >Save</button>
+  <mat-error *ngIf="formControlGroupName.invalid">{{getInvalidGroupNameErrorMessage()}}</mat-error>
+
+</div>

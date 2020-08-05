@@ -2,7 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
 
-export interface DialogData {
+export interface PaymentDialogData {
   // the titel of the dialog, this is not the title of the transaction
   modalTitle: string;
   description: string;
@@ -30,7 +30,7 @@ export class PaymentModalComponent implements OnInit{
 
   constructor(
     public dialogRef: MatDialogRef<PaymentModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData) {
+    @Inject(MAT_DIALOG_DATA) public data: PaymentDialogData) {
   }
 
   /*
@@ -81,7 +81,7 @@ export class PaymentModalComponent implements OnInit{
   }
 
   // Create the return data, with the existing data
-  private createReturnData(): DialogData{
+  private createReturnData(): PaymentDialogData{
     const newDescription = this.formControlDescription.value;
     const payer = this.formControlPayer.value;
     const recipients = new Array<string>(0);

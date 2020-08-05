@@ -1,7 +1,7 @@
 <div>
   <mat-card class="center">
     <mat-label class="balance_label">Balance</mat-label>
-    <mat-label class="balance_number" [ngStyle]="{'color' : (balance >= 0) ? 'green' : 'red'}" >{{balance}}{{currencySymbol}}</mat-label>
+    <mat-label class="balance_number" [ngStyle]="{'color' : (getCurrentBalance() >= 0) ? 'green' : 'red'}" >{{getCurrentBalance()}}{{currencySymbol}}</mat-label>
   </mat-card>
 </div>
 

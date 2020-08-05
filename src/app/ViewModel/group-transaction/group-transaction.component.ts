@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import {DialogData, PaymentModalComponent} from '../payment-modal/payment-modal.component';
+import {PaymentDialogData, PaymentModalComponent} from '../payment-modal/payment-modal.component';
 import {MatDialog} from '@angular/material/dialog';
+import {Transaction} from '../../DataModel/Group/Transaction';
 
 @Component({
   selector: 'app-group-transaction',
@@ -10,7 +11,8 @@ import {MatDialog} from '@angular/material/dialog';
 export class GroupTransactionComponent {
 
   // the data that is used to create a transaction
-  data: DialogData;
+  data: PaymentDialogData;
+  transactions: Transaction[] = new Array<Transaction>(0);
 
   constructor(public dialog: MatDialog) {
   }
@@ -28,6 +30,7 @@ export class GroupTransactionComponent {
     dialogRef.afterClosed().subscribe(result => {
       this.data = result;
       if (this.data !== undefined){
+        // TODO Send Data to matrix here
         console.log(this.data.description);
       }
 
