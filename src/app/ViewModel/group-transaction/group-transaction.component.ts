@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {PaymentDialogData, PaymentModalComponent} from '../payment-modal/payment-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {Transaction} from '../../DataModel/Group/Transaction';
@@ -9,6 +9,9 @@ import {Transaction} from '../../DataModel/Group/Transaction';
   styleUrls: ['./group-transaction.component.css']
 })
 export class GroupTransactionComponent {
+
+  // Input is used to pass the current selected group to the transaction component
+  @Input() group: string;
 
   // the data that is used to create a transaction
   data: PaymentDialogData;
