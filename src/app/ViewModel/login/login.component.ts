@@ -3,6 +3,7 @@ import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
 import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse";
+import {LoginErrorType} from "../../ServerCommunication/Response/ErrorTypes";
 
 @Component({
   selector: 'app-login',
@@ -37,9 +38,10 @@ export class LoginComponent {
         // Make here the call to register the user in the clientInterface with this.matrixUrlControl.value and
         // this.passwordControl.value
         this.clientService.login(this.matrixUrlControl.value, this.passwordControl.value)
-          .then(val => console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'));
+          .then((val: ServerResponse) => console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'),
+            (resp: ServerResponse) => console.log('logIn failed :/    :( because ' + LoginErrorType[resp.getError()]));
 
-        console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
+        //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
       }
   }
 
