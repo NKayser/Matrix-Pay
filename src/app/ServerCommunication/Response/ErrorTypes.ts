@@ -12,3 +12,7 @@ export enum SettingsError {
   Setter,
   Getter
 }
+
+export enum GroupError {
+  SendEvent
+}

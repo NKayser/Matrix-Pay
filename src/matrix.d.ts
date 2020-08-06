@@ -16,8 +16,9 @@ declare class DiscoveredClientConfig {
 
 
 declare class MatrixClient extends EventEmitter {
-  setAccountData(eventType: string, contents: any, callback: boolean): Promise<any>;
-  getAccountDataFromServer(eventType: string, contents: any, callback: boolean): Promise<MatrixEvent>;
+  setAccountData(eventType: string, contents: any, callback?: (res: object, err: object) => void): Promise<object>;
+  getAccountDataFromServer(eventType: string, contents: any, callback?: (res: object, err: object) => void): Promise<MatrixEvent>;
+  sendEvent(roomId: string, eventType: string, content: object, txnId?: string, callback?: (res: object, err: object) => void): Promise<any>;
 }
 
 declare class MatrixEvent {

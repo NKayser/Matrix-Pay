@@ -32,7 +32,7 @@ export class SettingsService {
   public async changeCurrency(currency: string): Promise<ServerResponse> {
     // Get Client. This method should only be called when logged in, so this should always work
     const client: MatrixClient = await this.matrixClientService.getClient()
-      .catch(() => {return new UnsuccessfulResponse(SettingsError.NoClient)});
+      .catch(() => {return new UnsuccessfulResponse(SettingsError.NoClient).promise()});
 
     // Set Value
     await client.setAccountData(SettingsService.CURRENCY_CONTENT_KEY, {currency})
@@ -58,7 +58,7 @@ export class SettingsService {
   public async changeLanguage(language: string): Promise<ServerResponse> {
     // Get Client. This method should only be called when logged in, so this should always work
     const client: MatrixClient = await this.matrixClientService.getClient()
-      .catch(() => {return new UnsuccessfulResponse(SettingsError.NoClient)});
+      .catch(() => {return new UnsuccessfulResponse(SettingsError.NoClient).promise()});
 
     // Set Value
     await client.setAccountData(SettingsService.LANGUAGE_CONTENT_KEY, {language})

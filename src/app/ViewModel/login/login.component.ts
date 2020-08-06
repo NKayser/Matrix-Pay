@@ -44,7 +44,7 @@ export class LoginComponent {
           this.passwordControl.value);
 
         if (loginResponse.wasSuccessful()) {
-          console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+          console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         } else {
           console.log('logIn failed :/    :( because ' + LoginError[loginResponse.getError()]);
         }
