@@ -27,7 +27,15 @@ export class ObservableService implements ObservableInterface {
   }
 
   private async listenToMatrix(): Promise<void> {
-    this.matrixClient = await this.matrixClientService.getClient();
+    this.matrixClientService.getClientObserver().subscribe(
+      client => {
+        console.log('listening to Matrix');
+        // these two lines are temporary (test)
+        let domain = client.getDomain();
+        console.log(domain);
+      }
+    );
+    // this.matrixClient = await this.matrixClientService.getClient();
     // listen to Matrix Events, use next() on Subjects
     // example: this.groupsObservable.next({groupId: 'abc', groupName: 'Unigruppe', userIds: ['a', 'b'], userNames: ['Karl', 'Sophie'], isLeave: false});
   }

@@ -9,11 +9,14 @@ import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {LoginError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
+import {Observable, Subject} from "rxjs";
+import {MatIcon} from "@angular/material/icon";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MatrixClientService implements ClientInterface {
+  private clientObservable = new Subject();
   private matrixClient: MatrixClient;
   private serverAddress: string;
   private accessToken: string;
@@ -56,8 +59,9 @@ export class MatrixClientService implements ClientInterface {
     // Start the Client
     this.matrixClient.startClient();
 
+    // move to the end of the method?
     // Call Observable Service
-    new ObservableService(this);
+    this.clientObservable.next(this.matrixClient);
 
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
@@ -115,5 +119,9 @@ export class MatrixClientService implements ClientInterface {
       return this.matrixClient;
     }*/
     return this.matrixClient;
+  }
+
+  public getClientObserver(): Observable<MatrixClient> {
+    return this.clientObservable;
   }
 }
