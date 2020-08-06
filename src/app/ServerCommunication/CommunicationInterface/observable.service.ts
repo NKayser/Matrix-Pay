@@ -3,16 +3,21 @@ import {ObservableInterface} from './observableInterface';
 import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
 import {GroupsType, BalancesType, GroupMemberType, RecommendationsType} from './parameterTypes';
+import {MatrixClientService} from './matrix-client.service';
+// @ts-ignore
+import {MatrixClient} from 'matrix-js-sdk';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ObservableService implements ObservableInterface {
+  private matrixClientService: MatrixClientService;
   private groupsObservable: Subject<GroupsType>;
   private balancesObservable: Subject<BalancesType>;
   private recommendationsObservable: Subject<RecommendationsType>;
 
-  constructor() {
+  constructor(matrixClientService: MatrixClientService) {
+    this.matrixClientService = matrixClientService;
     this.groupsObservable = new Subject();
     this.balancesObservable = new Subject();
     this.recommendationsObservable = new Subject();
