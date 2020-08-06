@@ -1,0 +1,14 @@
+<h1>Add user to {{data.group}}</h1>
+<div mat-dialog-content>
+
+  <mat-form-field>
+    <mat-label>User Name</mat-label>
+    <input matInput [formControl]="formControlUser" placeholder="Insert User Name" value="">
+    <mat-error *ngIf="formControlUser.invalid">{{getInvalidUserErrorMessage()}}</mat-error>
+  </mat-form-field>
+
+  <button mat-raised-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button (click)="onSave()" >Save</button>
+  <mat-error *ngIf="formControlUser.invalid">{{getInvalidUserErrorMessage()}}</mat-error>
+
+</div>

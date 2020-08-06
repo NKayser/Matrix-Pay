@@ -9,7 +9,8 @@
   },
   "files": [
     "src/test.ts",
-    "src/polyfills.ts"
+    "src/polyfills.ts",
+    "src/app/ServerCommunication/Response/ServerResponse.ts"
   ],
   "include": [
     "src/**/*.spec.ts",

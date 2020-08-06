@@ -1,29 +1,36 @@
 <h1>{{data.modalTitle}}</h1>
 <div mat-dialog-content>
 
-  <!--TODO implement that you can add multiple amounts and recipients-->
+  <!--Description form-->
   <mat-form-field>
     <mat-label>Description</mat-label>
-    <input matInput [(ngModel)]="data.description" placeholder="Insert Description" value="">
+    <input matInput [formControl]="formControlDescription" placeholder="Insert Description" value="">
+    <mat-error *ngIf="formControlDescription.invalid">{{getInvalidDescriptionErrorMessage()}}</mat-error>
   </mat-form-field>
 
+  <!--Payer form-->
   <mat-form-field>
     <mat-label>Payer</mat-label>
-    <input matInput [(ngModel)]="data.payerId" placeholder="Insert Payer" value="">
+    <input matInput [formControl]="formControlPayer" placeholder="Insert Payer" value="">
+    <mat-error *ngIf="formControlPayer.invalid">{{getInvalidPayerErrorMessage()}}</mat-error>
   </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Recipients</mat-label>
-    <input matInput [(ngModel)]="data.recipientsId" placeholder="Insert Recipients" value="">
-  </mat-form-field>
+  <!--Amount form-->
+  <mat-action-list>
+    <mat-list-item *ngFor="let recipient of data.recipientsId; let i = index">
+      <div><mat-checkbox [(ngModel)]="data.isAdded[i]"></mat-checkbox></div>
+      <mat-label>{{recipient}}</mat-label>
+      <mat-form-field *ngIf="data.isAdded[i]">
+        <mat-label>Amount</mat-label>
+        <input matInput [formControl]="formControlAmount[i]">
+        <mat-error *ngIf="formControlAmount[i].invalid">{{getInvalidNumberErrorMessage()}}</mat-error>
+      </mat-form-field>
+    </mat-list-item>
+  </mat-action-list>
 
-  <mat-form-field>
-    <mat-label>Amount</mat-label>
-    <input matInput [(ngModel)]="data.amount" placeholder="Insert Amounts" value="">
-  </mat-form-field>
-
-  <!--Cancel and ave buttons-->
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-button [mat-dialog-close]="data" >Save</button>
+  <!--Cancel and Save buttons-->
+  <button mat-raised-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button (click)="onSave()" >Save</button>
+  <mat-error *ngIf="formInvalid">{{getInvalidFormErrorMessage()}}</mat-error>
 
 </div>

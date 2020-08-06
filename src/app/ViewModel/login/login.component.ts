@@ -1,5 +1,6 @@
-import { Component} from '@angular/core';
+import { Component, Output, EventEmitter} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
+
 
 @Component({
   selector: 'app-login',
@@ -7,6 +8,9 @@ import {FormControl, Validators} from '@angular/forms';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+
+  // emitter to tell the App Component to display the Menu when logged in
+  @Output() loggedIn = new EventEmitter<boolean>();
 
   // Manages if the password is shown in the view
   hide = true;
@@ -28,6 +32,9 @@ export class LoginComponent {
       // check if any values are incorrect, if no pass them to the service
       if (!this.matrixUrlControl.invalid && !this.passwordControl.invalid){
         console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
+
+        // Tell AppComponent, that user is logged in
+        this.loggedIn.emit(true);
       }
   }
 

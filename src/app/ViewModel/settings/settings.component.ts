@@ -11,6 +11,9 @@ export class SettingsComponent implements OnInit {
   selectedLanguage = 'english';
   selectedCurrency = 'euro';
 
+  oldSelectedLanguage: string;
+  oldSelectedCurrency: string;
+
   constructor() { }
 
   ngOnInit(): void {
@@ -20,16 +23,31 @@ export class SettingsComponent implements OnInit {
   // initialise the setting values
   initSettings(): void{
 
+    this.oldSelectedCurrency = this.selectedCurrency;
+    this.oldSelectedLanguage = this.selectedLanguage;
+
   }
 
-  // update Matrix-Settings when the user changes the currency
-  currencyChanged(): void {
-    console.log('currency');
+  public getCurrency(): void {
+
   }
 
-  // update Matrix-Settings when the user changes the language
-  languageChanged(): void{
-    console.log('language');
+  public getLanguage(): void {
+
   }
+
+  // correspondes to the changeDefaultCurrency() and changeDefaultLanguage from the PhasenberichtEntwurf
+  applySettings(): void{
+    if (this.oldSelectedLanguage !== this.selectedLanguage){
+      this.oldSelectedLanguage = this.selectedLanguage;
+      console.log(this.selectedLanguage);
+    }
+    if (this.oldSelectedCurrency !== this.selectedCurrency){
+      this.oldSelectedCurrency = this.selectedCurrency;
+      console.log(this.selectedCurrency);
+    }
+  }
+
+
 
 }

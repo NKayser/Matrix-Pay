@@ -1,0 +1,23 @@
+<div>
+  <mat-card class="center">
+    <mat-label class="balance_label">Balance</mat-label>
+    <mat-label class="balance_number" [ngStyle]="{'color' : (getTotalBalance() >= 0) ? 'green' : 'red'}" >{{getTotalBalance()}}{{currencySymbol}}</mat-label>
+  </mat-card>
+</div>
+
+<mat-divider class="divider"></mat-divider>
+
+<div class="payback_div">
+  <mat-list>
+    <mat-list-item>
+      <mat-card>
+        <div class="approve_div">
+          <mat-label class="approve_person">Max Musterman</mat-label>
+          <mat-label class="approve_group">Group1</mat-label>
+          <button mat-raised-button color="primary" class="approve_button">Approve Payback</button>
+        </div>
+        <mat-label class="approve_amount">52,34€</mat-label>
+      </mat-card>
+    </mat-list-item>
+  </mat-list>
+</div>

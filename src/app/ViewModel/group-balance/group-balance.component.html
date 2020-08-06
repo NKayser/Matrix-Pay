@@ -1,1 +1,26 @@
-<p>group-balance works!</p>
+<div>
+  <ngx-charts-bar-horizontal
+  [results]="data"
+  [xAxis]="true"
+  [yAxis]="true"
+  [xAxisLabel]="true"
+  [customColors]="getCustomColor"
+  >
+  </ngx-charts-bar-horizontal>
+</div>
+
+<mat-divider class="divider"></mat-divider>
+
+<div class="payback_div">
+  <mat-list>
+    <mat-list-item>
+      <mat-card>
+        <div class="approve_div">
+          <mat-label class="approve_person">Max Musterman</mat-label>
+          <button mat-raised-button color="primary" class="approve_button">Approve Payback</button>
+        </div>
+        <mat-label class="approve_amount">52,34€</mat-label>
+      </mat-card>
+    </mat-list-item>
+  </mat-list>
+</div>

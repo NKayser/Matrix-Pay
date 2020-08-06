@@ -1,0 +1,39 @@
+/*Controls the button on the approve Payback cards*/
+.approve_button {
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+}
+
+/*Controls the person label on the approve Payback cards*/
+.approve_person {
+  font-size: 120%;
+}
+
+/*Controls the group label on the approve Payback cards*/
+.approve_group {
+  margin-left: 10px;
+  color: gray;
+}
+
+/*Controls the div of the approve Payback cards*/
+.approve_div {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+/*Controls the amount label on the approve Payback cards*/
+.approve_amount {
+  font-size: 300%;
+}
+
+/*Controls divider between the overview and the payback list*/
+.divider{
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/*Controls the div, that contains all Payback cards*/
+.payback_div{
+  margin-top: 30px;
+}
