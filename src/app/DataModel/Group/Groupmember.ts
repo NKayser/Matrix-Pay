@@ -9,6 +9,7 @@ export class Groupmember {
   public constructor(contact: Contact, group: Group) {
     this._contact = contact;
     this._group = group;
+    this._balance = 0;
   }
 
   get contact(): Contact {

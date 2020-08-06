@@ -1,10 +1,10 @@
-import {ActivityType} from './ActivityType';
 import {Group} from './Group';
 import {AtomarChange} from './AtomarChange';
 import {Groupmember} from './Groupmember';
+import {TransactionType} from './TransactionType';
 
 export class Transaction {
-  private readonly _activityType: ActivityType;
+  private readonly _transactionType: TransactionType;
   private readonly _transactionId: string;
   private _name: string;
   private readonly _creationDate: Date;
@@ -13,9 +13,9 @@ export class Transaction {
   private _recipients: AtomarChange[];
   private readonly _sender: Groupmember;
 
-  constructor(activityType: ActivityType, transactionId: string, name: string, creationDate: Date, group: Group,
+  constructor(transactionType: TransactionType, transactionId: string, name: string, creationDate: Date, group: Group,
               payer: AtomarChange, recipients: AtomarChange[], sender: Groupmember) {
-    this._activityType = activityType;
+    this._transactionType = transactionType;
     this._transactionId = transactionId;
     this._name = name;
     this._creationDate = creationDate;
@@ -25,9 +25,8 @@ export class Transaction {
     this._sender = sender;
   }
 
-
-  get activityType(): ActivityType {
-    return this._activityType;
+  get transactionType(): TransactionType {
+    return this._transactionType;
   }
 
   get transactionId(): string {

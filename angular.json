@@ -23,6 +23,12 @@
               "src/favicon.ico",
               "src/assets"
             ],
+            "allowedCommonJsDependencies": [
+              "matrix-js-sdk",
+              "qs",
+              "browser-request",
+              "@babel/runtime/helpers/interopRequireWildcard"
+            ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.css"
