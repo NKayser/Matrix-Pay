@@ -21,7 +21,7 @@ export class ObservableService implements ObservableInterface {
 
   private listenToMatrix(): void {
     // listen to Matrix Events, use next() on Subjects
-    // Bsp: this.groupsObservable.next(new GroupsType('abc', 'Unigruppe', ['a', 'b'], ['Karl', 'Sophie'], false));
+    // example: this.groupsObservable.next({groupId: 'abc', groupName: 'Unigruppe', userIds: ['a', 'b'], userNames: ['Karl', 'Sophie'], isLeave: false});
   }
 
   getGroupsObservable(): Observable<GroupsType> {

@@ -57,7 +57,7 @@ export class MatrixClientService implements ClientInterface {
     this.matrixClient.startClient();
 
     // Call Observable Service
-    new ObservableService();
+    //new ObservableService();
 
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
