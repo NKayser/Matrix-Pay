@@ -11,12 +11,14 @@ import {MatrixClient} from 'matrix-js-sdk';
   providedIn: 'root'
 })
 export class ObservableService implements ObservableInterface {
+  private matrixClient: MatrixClient; // move into local scope of listenToMatrix()?
   private matrixClientService: MatrixClientService;
   private groupsObservable: Subject<GroupsType>;
   private balancesObservable: Subject<BalancesType>;
   private recommendationsObservable: Subject<RecommendationsType>;
 
   constructor(matrixClientService: MatrixClientService) {
+    console.log('this is ObservableService');
     this.matrixClientService = matrixClientService;
     this.groupsObservable = new Subject();
     this.balancesObservable = new Subject();
@@ -24,7 +26,8 @@ export class ObservableService implements ObservableInterface {
     this.listenToMatrix();
   }
 
-  private listenToMatrix(): void {
+  private async listenToMatrix(): Promise<void> {
+    this.matrixClient = await this.matrixClientService.getClient();
     // listen to Matrix Events, use next() on Subjects
     // example: this.groupsObservable.next({groupId: 'abc', groupName: 'Unigruppe', userIds: ['a', 'b'], userNames: ['Karl', 'Sophie'], isLeave: false});
   }
