@@ -1,7 +1,7 @@
 <div>
   <mat-card class="center">
     <mat-label class="balance_label">Balance</mat-label>
-    <mat-label class="balance_number" [ngStyle]="{'color' : (getTotalBalance() >= 0) ? 'green' : 'red'}" >{{getTotalBalance()}}{{currencySymbol}}</mat-label>
+    <mat-label class="balance_number" [ngStyle]="{'color' : (getTotalBalance() >= 0) ? 'green' : 'red'}" >{{getTotalBalance()}}</mat-label>
   </mat-card>
 </div>
 
@@ -9,14 +9,14 @@
 
 <div class="payback_div">
   <mat-list>
-    <mat-list-item>
+    <mat-list-item *ngFor="let recommendation of recommendations">
       <mat-card>
         <div class="approve_div">
-          <mat-label class="approve_person">Max Musterman</mat-label>
-          <mat-label class="approve_group">Group1</mat-label>
+          <mat-label class="approve_person">{{recommendation.payer.contact.name}}</mat-label>
+          <mat-label class="approve_group">{{recommendation.group.name}}</mat-label>
           <button mat-raised-button color="primary" class="approve_button">Approve Payback</button>
         </div>
-        <mat-label class="approve_amount">52,34€</mat-label>
+        <mat-label class="approve_amount">{{recommendation.payer.amount}}{{currencyMap[recommendation.group.currency]}}</mat-label>
       </mat-card>
     </mat-list-item>
   </mat-list>

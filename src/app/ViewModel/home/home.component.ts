@@ -1,4 +1,7 @@
 import {Component, OnInit} from '@angular/core';
+import {Recommendation} from '../../DataModel/Group/Recommendation';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {currencyMap} from '../../DataModel/Utils/Currency';
 
 @Component({
   selector: 'app-home',
@@ -7,17 +10,21 @@ import {Component, OnInit} from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
-  private balance: number[] = new Array<number>(0);
-  currencySymbol: string;
+  balances: number[] = [5, 10, 0, 5, 6];
 
-  constructor() {
+  recommendations: Recommendation[] = [];
+  currencyMap = currencyMap;
 
-    this.balance = [54, 65, 21];
-    this.currencySymbol = '€';
-
-  }
+  constructor(private dataModelService: DataModelService) {}
 
   ngOnInit(): void {
+
+    const groups = this.dataModelService.getGroups();
+    for (const group of groups){
+      for (const recommendation of group.recommendations){
+        this.recommendations.push(recommendation);
+      }
+    }
   }
 
   // Calculate the total Balances of the User
@@ -29,10 +36,6 @@ export class HomeComponent implements OnInit {
     }*/
     return total;
     // TODO Add loop to calculate all Balances
-  }
-
-  public getRecommendations(): void{
-
   }
 
   public confirmPayback(payerId: string, recipientId: string, amount: number): void{

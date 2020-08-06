@@ -62,7 +62,8 @@ export class GroupSelectionComponent implements OnInit{
     testGroup.addTransaction(new Transaction(TransactionType.EXPENSE, 't2', 'another one', new Date(2020, 10, 13), testGroup,
       new AtomarChange(c3, 15), [new AtomarChange(c2, 15)], m1));
     const r1 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
-    testGroup.setRecommendations([r1]);
+    const r2 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
+    testGroup.setRecommendations([r1, r2]);
     // TODO test code ends here
 
     this.groups = this.dataModelService.getGroups();
