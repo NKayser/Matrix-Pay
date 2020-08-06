@@ -5,7 +5,7 @@ import {Group} from '../Group/Group';
 import {Groupmember} from '../Group/Groupmember';
 
 export class User {
-  private static readonly _singleUser: User;
+  private static _singleUser: User;
   private readonly _contact: Contact;
   private _currency: Currency;
   private _language: Language;
@@ -15,6 +15,8 @@ export class User {
     this._contact = contact;
     this._currency = currency;
     this._language = language;
+    this._groups = [];
+    User._singleUser = this;
   }
 
   static get singleUser(): User {
