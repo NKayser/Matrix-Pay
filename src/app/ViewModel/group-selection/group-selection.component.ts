@@ -1,11 +1,20 @@
 import {Component, OnInit} from '@angular/core';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
+import {Observable} from 'rxjs';
+import {map, shareReplay} from 'rxjs/operators';
 import {CreateGroupModalComponent, GroupCreateDialogData} from '../create-group-modal/create-group-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {LeaveGroupDialogData, LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
 import {AddMemberToGroupDialogData, AddMemberToGroupModalComponent} from '../add-user-to-group-modal/add-member-to-group-modal.component';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {Currency} from '../../DataModel/Utils/Currency';
+import {Group} from '../../DataModel/Group/Group';
+import {Transaction} from '../../DataModel/Group/Transaction';
+import {TransactionType} from '../../DataModel/Group/TransactionType';
+import {Contact} from '../../DataModel/Group/Contact';
+import {Groupmember} from '../../DataModel/Group/Groupmember';
+import {AtomarChange} from '../../DataModel/Group/AtomarChange';
+import {Recommendation} from '../../DataModel/Group/Recommendation';
 
 @Component({
   selector: 'app-group-selection',
@@ -14,14 +23,14 @@ import {AddMemberToGroupDialogData, AddMemberToGroupModalComponent} from '../add
 })
 export class GroupSelectionComponent implements OnInit{
 
-  currentGroup: string;
+  currentGroup: Group;
   createGroupData: GroupCreateDialogData;
   leaveGroupData: LeaveGroupDialogData;
   addUserToGroupData: AddMemberToGroupDialogData;
 
   // this is an array of group names, which gets displayed by the view
   // this should get read from the dataService
-  groups = ['Group1', 'Group2', 'Group3'];
+  groups = [];
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
@@ -29,11 +38,37 @@ export class GroupSelectionComponent implements OnInit{
       shareReplay()
     );
 
-  constructor(private breakpointObserver: BreakpointObserver, public dialog: MatDialog) {}
+  constructor(private breakpointObserver: BreakpointObserver, public dialog: MatDialog, private dataModelService: DataModelService) {}
 
   // set default selected group
   ngOnInit(): void{
-    this.currentGroup = this.groups[0];
+
+
+    // TODO Remove test code
+    this.dataModelService.initializeUserFirstTime('', '');
+    this.dataModelService.getUser().createGroup('1', 'gruppe1', Currency.EUR);
+    const c1 = new Contact('c1', 'Alice');
+    const c2 = new Contact('c2', 'Bob');
+    const c3 = new Contact('c3', 'Eve');
+    const testGroup = this.dataModelService.getGroup('1');
+    const m1 = new Groupmember(c1, testGroup);
+    const m2 = new Groupmember(c2, testGroup);
+    const m3 = new Groupmember(c3, testGroup);
+    testGroup.addGroupmember(m1);
+    testGroup.addGroupmember(m2);
+    testGroup.addGroupmember(m3);
+    testGroup.addTransaction(new Transaction(TransactionType.EXPENSE, 't1', 't1', new Date(2020, 10, 5), testGroup,
+      new AtomarChange(c1, 10), [new AtomarChange(c2, 10)], m1));
+    testGroup.addTransaction(new Transaction(TransactionType.EXPENSE, 't2', 'another one', new Date(2020, 10, 13), testGroup,
+      new AtomarChange(c3, 15), [new AtomarChange(c2, 15)], m1));
+    const r1 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
+    testGroup.setRecommendations([r1]);
+    // TODO test code ends here
+
+    this.groups = this.dataModelService.getGroups();
+    if (this.groups.length >= 1){
+      this.currentGroup = this.groups[0];
+    }
   }
 
   // Select a specific group and change the view accordingly
