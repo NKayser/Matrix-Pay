@@ -11,16 +11,11 @@ export class BasicDataUpdateService {
   // injection of DataModelService is missing
   constructor(observables: ObservableService) {
     this.observables = observables;
-    this.listenToChanges();
+    this.addGroup();
   }
 
-  private listenToChanges(): void {
-    this.observables.getGroupsObservable().subscribe(
-      parameters => this.addGroup(parameters.groupId, parameters.groupName, parameters.userIds, parameters.userNames, parameters.isLeave)
-    );
-  }
-
-  private addGroup(groupId: string, groupName: string, userIds: string[], userNames: string[], isLeave: boolean): void {
-    return null;
+  private addGroup(): void {
+    // do things in subscribe()
+    this.observables.getGroupsObservable().subscribe();
   }
 }

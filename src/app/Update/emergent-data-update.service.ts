@@ -12,24 +12,16 @@ export class EmergentDataUpdateService {
   // injection of DataModelService is missing
   constructor(observables: ObservableService) {
     this.observables = observables;
-    this.listenToChanges();
+    // invoke all methods
+    this.updateBalances();
+    this.updateRecommendationsForUserPaybacks();
   }
 
-  listenToChanges(): void {
-    this.observables.getBalancesObservable().subscribe(
-      parameters => this.updateBalances(parameters.groupId, parameters.balances, parameters.participantIds)
-    );
-    this.observables.getRecommendationsObservable().subscribe(
-      parameters => this.updateRecommendationsForUserPaybacks(parameters.groupId, parameters.amounts, parameters.receiverIds)
-    );
+  private updateBalances(): void {
+    this.observables.getBalancesObservable().subscribe();
   }
 
-  // The following methods execute the changes in DataModel
-  private updateBalances(groupID: string, balances: number[], participantIds: string[]): void {
-    return null;
-  }
-
-  private updateRecommendationsForUserPaybacks(groupID: string, amounts: number[], receiverIds: string[]): void {
-    return null;
+  private updateRecommendationsForUserPaybacks(): void {
+    this.observables.getRecommendationsObservable().subscribe();
   }
 }
