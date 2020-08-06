@@ -7,7 +7,7 @@ import { ClientInterface } from './ClientInterface';
 import {ObservableService} from './observable.service';
 import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
-import {LoginErrorType} from '../Response/ErrorTypes';
+import {LoginError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
 
 @Injectable({
@@ -18,19 +18,20 @@ export class MatrixClientService implements ClientInterface {
   private serverAddress: string;
   private accessToken: string;
   private loggedIn: boolean = false;
+  private prepared: boolean;
 
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
-      return new UnsuccessfulResponse(LoginErrorType.AlreadyLoggedIn).promise();
+      return new UnsuccessfulResponse(LoginError.AlreadyLoggedIn).promise();
     }
 
     // Discover Homeserver Address and throw Errors if not successful
     const seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
     if (seperatedAccount.length != 2 || seperatedAccount[1] == '' || seperatedAccount[1] == undefined) {
-      return new UnsuccessfulResponse(LoginErrorType.UserIdFormat).promise();
+      return new UnsuccessfulResponse(LoginError.UserIdFormat).promise();
     }
     const domain = seperatedAccount[1];
 
@@ -38,7 +39,7 @@ export class MatrixClientService implements ClientInterface {
     const config: DiscoveredClientConfig = await AutoDiscovery.findClientConfig(domain);
     const configState: string = config['m.homeserver']['state'];
     if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
-      return new UnsuccessfulResponse(LoginErrorType.Autodiscovery,
+      return new UnsuccessfulResponse(LoginError.Autodiscovery,
         config['m.homeserver']['error']).promise();
     }
     this.serverAddress = config['m.homeserver']['base_url'];
@@ -48,8 +49,9 @@ export class MatrixClientService implements ClientInterface {
 
     // Login and get Access Token
     this.accessToken = await this.matrixClient.loginWithPassword(account, password).catch((reason: string) => {
-      return new UnsuccessfulResponse(LoginErrorType.InvalidPassword, reason).promise();
+      return new UnsuccessfulResponse(LoginError.InvalidPassword, reason).promise();
     });
+    this.loggedIn = true;
 
     // Start the Client
     this.matrixClient.startClient();
@@ -58,10 +60,20 @@ export class MatrixClientService implements ClientInterface {
     new ObservableService();
 
     // Sync for the first time and set loggedIn to true when ready
-    this.matrixClient.once('sync', (state, prevState, res) => {
-      this.loggedIn = (state === 'PREPARED'); // state will be 'PREPARED' when the client is ready to use
-      return new SuccessfulResponse();
+    this.matrixClient.once('sync', async (state, prevState, res) => {
+      // state will be 'PREPARED' when the client is ready to use
+      this.prepared = await (state === 'PREPARED' || state === 'SYNCING');
+      console.log("prepared: " + this.prepared);
+      //return new SuccessfulResponse();
     });
+/*
+    if (this.matrixClient.isInitialSyncComplete()) {
+      this.prepared = true;
+      console.log("prepared: " + this.prepared);
+      return new SuccessfulResponse();
+    }
+*/
+    return new SuccessfulResponse();
 
     // TODO: Initialization of Data
   }
@@ -70,19 +82,38 @@ export class MatrixClientService implements ClientInterface {
     if (this.loggedIn) {
       await this.matrixClient.logout();
       this.loggedIn = false;
+      this.prepared = false;
     }
 
     // User was already logged out
     return new SuccessfulResponse();
   }
 
-  public getClient(): MatrixClient {
+  public async getClient(): Promise<MatrixClient> {
     if (this.loggedIn == false) {
       throw new Error('can only get Client if logged in');
-    } else if (this.matrixClient == null) {
-      throw new Error('logged in, but Client not set yet for unknown reason')
+    } else if (this.matrixClient == undefined) {
+      throw new Error('unknown error')
     }
+    /*
+        function sleep(ms) {
+          return new Promise(resolve => setTimeout(resolve, ms));
+        }
 
+        await sleep( 5000);
+        console.log("Timer over");
+    */
+
+    /*
+    if (!this.prepared) {
+      this.matrixClient.once('sync', (state, prevState, res) => {
+        if (state === 'PREPARED') { // state will be 'PREPARED' when the client is ready to use
+          return this.matrixClient;
+        }
+      });
+    } else {
+      return this.matrixClient;
+    }*/
     return this.matrixClient;
   }
 }

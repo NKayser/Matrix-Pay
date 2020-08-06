@@ -4,5 +4,5 @@ import { ServerResponse } from '../Response/ServerResponse';
 export interface ClientInterface {
   login(account: string, password: string): Promise<ServerResponse>;
   logout(): Promise<ServerResponse>;
-  getClient(): MatrixClient;
+  getClient(): Promise<MatrixClient>;
 }

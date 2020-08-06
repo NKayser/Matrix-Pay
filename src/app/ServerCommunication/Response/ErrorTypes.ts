@@ -1,7 +1,14 @@
-export enum LoginErrorType {
+export enum LoginError {
   AlreadyLoggedIn,
   Autodiscovery,
   UserIdFormat,
   ServerUnreachable,
-  InvalidPassword
+  InvalidPassword,
+  Unknown
+}
+
+export enum SettingsError {
+  NoClient,
+  Setter,
+  Getter
 }
