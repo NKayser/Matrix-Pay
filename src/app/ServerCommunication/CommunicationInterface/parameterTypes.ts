@@ -7,6 +7,7 @@ export interface BalancesType {
 export interface RecommendationsType {
   groupId: string;
   amounts: number[];
+  payerIds: string[];
   receiverIds: string[];
 }
 
