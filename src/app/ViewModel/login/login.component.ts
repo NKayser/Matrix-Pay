@@ -1,5 +1,10 @@
 import { Component} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
+import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
+import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
+import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse";
+import {LoginError} from "../../ServerCommunication/Response/ErrorTypes";
+import {SettingsService} from "../../ServerCommunication/SettingsCommunication/settings.service";
 
 @Component({
   selector: 'app-login',
@@ -7,6 +12,8 @@ import {FormControl, Validators} from '@angular/forms';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+  private clientService: ClientInterface;
+  private settingsService: SettingsService; // delete later
 
   // Manages if the password is shown in the view
   hide = true;
@@ -15,11 +22,14 @@ export class LoginComponent {
   matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('.*')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor() { }
+  constructor(clientService: MatrixClientService, settingsService: SettingsService) {
+    this.clientService = clientService;
+    this.settingsService = settingsService;
+  }
 
 
   // login the user with the current values if matrixUrl and password
-  login(): void{
+  async login() {
 
       // check all formControls to make sure all values are correct
       this.matrixUrlControl.markAllAsTouched();
@@ -27,7 +37,27 @@ export class LoginComponent {
 
       // check if any values are incorrect, if no pass them to the service
       if (!this.matrixUrlControl.invalid && !this.passwordControl.invalid){
-        console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
+
+        // Make here the call to register the user in the clientInterface with this.matrixUrlControl.value and
+        // this.passwordControl.value
+        const loginResponse: ServerResponse = await this.clientService.login(this.matrixUrlControl.value,
+          this.passwordControl.value);
+
+        if (loginResponse.wasSuccessful()) {
+          console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        } else {
+          console.log('logIn failed :/    :( because ' + LoginError[loginResponse.getError()]);
+        }
+
+        const currencyResponse: ServerResponse = await this.settingsService.changeCurrency("EURO");
+
+        if (currencyResponse.wasSuccessful()) {
+          console.log('currency changed');
+        } else {
+          console.log('currency not changed ' + currencyResponse);
+        }
+
+        //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
       }
   }
 

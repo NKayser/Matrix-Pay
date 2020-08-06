@@ -11,5 +11,13 @@
   ],
   "include": [
     "src/**/*.d.ts"
-  ]
+  ],
+  "paths": {
+    "*": [
+      "node_modules"
+    ],
+    "matrix-js-sdk": [
+      "node_modules/@types/matrix-js-sdk/index.d.ts"
+    ]
+  }
 }
