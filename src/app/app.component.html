@@ -1,1 +1,3 @@
-<app-navigation-menu></app-navigation-menu>
+<!--Bind Login and Logout from other components to the app component-->
+<app-navigation-menu *ngIf="loggedIn" (loggedOut)="logout()"></app-navigation-menu>
+<app-login *ngIf="!loggedIn" (loggedIn)="login()"></app-login>

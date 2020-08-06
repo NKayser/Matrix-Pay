@@ -19,4 +19,12 @@ export class HistoryComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  public getActivities(): void {
+
+  }
+
+  public fetchHistory(): void{
+
+  }
+
 }

@@ -1,10 +1,11 @@
-import { Component} from '@angular/core';
+import { Component, Output, EventEmitter} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
 import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse";
 import {LoginError} from "../../ServerCommunication/Response/ErrorTypes";
 import {SettingsService} from "../../ServerCommunication/SettingsCommunication/settings.service";
+
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,9 @@ import {SettingsService} from "../../ServerCommunication/SettingsCommunication/s
 export class LoginComponent {
   private clientService: ClientInterface;
   private settingsService: SettingsService; // delete later
+
+  // emitter to tell the App Component to display the Menu when logged in
+  @Output() loggedIn = new EventEmitter<boolean>();
 
   // Manages if the password is shown in the view
   hide = true;
@@ -37,7 +41,6 @@ export class LoginComponent {
 
       // check if any values are incorrect, if no pass them to the service
       if (!this.matrixUrlControl.invalid && !this.passwordControl.invalid){
-
         // Make here the call to register the user in the clientInterface with this.matrixUrlControl.value and
         // this.passwordControl.value
         const loginResponse: ServerResponse = await this.clientService.login(this.matrixUrlControl.value,
@@ -58,6 +61,9 @@ export class LoginComponent {
         }
 
         //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
+
+        // Tell AppComponent, that user is logged in
+        this.loggedIn.emit(true);
       }
   }
 

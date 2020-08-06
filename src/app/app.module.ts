@@ -32,6 +32,9 @@ import { HistoryComponent } from './ViewModel/history/history.component';
 import { HomeComponent } from './ViewModel/home/home.component';
 import { PageNotFoundComponent } from './ViewModel/page-not-found/page-not-found.component';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import { LeaveGroupModalComponent } from './ViewModel/leave-group-modal/leave-group-modal.component';
+import { CreateGroupModalComponent } from './ViewModel/create-group-modal/create-group-modal.component';
+import { AddMemberToGroupModalComponent } from './ViewModel/add-user-to-group-modal/add-member-to-group-modal.component';
 
 
 @NgModule({
@@ -46,7 +49,10 @@ import {NgxChartsModule} from '@swimlane/ngx-charts';
     PaymentModalComponent,
     HistoryComponent,
     HomeComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
+    LeaveGroupModalComponent,
+    CreateGroupModalComponent,
+    AddMemberToGroupModalComponent
   ],
   imports: [
     BrowserModule,

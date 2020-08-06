@@ -23,7 +23,7 @@
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
       <span>Matrix Pay</span>
-      <button mat-raised-button class = "logout">Logout</button>
+      <button mat-raised-button (click)="logout()" class = "logout">Logout</button>
     </mat-toolbar>
     <!--Display selected Menu here-->
     <router-outlet></router-outlet>
