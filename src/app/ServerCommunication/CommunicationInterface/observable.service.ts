@@ -44,11 +44,11 @@ export class ObservableService implements ObservableInterface {
     // these two lines are temporary (test)
     let domain = this.matrixClient.getDomain();
     console.log(domain);
-    this.matrixClient.on('accountData', function(event, oldEvent){
-      // console.log('got account data change');
+    this.matrixClient.on('accountData', (event, oldEvent) => {
+      // console.log('got account data change' + event.getType());
       if (event.getType() === 'currency') {
-        // console.log('got currency change');
-        // TODO: call next() on settingsCurrencyObservable
+        console.log('got currency change to ' + event.getContent().currency);
+        this.settingsCurrencyObservable.next({currency: event.getContent().currency});
       }
     });
   }
