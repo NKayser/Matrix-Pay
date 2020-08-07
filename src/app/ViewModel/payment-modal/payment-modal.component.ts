@@ -1,13 +1,14 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
+import {Contact} from '../../DataModel/Group/Contact';
 
 export interface PaymentDialogData {
   // the titel of the dialog, this is not the title of the transaction
   modalTitle: string;
   description: string;
-  payerId: string;
-  recipientsId: string[];
+  payerId: Contact;
+  recipientsId: Contact[];
   amount: number[];
   isAdded: boolean[];
 }
@@ -22,9 +23,9 @@ export class PaymentModalComponent implements OnInit{
   // Save the FormControls which check the amounts of the recipients
   formControlAmount: FormControl[];
   // Save the FormControl which check the description TODO Add regex
-  formControlDescription = new FormControl('', [Validators.required]);
+  formControlDescription: FormControl;
   // Save the FormControl which checks the payer TODO Add regex
-  formControlPayer = new FormControl('', [Validators.required]);
+  formControlPayer: FormControl;
   // Helper variable if the form is valid
   formInvalid = false;
 
@@ -39,8 +40,11 @@ export class PaymentModalComponent implements OnInit{
   ngOnInit(): void {
     this.formControlAmount = new Array<FormControl>(this.data.amount.length);
     for (let i = 0; i < this.data.amount.length; i++){
-      this.formControlAmount[i] = new FormControl('', [Validators.required]);
+      this.formControlAmount[i] = new FormControl(this.data.amount[i], [Validators.required]);
     }
+
+    this.formControlDescription = new FormControl(this.data.description, [Validators.required]);
+    this.formControlPayer = new FormControl(this.data.payerId.name, [Validators.required]);
   }
 
   // Checks if all inputs of the form are valid
@@ -84,7 +88,7 @@ export class PaymentModalComponent implements OnInit{
   private createReturnData(): PaymentDialogData{
     const newDescription = this.formControlDescription.value;
     const payer = this.formControlPayer.value;
-    const recipients = new Array<string>(0);
+    const recipients = new Array<Contact>(0);
     const newAmount = new Array<number>(0);
     for (let i = 0; i < this.data.amount.length; i++){
         recipients.push(this.data.recipientsId[i]);

@@ -6,7 +6,7 @@
     <mat-toolbar>Group Menu</mat-toolbar>
     <mat-action-list>
       <!--Iterate through all groups and bind the index correctly to the function-->
-      <a mat-list-item *ngFor="let group of groups, index as i" (click)="selectGroup(i)">{{group}}</a>
+      <a mat-list-item *ngFor="let group of groups, index as i" (click)="selectGroup(i)">{{group.name}}</a>
     </mat-action-list>
   </mat-sidenav>
 
@@ -20,7 +20,7 @@
         *ngIf="isHandset$ | async">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
-      <mat-label>{{currentGroup}}</mat-label>
+      <mat-label>{{currentGroup.name}}</mat-label>
       <div class="buttonDiv">
         <button mat-raised-button class = "groupButtons" (click)="leaveGroup()">Leave Group</button>
         <button mat-raised-button class = "groupButtons" (click)="addGroup()">Create Group</button>

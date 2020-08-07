@@ -22,6 +22,10 @@ export class DataModelService {
 
   }
 
+  public getUser(): User{
+    return this.user;
+  }
+
   public initializeUserThisSession(userContactId: string, userName: string, currency: Currency, language: Language): User{
     const contact = new Contact(userContactId, userName);
     const user = new User(contact, currency, language);

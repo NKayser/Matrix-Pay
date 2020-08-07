@@ -13,13 +13,13 @@
 
 <div class="payback_div">
   <mat-list>
-    <mat-list-item>
+    <mat-list-item *ngFor="let recommendation of recommendations">
       <mat-card>
         <div class="approve_div">
-          <mat-label class="approve_person">Max Musterman</mat-label>
+          <mat-label class="approve_person">{{recommendation.payer.contact.name}}</mat-label>
           <button mat-raised-button color="primary" class="approve_button">Approve Payback</button>
         </div>
-        <mat-label class="approve_amount">52,34€</mat-label>
+        <mat-label class="approve_amount">{{recommendation.payer.amount}}{{currencyMap[group.currency]}}</mat-label>
       </mat-card>
     </mat-list-item>
   </mat-list>

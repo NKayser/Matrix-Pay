@@ -19,7 +19,7 @@
   <mat-action-list>
     <mat-list-item *ngFor="let recipient of data.recipientsId; let i = index">
       <div><mat-checkbox [(ngModel)]="data.isAdded[i]"></mat-checkbox></div>
-      <mat-label>{{recipient}}</mat-label>
+      <mat-label>{{recipient.name}}</mat-label>
       <mat-form-field *ngIf="data.isAdded[i]">
         <mat-label>Amount</mat-label>
         <input matInput [formControl]="formControlAmount[i]">

@@ -4,10 +4,8 @@
   <mat-label>Language</mat-label>
 
   <mat-form-field appearance="fill">
-    <mat-select [(value)]="selectedLanguage">
-      <mat-option value="english">English</mat-option>
-      <mat-option value="german">German</mat-option>
-      <mat-option value="french">French</mat-option>
+    <mat-select [(ngModel)]="selectedLanguage">
+      <mat-option *ngFor="let language of languageMap, index as i" [value]="i">{{language}}</mat-option>
     </mat-select>
   </mat-form-field>
 </div>
@@ -17,10 +15,8 @@
   <mat-label>Currency</mat-label>
 
   <mat-form-field appearance="fill">
-    <mat-select [(value)]="selectedCurrency">
-      <mat-option value="euro">Euro (€)</mat-option>
-      <mat-option value="pound">Pound (£)</mat-option>
-      <mat-option value="dollar">Dollar ($)</mat-option>
+    <mat-select [(ngModel)]="selectedCurrency">
+      <mat-option *ngFor="let currency of currencyMap, index as j" [value]="j">{{currency}}</mat-option>
     </mat-select>
   </mat-form-field>
 </div>
