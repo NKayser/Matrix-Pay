@@ -1,3 +1,10 @@
+export interface UserType {
+  contactId: string;
+  name: string;
+  currency: string;
+  language: string;
+}
+
 export interface BalancesType {
   groupId: string;
   balances: number[];

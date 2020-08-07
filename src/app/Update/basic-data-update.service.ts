@@ -12,11 +12,19 @@ export class BasicDataUpdateService {
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     console.log('This is BasicDataUpdateService');
     this.observables = observables;
-    this.addGroup();
-    this.updateDefaultCurrency();
+    this.createUser();
   }
 
-  private addGroup(): void {
+  public async createUser(): Promise<void> {
+    this.observables.getUserObservable().subscribe(param => {
+      new User(new Contact(param.contactId, param.name),
+        this.currencyStringToEnum(param.currency), this.languageStringToEnum(param.language));
+      this.updateDefaultCurrency();
+      this.addGroup();
+    });
+  }
+
+  private async addGroup(): Promise<void> {
     // do things in subscribe()
     this.observables.getGroupsObservable().subscribe();
   }
