@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ObservableInterface} from './observableInterface';
 import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
-import {GroupsType, BalancesType, GroupMemberType, RecommendationsType} from './parameterTypes';
+import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType} from './parameterTypes';
 import {MatrixClientService} from './matrix-client.service';
 // @ts-ignore
 import {MatrixClient} from 'matrix-js-sdk';
@@ -16,6 +16,7 @@ export class ObservableService implements ObservableInterface {
   private groupsObservable: Subject<GroupsType>;
   private balancesObservable: Subject<BalancesType>;
   private recommendationsObservable: Subject<RecommendationsType>;
+  private settingsCurrencyObservable: Subject<CurrencyType>;
 
   constructor(matrixClientService: MatrixClientService) {
     console.log('this is ObservableService');
@@ -33,6 +34,13 @@ export class ObservableService implements ObservableInterface {
         // these two lines are temporary (test)
         let domain = client.getDomain();
         console.log(domain);
+        client.on("Room.timeline", function(event, room, toStartOfTimeline) {
+          // we know we only want to respond to messages
+          if (event.getType() !== 'currency') {
+            console.log('currency changed');
+            return;
+          }
+        });
       }
     );
     // this.matrixClient = await this.matrixClientService.getClient();
@@ -50,5 +58,9 @@ export class ObservableService implements ObservableInterface {
 
   getRecommendationsObservable(): Observable<RecommendationsType> {
     return this.recommendationsObservable;
+  }
+
+  getSettingsCurrencyObservable(): Observable<CurrencyType> {
+    return this.settingsCurrencyObservable;
   }
 }

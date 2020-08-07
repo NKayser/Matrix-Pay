@@ -14,7 +14,6 @@ import {Contact} from '../DataModel/Group/Contact';
 export class EmergentDataUpdateService {
   observables: ObservableInterface;
 
-  // injection of DataModelService is missing
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     this.observables = observables;
     // invoke all methods

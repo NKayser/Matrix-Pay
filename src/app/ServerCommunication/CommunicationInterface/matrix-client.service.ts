@@ -10,7 +10,6 @@ import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {LoginError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
 import {Observable, Subject} from "rxjs";
-import {MatIcon} from "@angular/material/icon";
 
 @Injectable({
   providedIn: 'root'

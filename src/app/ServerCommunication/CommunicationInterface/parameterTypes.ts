@@ -25,3 +25,7 @@ export interface GroupMemberType{
   names: string[];
   date: Date;
 }
+
+export interface CurrencyType{
+  currency: string;
+}

@@ -9,14 +9,18 @@ import {DataModelService} from '../DataModel/data-model.service';
 export class BasicDataUpdateService {
   private observables: ObservableInterface;
 
-  // injection of DataModelService is missing
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     this.observables = observables;
     this.addGroup();
+    this.updateDefaultCurrency();
   }
 
   private addGroup(): void {
     // do things in subscribe()
     this.observables.getGroupsObservable().subscribe();
+  }
+
+  private updateDefaultCurrency(): void {
+    this.observables.getSettingsCurrencyObservable().subscribe();
   }
 }
