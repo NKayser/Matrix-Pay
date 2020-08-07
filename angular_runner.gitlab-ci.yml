@@ -1,7 +1,0 @@
-build:
-    script:
-        - ng build Angular-MatrixMicroPayments-App
-
-test:
-    script:
-        - ng test Angular-MatrixMicroPayments-App
