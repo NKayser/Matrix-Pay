@@ -6,6 +6,7 @@ import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse"
 import {LoginError} from "../../ServerCommunication/Response/ErrorTypes";
 import {SettingsService} from "../../ServerCommunication/SettingsCommunication/settings.service";
 import {TransactionService} from "../../ServerCommunication/GroupCommunication/transaction.service";
+import {GroupService} from "../../ServerCommunication/GroupCommunication/group.service";
 
 
 @Component({
@@ -17,6 +18,7 @@ export class LoginComponent {
   private clientService: ClientInterface;
   private settingsService: SettingsService; // delete later
   private transactionService: TransactionService; // delete later
+  private groupService: GroupService; // delete later
 
   // emitter to tell the App Component to display the Menu when logged in
   @Output() loggedIn = new EventEmitter<boolean>();
@@ -28,10 +30,11 @@ export class LoginComponent {
   matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('.*')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService, settingsService: SettingsService, transactionService: TransactionService) {
+  constructor(clientService: MatrixClientService, settingsService: SettingsService, transactionService: TransactionService, groupService: GroupService) {
     this.clientService = clientService;
     this.settingsService = settingsService;
     this.transactionService = transactionService;
+    this.groupService = groupService;
   }
 
 
@@ -55,25 +58,12 @@ export class LoginComponent {
           console.log('logIn failed :/    :( because ' + LoginError[loginResponse.getError()]);
         }
 
-        // Error could be thrown here already
-        const currencyResponse: ServerResponse = await this.settingsService.changeCurrency("EURO");
+        const groupResponse: ServerResponse = await this.groupService.createGroup("Test Angular Privat 5", "Bitcoin");
 
-        if (currencyResponse.wasSuccessful()) {
-          console.log('currency changed');
+        if (groupResponse.wasSuccessful()) {
+          console.log('groupCreation successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         } else {
-          console.log('currency not changed ' + currencyResponse);
-        }
-
-        const transactionResponse: ServerResponse = await this.transactionService.modifyTransaction(
-          "!aNKgLTFyuhwBnCHPXe:dsn.tm.kit.edu", "$KxQau9JUzLvnTSg5hCzyAEfZx3FjTnJHJkqyCszBuao",
-          "Pizza Modified", "@uzpjs:dsn.tm.kit.edu",
-          ["@uzpjs:dsn.tm.kit.edu", "@uelkt:dsn.tm.kit.edu"], [400, 500]
-        );
-
-        if (transactionResponse.wasSuccessful()) {
-          console.log('transaction created');
-        } else {
-          console.log('transaction not created because ' + transactionResponse.getError());
+          console.log('groupCreation failed :/    :( because ' + groupResponse.getError());
         }
 
         //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);

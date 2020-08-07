@@ -16,5 +16,9 @@ export enum SettingsError {
 export enum GroupError {
   SendEvent,
   NoOriginal,
-  InvalidUsers
+  InvalidUsers,
+  Unknown,
+  InvalidName, // or invalid Alias
+  SetCurrency,
+  InUse,
 }
