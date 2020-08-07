@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ObservableInterface} from '../ServerCommunication/CommunicationInterface/observableInterface';
 import {ObservableService} from '../ServerCommunication/CommunicationInterface/observable.service';
 import {DataModelService} from '../DataModel/data-model.service';
@@ -10,6 +10,7 @@ export class BasicDataUpdateService {
   private observables: ObservableInterface;
 
   constructor(observables: ObservableService, private dataModel: DataModelService) {
+    console.log('This is BasicDataUpdateService');
     this.observables = observables;
     this.addGroup();
     this.updateDefaultCurrency();

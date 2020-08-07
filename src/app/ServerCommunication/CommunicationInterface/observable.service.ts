@@ -24,12 +24,12 @@ export class ObservableService implements ObservableInterface {
     this.settingsCurrencyObservable = new Subject();
   }
 
-  public setUp(matrixClient: MatrixClient): void {
+  public async setUp(matrixClient: MatrixClient): void {
     this.matrixClient = matrixClient;
     this.listenToMatrix();
   }
 
-  public tearDown(): void {
+  public async tearDown(): void {
   }
 
   private listenToMatrix(): void {

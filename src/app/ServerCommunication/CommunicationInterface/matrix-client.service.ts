@@ -9,6 +9,8 @@ import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {LoginError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
+import {BasicDataUpdateService} from '../../Update/basic-data-update.service';
+import {EmergentDataUpdateService} from '../../Update/emergent-data-update.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +25,8 @@ export class MatrixClientService implements ClientInterface {
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
 
-  constructor(private observableService: ObservableService) {}
+  constructor(private observableService: ObservableService,
+              private basicDataUpdateService: BasicDataUpdateService, private emergentDataUpdateService: EmergentDataUpdateService) {}
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
