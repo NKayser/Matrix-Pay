@@ -9,13 +9,11 @@ import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {LoginError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
-import {Observable, Subject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MatrixClientService implements ClientInterface {
-  private clientObservable = new Subject();
   private matrixClient: MatrixClient;
   private serverAddress: string;
   private accessToken: string;
@@ -24,6 +22,8 @@ export class MatrixClientService implements ClientInterface {
 
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
+
+  constructor(private observableService: ObservableService) {}
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
@@ -60,7 +60,7 @@ export class MatrixClientService implements ClientInterface {
 
     // move to the end of the method?
     // Call Observable Service
-    this.clientObservable.next(this.matrixClient);
+    this.observableService.setUp(this.matrixClient);
 
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
@@ -86,6 +86,7 @@ export class MatrixClientService implements ClientInterface {
       await this.matrixClient.logout();
       this.loggedIn = false;
       this.prepared = false;
+      this.observableService.tearDown();
     }
 
     // User was already logged out
@@ -118,9 +119,5 @@ export class MatrixClientService implements ClientInterface {
       return this.matrixClient;
     }*/
     return this.matrixClient;
-  }
-
-  public getClientObserver(): Observable<MatrixClient> {
-    return this.clientObservable;
   }
 }
