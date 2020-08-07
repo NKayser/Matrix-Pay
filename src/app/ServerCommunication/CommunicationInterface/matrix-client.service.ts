@@ -23,6 +23,8 @@ export class MatrixClientService implements ClientInterface {
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
 
+  constructor(private observableService: ObservableService) {}
+
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
       return new UnsuccessfulResponse(LoginError.AlreadyLoggedIn).promise();
@@ -56,8 +58,9 @@ export class MatrixClientService implements ClientInterface {
     // Start the Client
     this.matrixClient.startClient();
 
+    // move to the end of the method?
     // Call Observable Service
-    new ObservableService();
+    this.observableService.setUp(this.matrixClient);
 
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
@@ -83,6 +86,7 @@ export class MatrixClientService implements ClientInterface {
       await this.matrixClient.logout();
       this.loggedIn = false;
       this.prepared = false;
+      this.observableService.tearDown();
     }
 
     // User was already logged out

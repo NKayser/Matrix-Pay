@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import {ObservableInterface} from '../ServerCommunication/CommunicationInterface/observableInterface';
+import {ObservableService} from '../ServerCommunication/CommunicationInterface/observable.service';
+import {DataModelService} from '../DataModel/data-model.service';
 
 @Injectable({
   providedIn: 'root'
@@ -7,19 +9,18 @@ import {ObservableInterface} from '../ServerCommunication/CommunicationInterface
 export class BasicDataUpdateService {
   private observables: ObservableInterface;
 
-  // injection of DataModelService is missing
-  constructor(observables: ObservableInterface) {
+  constructor(observables: ObservableService, private dataModel: DataModelService) {
     this.observables = observables;
-    this.listenToChanges();
+    this.addGroup();
+    this.updateDefaultCurrency();
   }
 
-  private listenToChanges(): void {
-    this.observables.getGroupsObservable().subscribe(
-      parameters => this.addGroup(parameters.groupId, parameters.groupName, parameters.userIds, parameters.userNames, parameters.isLeave)
-    );
+  private addGroup(): void {
+    // do things in subscribe()
+    this.observables.getGroupsObservable().subscribe();
   }
 
-  private addGroup(groupId: string, groupName: string, userIds: string[], userNames: string[], isLeave: boolean): void {
-    return null;
+  private updateDefaultCurrency(): void {
+    this.observables.getSettingsCurrencyObservable().subscribe();
   }
 }
