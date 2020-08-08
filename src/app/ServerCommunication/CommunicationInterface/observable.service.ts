@@ -26,14 +26,14 @@ export class ObservableService implements ObservableInterface {
     this.settingsCurrencyObservable = new Subject();
   }
 
-  public async setUp(matrixClient: MatrixClient): void {
+  public async setUp(matrixClient: MatrixClient): Promise<void> {
     this.matrixClient = matrixClient;
     // TODO: fetch name, currency and language from Matrix
     this.userObservable.next({contactId: this.matrixClient.getUserId(), name: 'Name', currency: 'USD', language: 'ENGLISH'});
     this.listenToMatrix();
   }
 
-  public async tearDown(): void {
+  public async tearDown(): Promise<void> {
   }
 
   private listenToMatrix(): void {
