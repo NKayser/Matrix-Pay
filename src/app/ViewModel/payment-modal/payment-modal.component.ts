@@ -7,8 +7,8 @@ export interface PaymentDialogData {
   // the titel of the dialog, this is not the title of the transaction
   modalTitle: string;
   description: string;
-  payerId: Contact;
-  recipientsId: Contact[];
+  payer: Contact;
+  recipients: Contact[];
   amount: number[];
   isAdded: boolean[];
 }
@@ -44,7 +44,7 @@ export class PaymentModalComponent implements OnInit{
     }
 
     this.formControlDescription = new FormControl(this.data.description, [Validators.required]);
-    this.formControlPayer = new FormControl(this.data.payerId.name, [Validators.required]);
+    // this.formControlPayer = new FormControl(this.data.payer.name, [Validators.required]);
   }
 
   // Checks if all inputs of the form are valid
@@ -87,15 +87,15 @@ export class PaymentModalComponent implements OnInit{
   // Create the return data, with the existing data
   private createReturnData(): PaymentDialogData{
     const newDescription = this.formControlDescription.value;
-    const payer = this.formControlPayer.value;
-    const recipients = new Array<Contact>(0);
+    const newPayer = this.data.payer;
+    const newRecipients = new Array<Contact>(0);
     const newAmount = new Array<number>(0);
     for (let i = 0; i < this.data.amount.length; i++){
-        recipients.push(this.data.recipientsId[i]);
+        newRecipients.push(this.data.recipients[i]);
         newAmount.push(this.formControlAmount[i].value);
     }
 
-    return {modalTitle: '', description: newDescription, payerId: payer, recipientsId: recipients, amount: newAmount,
+    return {modalTitle: '', description: newDescription, payer: newPayer, recipients: newRecipients, amount: newAmount,
       isAdded: this.data.isAdded};
 
   }

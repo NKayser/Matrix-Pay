@@ -68,45 +68,45 @@ export class GroupTransactionComponent implements OnInit {
   private generateEditExpenseData(transaction: Transaction): PaymentDialogData {
 
     const modalTitle = 'Edit Transaction';
-    const recipientsId = Array<Contact>(0);
+    const recipients = Array<Contact>(0);
     const description = transaction.name;
-    const payerId = transaction.payer.contact;
+    const payer = transaction.payer.contact;
     const amount = Array<number>(0);
     const isAdded = Array<boolean>(0);
     for (const recipient of this.group.groupmembers){
-      recipientsId.push(recipient.contact);
+      recipients.push(recipient.contact);
       const recipientAmount = this.getRecipientAmountFromTransaction(recipient.contact.contactId, transaction);
       amount.push(recipientAmount);
       isAdded.push(recipientAmount !== 0);
     }
 
-    recipientsId.shift();
+    recipients.shift();
     amount.shift();
     isAdded.shift();
 
-    return {modalTitle, description, payerId, recipientsId, amount, isAdded};
+    return {modalTitle, description, payer, recipients, amount, isAdded};
   }
 
   // Generate input data for expense Modal for a create transaction modal
   private generateCreateExpenseData(): PaymentDialogData {
 
     const modalTitle = 'Create Transaction';
-    const recipientsId = Array<Contact>(0);
+    const recipients = Array<Contact>(0);
     const description = '';
-    const payerId = this.dataModelService.getUser().contact;
+    const payer = this.dataModelService.getUser().contact;
     const amount = Array<number>(0);
     const isAdded = Array<boolean>(0);
     for (const recipient of this.group.groupmembers){
-      recipientsId.push(recipient.contact);
+      recipients.push(recipient.contact);
       amount.push(0);
       isAdded.push(true);
     }
 
-    recipientsId.shift();
+    recipients.shift();
     amount.shift();
     isAdded.shift();
 
-    return {modalTitle, description, payerId, recipientsId, amount, isAdded};
+    return {modalTitle, description, payer, recipients, amount, isAdded};
   }
 
   // get the amount of a recipient, if the recipient is not in the transaction return 0
