@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
 import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType} from './parameterTypes';
 // @ts-ignore
-import {MatrixClient} from 'matrix-js-sdk';
+import {MatrixClient, MatrixEvent} from 'matrix-js-sdk';
 
 @Injectable({
   providedIn: 'root'
@@ -28,8 +28,14 @@ export class ObservableService implements ObservableInterface {
 
   public async setUp(matrixClient: MatrixClient): Promise<void> {
     this.matrixClient = matrixClient;
-    // TODO: fetch name, currency and language from Matrix
-    this.userObservable.next({contactId: this.matrixClient.getUserId(), name: 'Name', currency: 'USD', language: 'ENGLISH'});
+    // TODO: get name from Matrix
+    const userId = await this.matrixClient.getUserId();
+    const currencyObject = await matrixClient.getAccountDataFromServer('currency');
+    console.log(currencyObject);
+    // When setting language is implemented in login component:
+    // const language = await matrixClient.getAccountDataFromServer('language');
+    // console.log(language);
+    this.userObservable.next({contactId: userId, name: 'Name', currency: currencyObject['currency'], /*language: language*/ language: 'ENGLISH'});
     this.listenToMatrix();
   }
 

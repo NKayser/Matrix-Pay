@@ -19,8 +19,9 @@ export class BasicDataUpdateService {
     this.createUser();
   }
 
-  public async createUser(): Promise<void> {
+  public createUser(): void {
     this.observables.getUserObservable().subscribe(param => {
+      console.log('call user constructor');
       new User(new Contact(param.contactId, param.name),
         this.currencyStringToEnum(param.currency), this.languageStringToEnum(param.language));
       this.updateDefaultCurrency();
