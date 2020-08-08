@@ -21,6 +21,7 @@ export interface RecommendationsType {
 export interface GroupsType {
   groupId: string;
   groupName: string;
+  currency: string;
   userIds: string[];
   userNames: string[];
   isLeave: boolean;

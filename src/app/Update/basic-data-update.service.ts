@@ -6,6 +6,7 @@ import {Currency} from '../DataModel/Utils/Currency';
 import {User} from '../DataModel/User/User';
 import {Contact} from '../DataModel/Group/Contact';
 import {Language} from '../DataModel/Utils/Language';
+import {Groupmember} from "../DataModel/Group/Groupmember";
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +32,16 @@ export class BasicDataUpdateService {
 
   private async addGroup(): Promise<void> {
     // do things in subscribe()
-    this.observables.getGroupsObservable().subscribe();
+    this.observables.getGroupsObservable().subscribe(param => {
+      if (!param.isLeave) {
+        console.log('new group detected');
+        this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
+        const newGroup = this.dataModel.getGroup(param.groupId);
+        for (let i = 0; i < param.userIds.length; i++) {
+          newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
+        }
+      }
+    });
   }
 
   private async updateDefaultCurrency(): Promise<void> {

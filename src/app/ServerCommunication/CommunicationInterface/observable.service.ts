@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
 import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType} from './parameterTypes';
 // @ts-ignore
-import {MatrixClient, MatrixEvent} from 'matrix-js-sdk';
+import {MatrixClient, MatrixEvent, EventTimeline} from 'matrix-js-sdk';
 
 @Injectable({
   providedIn: 'root'
@@ -56,6 +56,17 @@ export class ObservableService implements ObservableInterface {
         console.log('got currency change to ' + event.getContent().currency);
         this.settingsCurrencyObservable.next({currency: event.getContent().currency});
       }
+    });
+    // Fires whenever invited to a room or joining a room
+    // TODO: check whether client joined, check whether it is a MatrixPay room
+    this.matrixClient.on('Room', room => {
+      console.log('new room detected');
+      const groupId = room.roomId;
+      const groupName = room.name;
+      const currency = room.getLiveTimeline().getState(EventTimeline.FORWARDS)["currency"];
+      console.log(currency);
+      // TODO: get missing attributes from matrix
+      this.groupsObservable.next({groupId, groupName, currency: 'EURO', userIds: ['a', 'b'], userNames: ['Karl', 'Sophie'], isLeave: false});
     });
   }
 

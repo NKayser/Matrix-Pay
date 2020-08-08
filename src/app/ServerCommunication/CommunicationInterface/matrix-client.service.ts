@@ -61,10 +61,6 @@ export class MatrixClientService implements ClientInterface {
     // Start the Client
     this.matrixClient.startClient();
 
-    // move to the end of the method?
-    // Call Observable Service
-    this.observableService.setUp(this.matrixClient);
-
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
@@ -72,6 +68,10 @@ export class MatrixClientService implements ClientInterface {
       console.log("prepared: " + this.prepared);
       //return new SuccessfulResponse();
     });
+
+    // move to the end of the method?
+    // Call Observable Service
+    this.observableService.setUp(this.matrixClient);
 /*
     if (this.matrixClient.isInitialSyncComplete()) {
       this.prepared = true;
