@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 // @ts-ignore
 import { MatrixClient } from 'matrix-js-sdk';
+
 import {TransactionService} from './transaction.service';
 import {MatrixClientService} from '../CommunicationInterface/matrix-client.service';
 import {ClientInterface} from '../CommunicationInterface/ClientInterface';
@@ -33,7 +34,7 @@ export class GroupService {
 
   public async confirmRecommendation(groupId: string, recommendationId: number): Promise<ServerResponse> {
     // TODO: seperate into private methods and avoid magic numbers
-    const client: MatrixClient = this.matrixClientService.getClient();
+    const client: MatrixClient = await this.matrixClientService.getClient();
 
     // Part 1: Find the right recommendation
     const accountDataEvents = client.getRoom(groupId)['account_data']['events'];
@@ -106,7 +107,6 @@ export class GroupService {
           errCode = GroupError.InvalidName;
           break;
         case GroupService.ERRCODE_INUSE:
-          console.log('Room in use');
           errCode = GroupError.InUse;
           break;
         default:
@@ -132,22 +132,48 @@ export class GroupService {
   }
 
   public async leaveGroup(groupId: string): Promise<ServerResponse> {
-    const client: MatrixClient = this.matrixClientService.getClient();
+    const client: MatrixClient = await this.matrixClientService.getPreparedClient();
 
     // TODO: check if balance in that group is zero in order to be allowed to leave.
     // There should be a better way to do this
-    const accountDataEvents = client.getRoom(groupId)['account_data']['events'];
     let allowedToLeave: boolean = false;
+    const room = client.getRoom(groupId);
+    if (room == undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound).promise();
+    const accountData = await room.accountData;
+    console.log(accountData);
+    console.log(Object.keys(accountData));
 
-    for (const event of accountDataEvents) if (event['type'] == 'balances') {
-      event['content']['contacts'].forEach(function (element, index) {
-        if (element == client.getUserId() && event['content']['balances'][index] == 0) {
+    if (!(Object.keys(accountData).includes('balances'))) {
+      console.log('allowed to leave');
+      allowedToLeave = true;
+    } else {
+      console.log('check check');
+      console.log(accountData['balances']);
+      for(const element in accountData['balances']) {
+        console.log(element);/*
+        if (element == client.getUserId()) {
           allowedToLeave = true;
-        }
-      })
+        }*/
+      }
     }
+    console.log('test');
+/*
+    await client.leaveGroup(groupId).catch((err) => {
+      console.log("Error");
+      let errCode: number = GroupError.Unknown;
+      const errMessage: string = err['data']['error'];
 
-    return client.leaveGroup(groupId);
+      switch (err['data']['errcode']) {
+        case GroupService.ERRCODE_UNKNOWN:
+          errCode = GroupError.RoomNotFound;
+          break;
+        default:
+          break;
+      }
+      return new UnsuccessfulResponse(errCode, errMessage);//.promise();
+    });*/
+    console.log("test 2");
+    return new SuccessfulResponse();
   }
 
   public async modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string,
