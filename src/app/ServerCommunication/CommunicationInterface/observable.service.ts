@@ -29,15 +29,19 @@ De  // TODO: remove magic numbers
 
   public async setUp(matrixClient: MatrixClient): Promise<void> {
     this.matrixClient = matrixClient;
-    // TODO: get name from Matrix
+Ge    // Create the User in DataModel
     const userId = await this.matrixClient.getUserId();
-    const currencyObject = await matrixClient.getAccountDataFromServer('currency');
-    console.log(currencyObject);
-    // When setting language is implemented in login component:
-    // const language = await matrixClient.getAccountDataFromServer('language');
-    // console.log(language);
-    this.userObservable.next({contactId: userId, name: 'Name',
-      currency: currencyObject.currency, /*language: language*/ language: 'ENGLISH'});
+    // test: does not give the displayName, but the userId
+    const user = await this.matrixClient.getUser(userId).displayName;
+    // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
+    const currencyEventContent = await matrixClient.getAccountDataFromServer('currency'); // content of the matrix event
+    console.log(currencyEventContent);
+    /* When setting language is implemented in login component:
+       const languageEventContent = await matrixClient.getAccountDataFromServer('language');
+       console.log(languageEventContent);*/
+    this.userObservable.next({contactId: userId, name,
+      currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
+    // start the matrix listeners
     this.listenToMatrix();
   }
 
@@ -48,8 +52,10 @@ De  // TODO: remove magic numbers
   private async listenToMatrix(): Promise<void> {
     // listen to Matrix Events, use next() on Subjects
     // TODO: add dates where necessary
-    // TODO: listen for name changes
+    // TODO: make functions asyncronous where necessary
+    // TODO: error handling
     // TODO: detect transactions, modified transactions and when the user leaves a room
+    // TODO: listen for name changes
 
     console.log('ObservableService is listening to Matrix');
 
@@ -97,11 +103,20 @@ De  // TODO: remove magic numbers
     });
 
     // Fires whenever invited to a room or joining a room
-    // TODO: check whether client joined, check whether it is a MatrixPay room
+    // TODO: check whether it is a MatrixPay room
     this.matrixClient.on('Room', room => {
-      console.log('new room detected');
+      const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
+      if (!(members[this.matrixClient.getUserId()].membership === 'join')) {
+        return;
+      }
       const groupId = room.roomId;
       const groupName = room.name;
+      let userIds = [];
+      let userNames = [];
+      for (const id in members) {
+        userIds.push(id);
+        userNames.push(members[id].name);
+      }
       // currency is detected a second time by the other event listener,
       // but needed here for the observable (in DataModel for the group constructor)
       const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents("currency", " ");
@@ -123,15 +138,16 @@ De  // TODO: remove magic numbers
         currency = currencyEvent.getContent().currency;
         console.log(currencyEvent.getContent().currency);
       }
-      // TODO: get missing attributes from matrix
-      this.groupsObservable.next({groupId, groupName, currency: 'EURO', userIds: ['a', 'b'],
-        userNames: ['Karl', 'Sophie'], isLeave: false});
+      console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames);
+      // As long as we do not filter for paygroups, set currency to 'EURO' for testing
+      this.groupsObservable.next({groupId, groupName, /*currency*/ currency: 'EURO', userIds,
+        userNames, isLeave: false});
     });
 
     // Fires whenever the timeline in a room is updated
     this.matrixClient.on('Room.timeline',
       (event, room, toStartOfTimeline, removed, data) => {
-      console.log('got a timeline change. event type: '  + event.getType());
+      // console.log('got a timeline change. event type: '  + event.getType());
       // Maybe fetch transactions seperately
       // do we need this check?
       if (!toStartOfTimeline && data.liveEvent) {
@@ -167,7 +183,7 @@ De  // TODO: remove magic numbers
     this.matrixClient.on('RoomState.events', (event, state, prevEvent) => {
       if (event.getType() === 'currency') {
         const newCurrency = event.getContent().currency;
-        console.log('got change of room currency. new currency: ' + newCurrency);
+        console.log('got change of room currency. room: ' + state.roomId + ' new currency: ' + newCurrency);
         // TODO: call next() on observable
       }
     });
