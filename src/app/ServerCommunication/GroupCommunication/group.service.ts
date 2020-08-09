@@ -9,6 +9,7 @@ import {ServerResponse} from '../Response/ServerResponse';
 import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {GroupError} from '../Response/ErrorTypes';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
+import {Group} from "../../DataModel/Group/Group";
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,8 @@ export class GroupService {
   private static readonly ROOM_VISIBILITY: string = 'private';
   private static readonly ERRCODE_UNKNOWN: string = 'M_UNKNOWN';
   private static readonly ERRCODE_INUSE: string = 'M_ROOM_IN_USE';
+  private static readonly ERRCODE_UNRECOGNIZED: string = 'M_UNRECOGNIZED';
+  private static readonly ERRCODE_INVALID_PARAM: string = 'M_INVALID_PARAM';
   private static readonly CURRENCY_KEY: string = 'currency';
 
   constructor(transactionService: TransactionService, matrixClientService: MatrixClientService) {
@@ -28,8 +31,30 @@ export class GroupService {
   }
 
   public async addMember(groupId: string, userId: string): Promise<ServerResponse> {
-    const client: MatrixClient = await this.matrixClientService.getClient();
-    return client.inviteUserToGroup(groupId, userId);
+    const client: MatrixClient = await this.matrixClientService.getPreparedClient();
+    let response: ServerResponse;
+    await client.invite(groupId, userId).then(() => {
+      response = new SuccessfulResponse();
+    },
+      (err) => {
+      let errCode: number = GroupError.Unknown;
+      const errMessage: string = err['data']['error'];
+
+      switch (err['data']['errcode']) {
+        case GroupService.ERRCODE_UNKNOWN:
+        case GroupService.ERRCODE_UNRECOGNIZED:
+          errCode = GroupError.RoomNotFound;
+          break;
+        case GroupService.ERRCODE_INVALID_PARAM:
+          errCode = GroupError.InvalidUsers;
+          break;
+        default:
+          break;
+      }
+      response = new UnsuccessfulResponse(errCode, errMessage);
+    });
+
+    return await response;
   }
 
   public async confirmRecommendation(groupId: string, recommendationId: number): Promise<ServerResponse> {
@@ -37,7 +62,7 @@ export class GroupService {
     const client: MatrixClient = await this.matrixClientService.getClient();
 
     // Part 1: Find the right recommendation
-    const accountDataEvents = client.getRoom(groupId)['account_data']['events'];
+    const accountDataEvents = await client.getRoom(groupId)['account_data']['events'];
     let recommendations = null;
 
     for (const event of accountDataEvents['type']) {
@@ -60,7 +85,7 @@ export class GroupService {
     const payer = recommendations['payers'][recommendationId];
     const amount = recommendations['amounts'][recommendationId];
 
-    if (payer != client.getUserId()) {
+    if (payer != await client.getUserId()) {
       return new UnsuccessfulResponse(0, 'user not payer of recommendation');
     }
 
@@ -72,7 +97,7 @@ export class GroupService {
 
     // Part 3: delete Recommendation
     recommendations.splice(recommendationId, 1);
-    return client.setRoomAccountData(groupId, 'recommendations', recommendations);
+    return await client.setRoomAccountData(groupId, 'recommendations', recommendations);
   }
 
   /**

@@ -58,7 +58,9 @@ export class LoginComponent {
 
         //await client.setRoomAccountData('!vEoxoAdSnmcjVQQczC:dsn.tm.kit.edu', 'balances', {'@uelkt:dsn.tm.kit.edu': 0});
 
-        const groupResponse: ServerResponse = await this.groupService.leaveGroup('!vEoxoAdSnmcjVQQczC:dsn.tm.kit.edu').catch();
+        const groupResponse: ServerResponse = await this.groupService.addMember(
+          '!BGBWYmlePjKITRjxXS:dsn.tm.kit.edu', '@uwxkt:dsn.tm.kit.edu').catch();
+        //const groupResponse: ServerResponse = await this.groupService.addMember('abc', 'def');
 
         if (groupResponse.wasSuccessful()) {
           console.log('groupCreation successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');

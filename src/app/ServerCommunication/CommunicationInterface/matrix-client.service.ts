@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 // @ts-ignore
-import {createClient, MatrixClient, AutoDiscovery} from 'matrix-js-sdk';
+import {createClient, MatrixClient, AutoDiscovery, MatrixError} from 'matrix-js-sdk';
 
 import { ServerResponse } from '../Response/ServerResponse';
 import { ClientInterface } from './ClientInterface';
