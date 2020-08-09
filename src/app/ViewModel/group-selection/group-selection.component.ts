@@ -15,6 +15,8 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
+import {Activity} from '../../DataModel/Group/Activity';
+import {ActivityType} from '../../DataModel/Group/ActivityType';
 
 @Component({
   selector: 'app-group-selection',
@@ -64,6 +66,14 @@ export class GroupSelectionComponent implements OnInit{
     const r1 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
     const r2 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
     testGroup.setRecommendations([r1, r2]);
+    const a1 = new Activity(ActivityType.CONTACTLEFTGROUP, testGroup, c1, new Date());
+    const a2 = new Activity(ActivityType.GROUPCREATION, testGroup, c1, new Date());
+    const a3 = new Activity(ActivityType.NEWCONTACTINGROUP, testGroup, c1, new Date());
+    const a4 = new Activity(ActivityType.NEWPAYBACK, testGroup, c1, new Date());
+    testGroup.addActivity(a1);
+    testGroup.addActivity(a2);
+    testGroup.addActivity(a3);
+    testGroup.addActivity(a4);
     // TODO test code ends here
 
     this.groups = this.dataModelService.getGroups();
