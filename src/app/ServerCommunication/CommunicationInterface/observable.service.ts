@@ -42,17 +42,18 @@ De  // TODO: remove magic numbers
   }
 
   public async tearDown(): Promise<void> {
+  // TODO: implement
   }
 
-  private listenToMatrix(): void {
+  private async listenToMatrix(): Promise<void> {
     // listen to Matrix Events, use next() on Subjects
     // TODO: add dates where necessary
     // TODO: listen for name changes
-    // TODO: detect rooms the user left
+    // TODO: detect transactions, modified transactions and when the user leaves a room
 
     console.log('ObservableService is listening to Matrix');
 
-    // Fires whenever account data changes
+    // Fires whenever new user-scoped account_data is added.
     this.matrixClient.on('accountData', (event, oldEvent) => {
       // console.log('got account data change' + event.getType());
       switch (event.getType()) {
@@ -101,9 +102,27 @@ De  // TODO: remove magic numbers
       console.log('new room detected');
       const groupId = room.roomId;
       const groupName = room.name;
-      // currency is detected a second time by the other event listener, but needed here for the constructor
-      const currency = room.getLiveTimeline().getState(EventTimeline.FORWARDS).currency;
-      console.log(currency);
+      // currency is detected a second time by the other event listener,
+      // but needed here for the observable (in DataModel for the group constructor)
+      const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents("currency", " ");
+      let currency: string;
+      console.log(currencyEvent);
+      // See the sdk code of getStateEvents() for explanation
+      if (currencyEvent === null) {
+        // no such event type or no valid events with this event type and state key
+        console.log('no currency set');
+      } else if (Array.isArray(currencyEvent)) {
+        // extra check because currencyEvent === [] did not work
+        if (currencyEvent.length === 0) {
+          console.log('no currency set');
+        } else {
+        // event type ok, stateKey undefined (should not happen because we set stateKey to " ".)
+        console.log('stateKey undefinded');
+        }
+      } else {
+        currency = currencyEvent.getContent().currency;
+        console.log(currencyEvent.getContent().currency);
+      }
       // TODO: get missing attributes from matrix
       this.groupsObservable.next({groupId, groupName, currency: 'EURO', userIds: ['a', 'b'],
         userNames: ['Karl', 'Sophie'], isLeave: false});
@@ -142,6 +161,15 @@ De  // TODO: remove magic numbers
         isLeave = true;
       }
       // TODO: call next() on observable
+    });
+
+    // Fires whenever the event dictionary in room state is updated.
+    this.matrixClient.on('RoomState.events', (event, state, prevEvent) => {
+      if (event.getType() === 'currency') {
+        const newCurrency = event.getContent().currency;
+        console.log('got change of room currency. new currency: ' + newCurrency);
+        // TODO: call next() on observable
+      }
     });
   }
 
