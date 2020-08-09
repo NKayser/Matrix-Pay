@@ -134,32 +134,10 @@ export class GroupService {
   public async leaveGroup(groupId: string): Promise<ServerResponse> {
     const client: MatrixClient = await this.matrixClientService.getPreparedClient();
 
-    // TODO: check if balance in that group is zero in order to be allowed to leave.
-    // There should be a better way to do this
-    let allowedToLeave: boolean = false;
     const room = client.getRoom(groupId);
     if (room == undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound).promise();
-    const accountData = await room.accountData;
-    console.log(accountData);
-    console.log(Object.keys(accountData));
 
-    if (!(Object.keys(accountData).includes('balances'))) {
-      console.log('allowed to leave');
-      allowedToLeave = true;
-    } else {
-      console.log('check check');
-      console.log(accountData['balances']);
-      for(const element in accountData['balances']) {
-        console.log(element);/*
-        if (element == client.getUserId()) {
-          allowedToLeave = true;
-        }*/
-      }
-    }
-    console.log('test');
-/*
-    await client.leaveGroup(groupId).catch((err) => {
-      console.log("Error");
+    await client.leave(groupId).catch((err) => {
       let errCode: number = GroupError.Unknown;
       const errMessage: string = err['data']['error'];
 
@@ -171,8 +149,7 @@ export class GroupService {
           break;
       }
       return new UnsuccessfulResponse(errCode, errMessage);//.promise();
-    });*/
-    console.log("test 2");
+    });
     return new SuccessfulResponse();
   }
 

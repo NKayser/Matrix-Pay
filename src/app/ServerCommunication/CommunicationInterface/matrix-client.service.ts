@@ -4,7 +4,7 @@ import {createClient, MatrixClient, AutoDiscovery} from 'matrix-js-sdk';
 
 import { ServerResponse } from '../Response/ServerResponse';
 import { ClientInterface } from './ClientInterface';
-//import {ObservableService} from './observable.service';
+import {ObservableService} from './observable.service';
 import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {ClientError} from '../Response/ErrorTypes';
@@ -24,7 +24,7 @@ export class MatrixClientService implements ClientInterface {
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
   private static readonly TIMEOUT: number = 100000; // how long to wait until client is "prepared" (after first sync)
 
-  constructor(/*private observableService: ObservableService*/) {}
+  constructor(private observableService: ObservableService) {}
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
@@ -61,22 +61,15 @@ export class MatrixClientService implements ClientInterface {
 
     // move to the end of the method?
     // Call Observable Service
-    //this.observableService.setUp(this.matrixClient);
+    this.observableService.setUp(this.matrixClient);
 
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
       MatrixClientService.prepared = await (state === 'PREPARED' || state === 'SYNCING');
       console.log("prepared: " + MatrixClientService.prepared);
-      //return new SuccessfulResponse();
     });
-/*
-    if (this.matrixClient.isInitialSyncComplete()) {
-      MatrixClientService.prepared = true;
-      console.log("prepared: " + MatrixClientService.prepared);
-      return new SuccessfulResponse();
-    }
-*/
+
     return new SuccessfulResponse();
 
     // TODO: Initialization of Data
@@ -87,7 +80,7 @@ export class MatrixClientService implements ClientInterface {
       await this.matrixClient.logout();
       this.loggedIn = false;
       MatrixClientService.prepared = false;
-      //this.observableService.tearDown();
+      this.observableService.tearDown();
     }
 
     // User was already logged out
@@ -101,16 +94,6 @@ export class MatrixClientService implements ClientInterface {
       throw new Error('unknown error')
     }
 
-    /*
-    if (!MatrixClientService.prepared) {
-      this.matrixClient.once('sync', (state, prevState, res) => {
-        if (state === 'PREPARED') { // state will be 'PREPARED' when the client is ready to use
-          return this.matrixClient;
-        }
-      });
-    } else {
-      return this.matrixClient;
-    }*/
     return this.matrixClient;
   }
 
@@ -128,12 +111,10 @@ export class MatrixClientService implements ClientInterface {
 
   private static async until(condition: () => boolean, interval: number, timeout?: number): Promise<boolean> {
     let time: number = 0;
-    console.log("entered");
     while (condition() == false) {
-      console.log("while begin. Condition " + condition());
       if (timeout != undefined && time >= timeout) return Promise.reject();
       await new Promise(resolve => setTimeout(resolve, interval));
-      console.log("waited for " + time);
+      console.log("waiting for client to be prepared. " + time);
       time += interval;
     }
     return true;
@@ -146,7 +127,7 @@ export class MatrixClientService implements ClientInterface {
 
         await sleep( 23000);
         console.log("Timer over");
-        */
+    */
 
   }
 }

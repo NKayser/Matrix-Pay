@@ -25,6 +25,8 @@ declare class MatrixClient extends EventEmitter {
   inviteUserToGroup(groupId: string, userId: string): Promise<any>;
   sendStateEvent(roomId: string, eventType: string, content: object, stateKey: string, callback): Promise<any>;
   getRoom(roomId: string): object;
+  getRooms(): object[];
+  leave(roomId: string): Promise<any>;
 }
 
 declare class MatrixEvent {

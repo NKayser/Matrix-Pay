@@ -7,6 +7,7 @@ import {ClientError} from "../../ServerCommunication/Response/ErrorTypes";
 
 // @ts-ignore
 import {MatrixClient} from "matrix-js-sdk";
+import {GroupService} from "../../ServerCommunication/GroupCommunication/group.service";
 
 
 @Component({
@@ -27,7 +28,7 @@ export class LoginComponent {
   matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('.*')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService) {
+  constructor(clientService: MatrixClientService, private groupService: GroupService) {
     this.clientService = clientService;
   }
 
@@ -53,20 +54,22 @@ export class LoginComponent {
         }
 
         //const client: MatrixClient = await this.clientService.getPreparedClient();
-        //await client.setRoomAccountData('!KmKKSxNWHXYBxGglRQ:dsn.tm.kit.edu', 'balances', {'@uelkt:dsn.tm.kit.edu': 0});
-/*
-        const groupResponse: ServerResponse = await this.groupService.leaveGroup('!KmKKSxNWHXYBxGglRQ:dsn.tm.kit.edu').catch();
+        //console.log(client.getRooms());
+
+        //await client.setRoomAccountData('!vEoxoAdSnmcjVQQczC:dsn.tm.kit.edu', 'balances', {'@uelkt:dsn.tm.kit.edu': 0});
+
+        const groupResponse: ServerResponse = await this.groupService.leaveGroup('!vEoxoAdSnmcjVQQczC:dsn.tm.kit.edu').catch();
 
         if (groupResponse.wasSuccessful()) {
           console.log('groupCreation successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         } else {
           console.log('groupCreation failed :/    :( because ' + groupResponse.getError());
         }
-*/
+
         //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
 
         // Tell AppComponent, that user is logged in
-        //this.loggedIn.emit(true);
+        this.loggedIn.emit(true);
       }
   }
 
