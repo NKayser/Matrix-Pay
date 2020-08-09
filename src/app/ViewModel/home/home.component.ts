@@ -1,7 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {DataModelService} from '../../DataModel/data-model.service';
-import {currencyMap} from '../../DataModel/Utils/Currency';
+import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
+import {Contact} from '../../DataModel/Group/Contact';
 
 @Component({
   selector: 'app-home',
@@ -10,7 +11,8 @@ import {currencyMap} from '../../DataModel/Utils/Currency';
 })
 export class HomeComponent implements OnInit {
 
-  balances: number[] = [5, 10, 0, 5, 6];
+  usedCurrencies: Set<Currency> = new Set();
+  userContact: Contact;
 
   recommendations: Recommendation[] = [];
   currencyMap = currencyMap;
@@ -19,23 +21,36 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
 
+    this.userContact = this.dataModelService.getUser().contact;
     const groups = this.dataModelService.getGroups();
     for (const group of groups){
       for (const recommendation of group.recommendations){
         this.recommendations.push(recommendation);
       }
+
+      this.usedCurrencies.add(group.currency);
     }
   }
 
   // Calculate the total Balances of the User
-  public getTotalBalance(): number{
-    // TODO Remove this
-    const total = 0;
-    /*for (let i = 0; i < this.balance.length; i++){
-      total += this.balance[i];
-    }*/
-    return total;
-    // TODO Add loop to calculate all Balances
+  public getTotalBalance(currency: Currency): number{
+    const groups = this.dataModelService.getGroups();
+    let balance = 0;
+    for (const group of groups){
+      if (group.currency === currency){
+        console.log(group.groupmembers);
+        for (const member of group.groupmembers){
+          console.log('mem: ' + member.contact.contactId + ' ' + this.userContact.contactId);
+          console.log(member.balance);
+          if (member.contact.contactId === this.userContact.contactId){
+            balance += member.balance;
+            break;
+          }
+        }
+      }
+    }
+
+    return balance;
   }
 
   public confirmPayback(payerId: string, recipientId: string, amount: number): void{

@@ -1,8 +1,13 @@
 <div>
-  <mat-card class="center">
-    <mat-label class="balance_label">Balance</mat-label>
-    <mat-label class="balance_number" [ngStyle]="{'color' : (getTotalBalance() >= 0) ? 'green' : 'red'}" >{{getTotalBalance()}}</mat-label>
-  </mat-card>
+  <mat-list>
+    <mat-list-item *ngFor="let currency of usedCurrencies">
+      <mat-card class="center">
+        <mat-label class="balance_label">Balance {{currencyMap[currency]}}</mat-label>
+        <mat-label class="balance_number" [ngStyle]="{'color' : (getTotalBalance(currency) >= 0) ? 'green' : 'red'}" >{{getTotalBalance(currency)}}</mat-label>
+      </mat-card>
+    </mat-list-item>
+  </mat-list>
+
 </div>
 
 <mat-divider class="divider"></mat-divider>

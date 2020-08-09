@@ -47,15 +47,17 @@ export class GroupSelectionComponent implements OnInit{
 
 
     // TODO Remove test code
-    this.dataModelService.initializeUserFirstTime('', '');
+    const c1 = this.dataModelService.initializeUserFirstTime('c1', 'Alice').contact;
     this.dataModelService.getUser().createGroup('1', 'gruppe1', Currency.EUR);
-    const c1 = new Contact('c1', 'Alice');
+    this.dataModelService.getUser().createGroup('2', 'gruppe2', Currency.USD);
     const c2 = new Contact('c2', 'Bob');
     const c3 = new Contact('c3', 'Eve');
     const testGroup = this.dataModelService.getGroup('1');
-    const m1 = new Groupmember(c1, testGroup);
     const m2 = new Groupmember(c2, testGroup);
     const m3 = new Groupmember(c3, testGroup);
+    const m1 = testGroup.groupmembers[0];
+    m1.balance = 5;
+    console.log(m1.balance + ' ' + m1.contact.contactId);
     testGroup.addGroupmember(m1);
     testGroup.addGroupmember(m2);
     testGroup.addGroupmember(m3);
