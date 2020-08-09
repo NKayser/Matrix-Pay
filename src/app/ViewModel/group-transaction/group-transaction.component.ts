@@ -80,10 +80,6 @@ export class GroupTransactionComponent implements OnInit {
       isAdded.push(recipientAmount !== 0);
     }
 
-    recipients.shift();
-    amount.shift();
-    isAdded.shift();
-
     return {modalTitle, description, payer, recipients, amount, isAdded};
   }
 
@@ -101,10 +97,6 @@ export class GroupTransactionComponent implements OnInit {
       amount.push(0);
       isAdded.push(true);
     }
-
-    recipients.shift();
-    amount.shift();
-    isAdded.shift();
 
     return {modalTitle, description, payer, recipients, amount, isAdded};
   }

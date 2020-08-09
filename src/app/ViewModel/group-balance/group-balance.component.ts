@@ -40,18 +40,10 @@ export class GroupBalanceComponent implements OnInit {
       this.data.push({name: groupMember.contact.name, value: groupMember.balance});
     }
 
-    // For some reason there is an empty element in the array by using the method above
-    // By shifting the array, the first element gets removed
-    this.data.shift();
-
     this.recommendations = this.group.recommendations;
   }
 
   confirmPayback(payerId: string, recipientId: string, amount: number): void {
-
-  }
-
-  getBalances(): void{
 
   }
 

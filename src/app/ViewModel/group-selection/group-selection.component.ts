@@ -25,7 +25,9 @@ import {ActivityType} from '../../DataModel/Group/ActivityType';
 })
 export class GroupSelectionComponent implements OnInit{
 
+  // saves the currently selected group
   currentGroup: Group;
+  // save returned data form dialogs
   createGroupData: GroupCreateDialogData;
   leaveGroupData: LeaveGroupDialogData;
   addUserToGroupData: AddMemberToGroupDialogData;
@@ -78,6 +80,7 @@ export class GroupSelectionComponent implements OnInit{
     testGroup.addActivity(a4);
     // TODO test code ends here
 
+    // get all groups and select the first group as default
     this.groups = this.dataModelService.getGroups();
     if (this.groups.length >= 1){
       this.currentGroup = this.groups[0];
@@ -89,6 +92,7 @@ export class GroupSelectionComponent implements OnInit{
     this.currentGroup = this.groups[index];
   }
 
+  // open a leave group dialog and use the returned data to cause a proper reaction
   leaveGroup(): void{
     const dialogRef = this.dialog.open(LeaveGroupModalComponent, {
       width: '300px',
@@ -105,11 +109,11 @@ export class GroupSelectionComponent implements OnInit{
     });
   }
 
-  // TODO currency selection is missing
+
   addGroup(): void {
     const dialogRef = this.dialog.open(CreateGroupModalComponent, {
       width: '300px',
-      data: {groupName: ''}
+      data: {groupName: '', currency: this.dataModelService.getUser().currency}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -122,6 +126,7 @@ export class GroupSelectionComponent implements OnInit{
     });
   }
 
+  // open a dialog to add a new member to the group and get back the member matrix url
   addMemberToGroup(): void{
     const dialogRef = this.dialog.open(AddMemberToGroupModalComponent, {
       width: '300px',

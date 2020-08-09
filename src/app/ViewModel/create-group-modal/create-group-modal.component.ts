@@ -1,9 +1,11 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
+import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 
 export interface GroupCreateDialogData {
   groupName: string;
+  currency: Currency;
 }
 
 @Component({
@@ -11,10 +13,12 @@ export interface GroupCreateDialogData {
   templateUrl: './create-group-modal.component.html',
   styleUrls: ['./create-group-modal.component.css']
 })
-export class CreateGroupModalComponent implements OnInit {
+export class CreateGroupModalComponent implements OnInit{
 
-  // Save the FormControl which checks the GroupName TODO Add regex
+  // Save the FormControl which checks the GroupName
   formControlGroupName = new FormControl('', [Validators.required]);
+  selectedCurrency: Currency;
+  currencyMap = currencyMap;
 
   constructor(
     public dialogRef: MatDialogRef<CreateGroupModalComponent>,
@@ -22,6 +26,7 @@ export class CreateGroupModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.selectedCurrency = this.data.currency;
   }
 
   onCancel(): void {
@@ -31,7 +36,7 @@ export class CreateGroupModalComponent implements OnInit {
   // Save the dialog and return the data, if the form is valid
   onSave(): void {
     if (!this.formControlGroupName.invalid){
-      this.dialogRef.close({groupName: this.formControlGroupName.value});
+      this.dialogRef.close({groupName: this.formControlGroupName.value, currency: this.selectedCurrency});
     }
   }
 

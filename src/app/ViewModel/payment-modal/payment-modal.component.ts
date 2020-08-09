@@ -24,8 +24,6 @@ export class PaymentModalComponent implements OnInit{
   formControlAmount: FormControl[];
   // Save the FormControl which check the description TODO Add regex
   formControlDescription: FormControl;
-  // Save the FormControl which checks the payer TODO Add regex
-  formControlPayer: FormControl;
   // Helper variable if the form is valid
   formInvalid = false;
 
@@ -55,10 +53,6 @@ export class PaymentModalComponent implements OnInit{
       if (this.formControlAmount[i].invalid && this.data.isAdded[i]){
         tempValid = true;
       }
-    }
-
-    if (this.formControlPayer.invalid){
-      tempValid = true;
     }
 
     if (this.formControlDescription.invalid){
