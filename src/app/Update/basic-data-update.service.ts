@@ -25,13 +25,13 @@ export class BasicDataUpdateService {
       console.log('call user constructor');
       new User(new Contact(param.contactId, param.name),
         this.currencyStringToEnum(param.currency), this.languageStringToEnum(param.language));
+      // invoke all methods
       this.updateDefaultCurrency();
       this.addGroup();
     });
   }
 
   private async addGroup(): Promise<void> {
-    // do things in subscribe()
     this.observables.getGroupsObservable().subscribe(param => {
       if (!param.isLeave) {
         console.log('new group detected');
