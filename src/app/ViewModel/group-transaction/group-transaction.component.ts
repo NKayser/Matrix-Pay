@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {PaymentDialogData, PaymentModalComponent} from '../payment-modal/payment-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {Transaction} from '../../DataModel/Group/Transaction';
@@ -12,7 +12,7 @@ import {DataModelService} from '../../DataModel/data-model.service';
   templateUrl: './group-transaction.component.html',
   styleUrls: ['./group-transaction.component.css']
 })
-export class GroupTransactionComponent implements OnInit {
+export class GroupTransactionComponent implements OnChanges {
 
   // Input is used to pass the current selected group to the transaction component
   @Input() group: Group;
@@ -24,7 +24,7 @@ export class GroupTransactionComponent implements OnInit {
   constructor(public dialog: MatDialog, private dataModelService: DataModelService) {
   }
 
-  ngOnInit(): void {
+  ngOnChanges(): void {
     this.transactions = this.group.transactions;
   }
 

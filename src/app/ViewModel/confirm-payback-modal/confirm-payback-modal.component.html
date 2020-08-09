@@ -1,0 +1,6 @@
+<h1>Approve Paypack</h1>
+<div mat-dialog-content>
+  <mat-label>Have you really payed back {{data.recipient.name}} {{data.amount * -1}}{{currencyMap[data.currency]}} in  Group {{data.group}}?</mat-label>
+  <button mat-raised-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button (click)="onSave()" >Confirm</button>
+</div>

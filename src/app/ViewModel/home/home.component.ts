@@ -3,6 +3,8 @@ import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 import {Contact} from '../../DataModel/Group/Contact';
+import {ConfirmPaybackDialogData, ConfirmPaybackModalComponent} from '../confirm-payback-modal/confirm-payback-modal.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-home',
@@ -16,8 +18,9 @@ export class HomeComponent implements OnInit {
 
   recommendations: Recommendation[] = [];
   currencyMap = currencyMap;
+  dialogData: ConfirmPaybackDialogData;
 
-  constructor(private dataModelService: DataModelService) {}
+  constructor(private dataModelService: DataModelService, public dialog: MatDialog) {}
 
   ngOnInit(): void {
 
@@ -53,8 +56,22 @@ export class HomeComponent implements OnInit {
     return balance;
   }
 
-  public confirmPayback(payerId: string, recipientId: string, amount: number): void{
+  confirmPayback(recommendationIndex: number): void {
 
+    const currentRec = this.recommendations[recommendationIndex];
+    const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
+      width: '350px',
+      data: {group: currentRec.group.name, confirm: false, recipient: currentRec.recipient.contact, amount: currentRec.recipient.amount,
+        currency: currentRec.group.currency}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.dialogData = result;
+      if (this.dialogData !== undefined){
+        // TODO Send Data to matrix here
+        console.log(this.dialogData);
+      }
+    });
   }
 
 }
