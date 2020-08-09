@@ -3,9 +3,10 @@ import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
 import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse";
-import {LoginError} from "../../ServerCommunication/Response/ErrorTypes";
-import {SettingsService} from "../../ServerCommunication/SettingsCommunication/settings.service";
-import {TransactionService} from "../../ServerCommunication/GroupCommunication/transaction.service";
+import {ClientError} from "../../ServerCommunication/Response/ErrorTypes";
+
+// @ts-ignore
+import {MatrixClient} from "matrix-js-sdk";
 import {GroupService} from "../../ServerCommunication/GroupCommunication/group.service";
 
 
@@ -16,9 +17,6 @@ import {GroupService} from "../../ServerCommunication/GroupCommunication/group.s
 })
 export class LoginComponent {
   private clientService: ClientInterface;
-  private settingsService: SettingsService; // delete later
-  private transactionService: TransactionService; // delete later
-  private groupService: GroupService; // delete later
 
   // emitter to tell the App Component to display the Menu when logged in
   @Output() loggedIn = new EventEmitter<boolean>();
@@ -30,11 +28,8 @@ export class LoginComponent {
   matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('.*')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService, settingsService: SettingsService, transactionService: TransactionService, groupService: GroupService) {
+  constructor(clientService: MatrixClientService, private groupService: GroupService) {
     this.clientService = clientService;
-    this.settingsService = settingsService;
-    this.transactionService = transactionService;
-    this.groupService = groupService;
   }
 
 
@@ -55,10 +50,15 @@ export class LoginComponent {
         if (loginResponse.wasSuccessful()) {
           console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         } else {
-          console.log('logIn failed :/    :( because ' + LoginError[loginResponse.getError()]);
+          console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
 
-        const groupResponse: ServerResponse = await this.groupService.createGroup("Test Angular Privat 5", "Bitcoin");
+        //const client: MatrixClient = await this.clientService.getPreparedClient();
+        //console.log(client.getRooms());
+
+        //await client.setRoomAccountData('!vEoxoAdSnmcjVQQczC:dsn.tm.kit.edu', 'balances', {'@uelkt:dsn.tm.kit.edu': 0});
+
+        const groupResponse: ServerResponse = await this.groupService.leaveGroup('!vEoxoAdSnmcjVQQczC:dsn.tm.kit.edu').catch();
 
         if (groupResponse.wasSuccessful()) {
           console.log('groupCreation successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
