@@ -11,13 +11,14 @@
   <!--Payer form-->
   <mat-form-field>
     <mat-label>Payer</mat-label>
-    <input matInput [formControl]="formControlPayer" placeholder="Insert Payer" value="">
-    <mat-error *ngIf="formControlPayer.invalid">{{getInvalidPayerErrorMessage()}}</mat-error>
+    <mat-select [(ngModel)]="data.payer">
+      <mat-option *ngFor="let recipient of data.recipients" [value]="recipient">{{recipient.name}}</mat-option>
+    </mat-select>
   </mat-form-field>
 
   <!--Amount form-->
   <mat-action-list>
-    <mat-list-item *ngFor="let recipient of data.recipientsId; let i = index">
+    <mat-list-item *ngFor="let recipient of data.recipients; let i = index">
       <div><mat-checkbox [(ngModel)]="data.isAdded[i]"></mat-checkbox></div>
       <mat-label>{{recipient.name}}</mat-label>
       <mat-form-field *ngIf="data.isAdded[i]">

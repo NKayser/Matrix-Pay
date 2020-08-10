@@ -15,6 +15,8 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
+import {Activity} from '../../DataModel/Group/Activity';
+import {ActivityType} from '../../DataModel/Group/ActivityType';
 
 @Component({
   selector: 'app-group-selection',
@@ -23,7 +25,9 @@ import {Recommendation} from '../../DataModel/Group/Recommendation';
 })
 export class GroupSelectionComponent implements OnInit{
 
+  // saves the currently selected group
   currentGroup: Group;
+  // save returned data form dialogs
   createGroupData: GroupCreateDialogData;
   leaveGroupData: LeaveGroupDialogData;
   addUserToGroupData: AddMemberToGroupDialogData;
@@ -45,15 +49,17 @@ export class GroupSelectionComponent implements OnInit{
 
 
     // TODO Remove test code
-    this.dataModelService.initializeUserFirstTime('', '');
+    const c1 = this.dataModelService.initializeUserFirstTime('c1', 'Alice').contact;
     this.dataModelService.getUser().createGroup('1', 'gruppe1', Currency.EUR);
-    const c1 = new Contact('c1', 'Alice');
+    this.dataModelService.getUser().createGroup('2', 'gruppe2', Currency.USD);
     const c2 = new Contact('c2', 'Bob');
     const c3 = new Contact('c3', 'Eve');
     const testGroup = this.dataModelService.getGroup('1');
-    const m1 = new Groupmember(c1, testGroup);
     const m2 = new Groupmember(c2, testGroup);
     const m3 = new Groupmember(c3, testGroup);
+    const m1 = testGroup.groupmembers[0];
+    m1.balance = 5;
+    console.log(m1.balance + ' ' + m1.contact.contactId);
     testGroup.addGroupmember(m1);
     testGroup.addGroupmember(m2);
     testGroup.addGroupmember(m3);
@@ -64,8 +70,17 @@ export class GroupSelectionComponent implements OnInit{
     const r1 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
     const r2 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
     testGroup.setRecommendations([r1, r2]);
+    const a1 = new Activity(ActivityType.CONTACTLEFTGROUP, testGroup, c1, new Date());
+    const a2 = new Activity(ActivityType.GROUPCREATION, testGroup, c1, new Date());
+    const a3 = new Activity(ActivityType.NEWCONTACTINGROUP, testGroup, c1, new Date());
+    const a4 = new Activity(ActivityType.NEWPAYBACK, testGroup, c1, new Date());
+    testGroup.addActivity(a1);
+    testGroup.addActivity(a2);
+    testGroup.addActivity(a3);
+    testGroup.addActivity(a4);
     // TODO test code ends here
 
+    // get all groups and select the first group as default
     this.groups = this.dataModelService.getGroups();
     if (this.groups.length >= 1){
       this.currentGroup = this.groups[0];
@@ -77,6 +92,7 @@ export class GroupSelectionComponent implements OnInit{
     this.currentGroup = this.groups[index];
   }
 
+  // open a leave group dialog and use the returned data to cause a proper reaction
   leaveGroup(): void{
     const dialogRef = this.dialog.open(LeaveGroupModalComponent, {
       width: '300px',
@@ -93,11 +109,11 @@ export class GroupSelectionComponent implements OnInit{
     });
   }
 
-  // TODO currency selection is missing
+
   addGroup(): void {
     const dialogRef = this.dialog.open(CreateGroupModalComponent, {
       width: '300px',
-      data: {groupName: ''}
+      data: {groupName: '', currency: this.dataModelService.getUser().currency}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -110,6 +126,7 @@ export class GroupSelectionComponent implements OnInit{
     });
   }
 
+  // open a dialog to add a new member to the group and get back the member matrix url
   addMemberToGroup(): void{
     const dialogRef = this.dialog.open(AddMemberToGroupModalComponent, {
       width: '300px',

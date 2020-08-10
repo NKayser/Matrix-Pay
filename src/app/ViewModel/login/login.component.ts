@@ -1,10 +1,10 @@
 import { Component, Output, EventEmitter} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
-import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
-import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse";
-import {LoginError} from "../../ServerCommunication/Response/ErrorTypes";
-import {SettingsService} from "../../ServerCommunication/SettingsCommunication/settings.service";
+import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
+import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
+import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
+import {SettingsService} from '../../ServerCommunication/SettingsCommunication/settings.service';
 import {TransactionService} from "../../ServerCommunication/GroupCommunication/transaction.service";
 
 
@@ -25,7 +25,7 @@ export class LoginComponent {
   hide = true;
 
   // gets the input values of the user and checks if they obey all requirements
-  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('.*')]);
+  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('\'@[a-z0-9.-]+:[a-z0-9.-]+\'')]);
   passwordControl = new FormControl('', [Validators.required]);
 
   constructor(clientService: MatrixClientService, settingsService: SettingsService, transactionService: TransactionService) {
@@ -52,7 +52,7 @@ export class LoginComponent {
         if (loginResponse.wasSuccessful()) {
           console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         } else {
-          console.log('logIn failed :/    :( because ' + LoginError[loginResponse.getError()]);
+          console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
 
         // Error could be thrown here already
