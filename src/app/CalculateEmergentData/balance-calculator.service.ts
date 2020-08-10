@@ -1,32 +1,43 @@
 import { Injectable } from '@angular/core';
 import {ProblemInstance} from './problemInstance';
 import {Transaction} from '../DataModel/Group/Transaction';
+import {Groupmember} from '../DataModel/Group/Groupmember';
 // as soon as available, import Transaction from DataModel
 // import {Transaction} from './DataModel/Transaction'
 
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for calculating the balances the user saves for all groupmembers of one group resulting from a number of given new transactions
+ * and the previous balances.
+ */
 export class BalanceCalculatorService {
-
+  /**
+   * Constructor for BalanceCalculatorService.
+   */
   constructor() { }
 
-  // to be implemented: calculation of balances
-  calculateBalances(contactIds: string[], amounts: number[], transactions: Transaction[]): ProblemInstance {
+  /**
+   * Calculates new balances for all groupmembers of one group and overwrites the values
+   * @param groupmembers  Groupmembers of the group for which the balances should be created.
+   * @param transactions  Transactions that should affect this calculation.
+   */
+  calculateBalances(groupmembers: Groupmember[], transactions: Transaction[]): ProblemInstance {
     for (const transaction of transactions) {
       let id = transaction.payer.contact.contactId;
       let amount = transaction.payer.amount;
-      for (let i = 0; i < contactIds.length; i++) {
-        if (contactIds[i] === id) {amounts[i] += amount; break; }
+      for (const groupmember of groupmembers) {
+        if (groupmember.contact.contactId === id) {groupmember.balance += amount; break; }
       }
       for (const recipient of transaction.recipients) {
         id = recipient.contact.contactId;
         amount = recipient.amount;
-        for (let i = 0; i < contactIds.length; i++) {
-          if (contactIds[i] === id) {amounts[i] -= amount; break; }
+        for (const groupmember of groupmembers) {
+          if (groupmember.contact.contactId === id) {groupmember.balance -= amount; break; }
         }
       }
     }
-    return new ProblemInstance(contactIds, amounts);
+    return new ProblemInstance(groupmembers);
   }
 }

@@ -1,13 +1,9 @@
 import { Component, Output, EventEmitter} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
-import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
-import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse";
-import {ClientError} from "../../ServerCommunication/Response/ErrorTypes";
-
-// @ts-ignore
-import {MatrixClient} from "matrix-js-sdk";
-import {GroupService} from "../../ServerCommunication/GroupCommunication/group.service";
+import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
+import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
+import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
 
 
 @Component({
@@ -25,7 +21,7 @@ export class LoginComponent {
   hide = true;
 
   // gets the input values of the user and checks if they obey all requirements
-  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('.*')]);
+  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('\'@[a-z0-9.-]+:[a-z0-9.-]+\'')]);
   passwordControl = new FormControl('', [Validators.required]);
 
   constructor(clientService: MatrixClientService, private groupService: GroupService) {
@@ -51,21 +47,6 @@ export class LoginComponent {
           console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         } else {
           console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
-        }
-
-        //const client: MatrixClient = await this.clientService.getPreparedClient();
-        //console.log(client.getRooms());
-
-        //await client.setRoomAccountData('!vEoxoAdSnmcjVQQczC:dsn.tm.kit.edu', 'balances', {'@uelkt:dsn.tm.kit.edu': 0});
-
-        const groupResponse: ServerResponse = await this.groupService.addMember(
-          '!BGBWYmlePjKITRjxXS:dsn.tm.kit.edu', '@uwxkt:dsn.tm.kit.edu').catch();
-        //const groupResponse: ServerResponse = await this.groupService.addMember('abc', 'def');
-
-        if (groupResponse.wasSuccessful()) {
-          console.log('groupCreation successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-        } else {
-          console.log('groupCreation failed :/    :( because ' + groupResponse.getError());
         }
 
         //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);

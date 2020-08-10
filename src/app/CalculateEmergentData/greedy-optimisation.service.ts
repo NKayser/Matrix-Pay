@@ -6,8 +6,13 @@ import {SolutionInstance} from './solutionInstance';
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * A Greedy Algorithm that can solve the optimisation problem of calculating paybacks for a group.
+ */
 export class GreedyOptimisationService implements OptimisationInterface{
-
+  /**
+   * Constructor for GreedyOptimisationService
+   */
   constructor() { }
 
   private static getMinIndex(balances: number[]): number { // Finds the index of the lowest balance
@@ -26,7 +31,10 @@ export class GreedyOptimisationService implements OptimisationInterface{
     return maxIndex;
   }
 
-  // to be implemented: optimisation algorithm
+  /**
+   * Calculates an optimal number of paybacks for a group using a Greedy Algorithm.
+   * @param problem  Problem instance for which the paybacks should be calculated.
+   */
   calculateOptimisation(problem: ProblemInstance): SolutionInstance {
     const solutionPayers: string[] = [];
     const solutionRecipients: string[] = [];

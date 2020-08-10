@@ -1,19 +1,22 @@
-import { Component, OnInit, Input } from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {Group} from '../../DataModel/Group/Group';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {currencyMap} from '../../DataModel/Utils/Currency';
+import {MatDialog} from '@angular/material/dialog';
+import {ConfirmPaybackDialogData, ConfirmPaybackModalComponent} from '../confirm-payback-modal/confirm-payback-modal.component';
 
 @Component({
   selector: 'app-group-balance',
   templateUrl: './group-balance.component.html',
   styleUrls: ['./group-balance.component.css']
 })
-export class GroupBalanceComponent implements OnInit {
+export class GroupBalanceComponent implements OnChanges {
 
   // Input is used to pass the current selected group to the balance component
   @Input() group: Group;
 
   currencyMap = currencyMap;
+  dialogData: ConfirmPaybackDialogData;
 
   recommendations: Recommendation[] = [];
   data = [];
@@ -30,29 +33,36 @@ export class GroupBalanceComponent implements OnInit {
     }
   }
 
-  constructor() {
+  constructor(public dialog: MatDialog) {
   }
 
-  ngOnInit(): void {
+  ngOnChanges(): void {
     // Initializes the graph with the balances of the members
+    this.data = [];
     const groupMembers = this.group.groupmembers;
     for (const groupMember of groupMembers){
       this.data.push({name: groupMember.contact.name, value: groupMember.balance});
     }
 
-    // For some reason there is an empty element in the array by using the method above
-    // By shifting the array, the first element gets removed
-    this.data.shift();
-
     this.recommendations = this.group.recommendations;
   }
 
-  confirmPayback(payerId: string, recipientId: string, amount: number): void {
+  confirmPayback(recommendationIndex: number): void {
 
-  }
+      const currentRec = this.recommendations[recommendationIndex];
+      const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
+        width: '350px',
+        data: {group: this.group.name, confirm: false, recipient: currentRec.recipient.contact, amount: currentRec.recipient.amount,
+          currency: this.group.currency}
+      });
 
-  getBalances(): void{
-
+      dialogRef.afterClosed().subscribe(result => {
+        this.dialogData = result;
+        if (this.dialogData !== undefined){
+          // TODO Send Data to matrix here
+          console.log(this.dialogData);
+        }
+      });
   }
 
 }

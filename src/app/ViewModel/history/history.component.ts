@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {Activity} from '../../DataModel/Group/Activity';
 
 @Component({
   selector: 'app-history',
@@ -7,24 +9,39 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HistoryComponent implements OnInit {
 
-  activities: string[];
+  activities: Activity[] = [];
 
-  constructor() {
-
-    this.activities = ['Filler Message 1', 'Filler Message 2', 'wegwgg', 'qsuiofgqöweojeggjörl', 'Filler Message 1', 'Filler Message 2',
-      'wegwgg', 'qsuiofgqöweojeggjörl', 'Filler Message 1', 'Filler Message 2', 'wegwgg', 'qsuiofgqöweojeggjörl'];
-
+  constructor(private dataModelService: DataModelService) {
   }
 
   ngOnInit(): void {
-  }
 
-  public getActivities(): void {
+    // TODO this method doesn't adds new activities automatically
+    // Either check out other methods or implement a time that refreshes after a fixed time intervall
+    const groups = this.dataModelService.getGroups();
 
+    for (const group of groups){
+      for (const activity of group.activities){
+        this.activities.push(activity);
+      }
+    }
+
+    this.sortByDate();
   }
 
   public fetchHistory(): void{
 
+  }
+
+  private getTime(date: Date): number {
+    return date != null ? date.getTime() : 0;
+  }
+
+
+  private sortByDate(): void {
+    this.activities.sort((a: Activity, b: Activity) => {
+      return this.getTime(a.creationDate) - this.getTime(b.creationDate);
+    });
   }
 
 }
