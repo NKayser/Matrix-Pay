@@ -21,16 +21,16 @@ export class LoginComponent {
   hide = true;
 
   // gets the input values of the user and checks if they obey all requirements
-  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('\'@[a-z0-9.-]+:[a-z0-9.-]+\'')]);
+  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService, private groupService: GroupService) {
+  constructor(clientService: MatrixClientService) {
     this.clientService = clientService;
   }
 
 
   // login the user with the current values if matrixUrl and password
-  async login() {
+  async login(): Promise<void> {
 
       // check all formControls to make sure all values are correct
       this.matrixUrlControl.markAllAsTouched();
@@ -49,7 +49,7 @@ export class LoginComponent {
           console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
 
-        //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
+        // console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
 
         // Tell AppComponent, that user is logged in
         this.loggedIn.emit(true);
