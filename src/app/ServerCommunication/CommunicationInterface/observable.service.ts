@@ -16,7 +16,7 @@ export class ObservableService implements ObservableInterface {
   private balancesObservable: Subject<BalancesType>;
   private recommendationsObservable: Subject<RecommendationsType>;
   private settingsCurrencyObservable: Subject<CurrencyType>;
-De  // TODO: remove magic numbers
+  // TODO: remove magic numbers
 
   constructor() {
     console.log('this is ObservableService');
@@ -30,11 +30,12 @@ De  // TODO: remove magic numbers
   public async setUp(matrixClient: MatrixClient): Promise<void> {
     this.matrixClient = matrixClient;
     // Create the User in DataModel
-    const userId = await this.matrixClient.getUserId();
+    const userId = this.matrixClient.getUserId();
     // test: does not give the displayName, but the userId
-    const user = await this.matrixClient.getUser(userId).displayName;
+    const user = this.matrixClient.getUser(userId).displayName;
     // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
-    const currencyEventContent = await matrixClient.getAccountDataFromServer('currency'); // content of the matrix event
+    const currencyEventContent = await matrixClient.getAccountDataFromServer('currency') // content of the matrix event
+      .catch(() => {console.log('rejected promise while getting account data from server'); });
     console.log(currencyEventContent);
     /* When setting language is implemented in login component:
        const languageEventContent = await matrixClient.getAccountDataFromServer('language');
@@ -52,7 +53,6 @@ De  // TODO: remove magic numbers
   private async listenToMatrix(): Promise<void> {
     // listen to Matrix Events, use next() on Subjects
     // TODO: add dates where necessary
-    // TODO: make functions asyncronous where necessary
     // TODO: error handling
     // TODO: detect transactions, modified transactions and when the user leaves a room
     // TODO: listen for name changes
