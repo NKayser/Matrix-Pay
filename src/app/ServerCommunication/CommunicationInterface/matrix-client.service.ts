@@ -9,6 +9,8 @@ import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {ClientError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
+import {BasicDataUpdateService} from '../../Update/basic-data-update.service';
+import {EmergentDataUpdateService} from '../../Update/emergent-data-update.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +26,8 @@ export class MatrixClientService implements ClientInterface {
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
   private static readonly TIMEOUT: number = 100000; // how long to wait until client is "prepared" (after first sync)
 
-  constructor(private observableService: ObservableService) {}
+  constructor(private observableService: ObservableService,
+              private basicDataUpdateService: BasicDataUpdateService, private emergentDataUpdateService: EmergentDataUpdateService) {}
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
@@ -59,10 +62,6 @@ export class MatrixClientService implements ClientInterface {
     // Start the Client
     this.matrixClient.startClient();
 
-    // move to the end of the method?
-    // Call Observable Service
-    this.observableService.setUp(this.matrixClient);
-
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
@@ -70,6 +69,10 @@ export class MatrixClientService implements ClientInterface {
       console.log("prepared: " + MatrixClientService.prepared);
     });
 
+    // move to the end of the method?
+    // Call Observable Service
+    this.observableService.setUp(this.matrixClient);
+    
     return new SuccessfulResponse();
 
     // TODO: Initialization of Data
