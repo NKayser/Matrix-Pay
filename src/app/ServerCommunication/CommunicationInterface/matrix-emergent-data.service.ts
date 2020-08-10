@@ -4,15 +4,11 @@ import {ServerResponse} from '../Response/ServerResponse';
 // @ts-ignore
 import {MatrixClient} from 'matrix-js-sdk';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
-import {EmergentDataError, GroupError} from '../Response/ErrorTypes';
-import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
-import {ClientInterface} from "./ClientInterface";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MatrixEmergentDataService implements EmergentDataInterface {
-  private clientService: ClientInterface;
   private client: MatrixClient;
 
   private static BALANCES_EVENT_TYPE: string = 'balances';
@@ -50,6 +46,8 @@ export class MatrixEmergentDataService implements EmergentDataInterface {
    */
   public async setRecommendations(groupId: string, amounts: number[], payerIds: string[], recipientIds: string[],
                                   lastTransactionId: string): Promise<ServerResponse> {
+    // TODO: known error: when setting Recommendations and then creating Transaction, this error occurs:
+    // Error: This room is configured to use encryption, but your client does not support encryption.
     await this.client;
 
     const content: object = {

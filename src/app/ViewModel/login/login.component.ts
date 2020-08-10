@@ -2,12 +2,13 @@ import { Component, Output, EventEmitter} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
-import {ClientError, EmergentDataError} from '../../ServerCommunication/Response/ErrorTypes';
+import {ClientError, EmergentDataError, GroupError} from '../../ServerCommunication/Response/ErrorTypes';
 import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
-import {EmergentDataInterface} from "../../ServerCommunication/CommunicationInterface/EmergentDataInterface";
+import {MatrixBasicDataService} from "../../ServerCommunication/CommunicationInterface/matrix-basic-data.service";
 import {MatrixEmergentDataService} from "../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service";
+
 // @ts-ignore
-import {MatrixClient, MatrixEvent} from "matrix-js-sdk";
+import {MatrixEvent} from "matrix-js-sdk";
 
 
 @Component({
@@ -17,7 +18,6 @@ import {MatrixClient, MatrixEvent} from "matrix-js-sdk";
 })
 export class LoginComponent {
   private clientService: ClientInterface;
-  private emergentDataService: EmergentDataInterface;
 
   // emitter to tell the App Component to display the Menu when logged in
   @Output() loggedIn = new EventEmitter<boolean>();
@@ -29,9 +29,10 @@ export class LoginComponent {
   matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService, emergentDataService: MatrixEmergentDataService) {
+  constructor(clientService: MatrixClientService,
+              private emergentDataService: MatrixEmergentDataService,
+              private basicDataService: MatrixBasicDataService) {
     this.clientService = clientService;
-    this.emergentDataService = emergentDataService;
   }
 
 
@@ -54,21 +55,6 @@ export class LoginComponent {
         } else {
           console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
-
-        const emergentResponse: ServerResponse = await this.emergentDataService.setBalances(
-          '!BGBWYmlePjKITRjxXS:dsn.tm.kit.edu', [100, 200, -300], ['Mickey Mouse', 'Hello Kitty', 'Donald Duck'], 'id_xyz');
-
-        if (emergentResponse.wasSuccessful()) {
-          console.log('emergent successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-        } else {
-          console.log('emergent failed :/    :( because ' + EmergentDataError[emergentResponse.getError()]);
-        }
-
-        const client: MatrixClient = await this.clientService.getPreparedClient();
-        const room = await client.getRoom('!BGBWYmlePjKITRjxXS:dsn.tm.kit.edu');
-        const accountDataEvent = await room['accountData']['balances'];
-        const accountData = accountDataEvent.getContent();
-        console.log(accountData);
 
         // Tell AppComponent, that user is logged in
         this.loggedIn.emit(true);
