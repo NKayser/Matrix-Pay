@@ -46,7 +46,7 @@ export class DataModelService {
   public initializeUserThisSession(userContactId: string, userName: string, currency: Currency, language: Language): User{
     const contact = new Contact(userContactId, userName);
     const user = new User(contact, currency, language);
-    status = new Status();
+    this.status = new Status();
     return user;
   }
 
@@ -60,7 +60,7 @@ export class DataModelService {
   public initializeUserFirstTime(userContactId: string, userName: string): User{
     const contact = new Contact(userContactId, userName);
     const user = new User(contact, Currency.EUR, Language.GERMAN);
-    status = new Status();
+    this.status = new Status();
     return user;
   }
 
