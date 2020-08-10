@@ -1,10 +1,11 @@
-export enum LoginError {
+export enum ClientError {
   AlreadyLoggedIn,
   Autodiscovery,
   UserIdFormat,
   ServerUnreachable,
   InvalidPassword,
-  Unknown
+  Unknown,
+  Timeout
 }
 
 export enum SettingsError {
@@ -16,5 +17,12 @@ export enum SettingsError {
 export enum GroupError {
   SendEvent,
   NoOriginal,
-  InvalidUsers
+  InvalidUsers,
+  Unknown,
+  InvalidName, // or invalid Alias
+  SetCurrency,
+  InUse,
+
+  RoomNotFound,
+  BalanceNotSettled
 }

@@ -27,6 +27,7 @@ export class UnsuccessfulResponse extends ServerResponse {
   }
 
   promise(): Promise<ServerResponse> {
-    return Promise.reject(this);
+    //return Promise.reject(this);
+    return Promise.resolve(this);
   }
 }
