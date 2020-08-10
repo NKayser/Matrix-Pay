@@ -3,8 +3,9 @@ import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
 import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
-import {LoginError} from '../../ServerCommunication/Response/ErrorTypes';
+import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
 import {SettingsService} from '../../ServerCommunication/SettingsCommunication/settings.service';
+import {TransactionService} from "../../ServerCommunication/GroupCommunication/transaction.service";
 
 
 @Component({
@@ -15,6 +16,7 @@ import {SettingsService} from '../../ServerCommunication/SettingsCommunication/s
 export class LoginComponent {
   private clientService: ClientInterface;
   private settingsService: SettingsService; // delete later
+  private transactionService: TransactionService; // delete later
 
   // emitter to tell the App Component to display the Menu when logged in
   @Output() loggedIn = new EventEmitter<boolean>();
@@ -26,9 +28,10 @@ export class LoginComponent {
   matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('\'@[a-z0-9.-]+:[a-z0-9.-]+\'')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService, settingsService: SettingsService) {
+  constructor(clientService: MatrixClientService, settingsService: SettingsService, transactionService: TransactionService) {
     this.clientService = clientService;
     this.settingsService = settingsService;
+    this.transactionService = transactionService;
   }
 
 
@@ -49,15 +52,28 @@ export class LoginComponent {
         if (loginResponse.wasSuccessful()) {
           console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         } else {
-          console.log('logIn failed :/    :( because ' + LoginError[loginResponse.getError()]);
+          console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
 
+        // Error could be thrown here already
         const currencyResponse: ServerResponse = await this.settingsService.changeCurrency("EURO");
 
         if (currencyResponse.wasSuccessful()) {
           console.log('currency changed');
         } else {
           console.log('currency not changed ' + currencyResponse);
+        }
+
+        const transactionResponse: ServerResponse = await this.transactionService.modifyTransaction(
+          "!aNKgLTFyuhwBnCHPXe:dsn.tm.kit.edu", "$KxQau9JUzLvnTSg5hCzyAEfZx3FjTnJHJkqyCszBuao",
+          "Pizza Modified", "@uzpjs:dsn.tm.kit.edu",
+          ["@uzpjs:dsn.tm.kit.edu", "@uelkt:dsn.tm.kit.edu"], [400, 500]
+        );
+
+        if (transactionResponse.wasSuccessful()) {
+          console.log('transaction created');
+        } else {
+          console.log('transaction not created because ' + transactionResponse.getError());
         }
 
         //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);

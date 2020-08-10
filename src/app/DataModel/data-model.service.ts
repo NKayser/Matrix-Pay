@@ -14,7 +14,6 @@ import {Language} from './Utils/Language';
   providedIn: 'root'
 })
 export class DataModelService {
-  private user: User;
   private status: Status;
 
   constructor(private balanceCalculator: BalanceCalculatorService,
@@ -30,15 +29,17 @@ export class DataModelService {
   public initializeUserThisSession(userContactId: string, userName: string, currency: Currency, language: Language): User{
     const contact = new Contact(userContactId, userName);
     const user = new User(contact, currency, language);
-    this.user = user;
     return user;
   }
 
   public initializeUserFirstTime(userContactId: string, userName: string): User{
     const contact = new Contact(userContactId, userName);
     const user = new User(contact, Currency.EUR, Language.GERMAN);
-    this.user = user;
     return user;
+  }
+
+  public get user(): User {
+    return User.singleUser;
   }
 
   public getTransactions(groupId: string): Transaction[] {
