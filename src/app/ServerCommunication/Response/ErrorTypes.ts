@@ -26,3 +26,7 @@ export enum GroupError {
   RoomNotFound,
   BalanceNotSettled
 }
+
+export enum EmergentDataError {
+  Unknown
+}
