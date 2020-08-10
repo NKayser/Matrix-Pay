@@ -29,7 +29,7 @@ De  // TODO: remove magic numbers
 
   public async setUp(matrixClient: MatrixClient): Promise<void> {
     this.matrixClient = matrixClient;
-Ge    // Create the User in DataModel
+    // Create the User in DataModel
     const userId = await this.matrixClient.getUserId();
     // test: does not give the displayName, but the userId
     const user = await this.matrixClient.getUser(userId).displayName;
