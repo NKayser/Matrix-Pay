@@ -29,18 +29,26 @@ export class CreateGroupModalComponent implements OnInit{
     this.selectedCurrency = this.data.currency;
   }
 
-  onCancel(): void {
+  /**
+   * Close the dialog without returning the data
+   */
+  public onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
-  onSave(): void {
+  /**
+   * Close the dialog and return the data
+   */
+  public onSave(): void {
     if (!this.formControlGroupName.invalid){
       this.dialogRef.close({groupName: this.formControlGroupName.value, currency: this.selectedCurrency});
     }
   }
 
-  getInvalidGroupNameErrorMessage(): string{
+  /**
+   * Return error message if the group name is invalid
+   */
+  public getInvalidGroupNameErrorMessage(): string{
     return 'Not a valid group name';
   }
 

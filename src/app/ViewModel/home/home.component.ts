@@ -5,6 +5,7 @@ import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 import {Contact} from '../../DataModel/Group/Contact';
 import {ConfirmPaybackDialogData, ConfirmPaybackModalComponent} from '../confirm-payback-modal/confirm-payback-modal.component';
 import {MatDialog} from '@angular/material/dialog';
+import {Utils} from "../../ServerCommunication/Response/Utils";
 
 @Component({
   selector: 'app-home',
@@ -13,15 +14,18 @@ import {MatDialog} from '@angular/material/dialog';
 })
 export class HomeComponent implements OnInit {
 
-  usedCurrencies: Set<Currency> = new Set();
-  userContact: Contact;
+  public usedCurrencies: Set<Currency> = new Set();
+  public recommendations: Recommendation[] = [];
+  public currencyMap = currencyMap;
 
-  recommendations: Recommendation[] = [];
-  currencyMap = currencyMap;
-  dialogData: ConfirmPaybackDialogData;
+  private userContact: Contact;
+  private dialogData: ConfirmPaybackDialogData;
 
   constructor(private dataModelService: DataModelService, public dialog: MatDialog) {}
 
+  /**
+   * Get reference to the recommendations and user
+   */
   ngOnInit(): void {
 
     this.userContact = this.dataModelService.getUser().contact;
@@ -35,16 +39,19 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  // Calculate the total Balances of the User
+  /**
+   * Calculate the total balance for the user for the selected Currency
+   * @param currency the currency for which the balances should be calculated
+   */
   public getTotalBalance(currency: Currency): number{
     const groups = this.dataModelService.getGroups();
     let balance = 0;
     for (const group of groups){
       if (group.currency === currency){
-        console.log(group.groupmembers);
+        if (Utils.log) console.log(group.groupmembers);
         for (const member of group.groupmembers){
-          console.log('mem: ' + member.contact.contactId + ' ' + this.userContact.contactId);
-          console.log(member.balance);
+          if (Utils.log) console.log('mem: ' + member.contact.contactId + ' ' + this.userContact.contactId);
+          if (Utils.log) console.log(member.balance);
           if (member.contact.contactId === this.userContact.contactId){
             balance += member.balance;
             break;
@@ -56,6 +63,10 @@ export class HomeComponent implements OnInit {
     return balance;
   }
 
+  /**
+   * Confirm the payback
+   * @param recommendationIndex the Index of the recommendation that should be confirmed
+   */
   confirmPayback(recommendationIndex: number): void {
 
     const currentRec = this.recommendations[recommendationIndex];
@@ -69,7 +80,7 @@ export class HomeComponent implements OnInit {
       this.dialogData = result;
       if (this.dialogData !== undefined){
         // TODO Send Data to matrix here
-        console.log(this.dialogData);
+        if (Utils.log) console.log(this.dialogData);
       }
     });
   }

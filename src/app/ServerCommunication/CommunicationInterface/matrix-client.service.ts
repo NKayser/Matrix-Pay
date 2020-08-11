@@ -11,6 +11,7 @@ import {ClientError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
 import {BasicDataUpdateService} from '../../Update/basic-data-update.service';
 import {EmergentDataUpdateService} from '../../Update/emergent-data-update.service';
+import {MatrixEmergentDataService} from "./matrix-emergent-data.service";
 
 @Injectable({
   providedIn: 'root'
@@ -25,9 +26,16 @@ export class MatrixClientService implements ClientInterface {
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
   private static readonly TIMEOUT: number = 100000; // how long to wait until client is "prepared" (after first sync)
+  // TODO: decide where to save these constants
+  private static readonly CURRENCY_KEY: string = 'currency';
+  private static readonly LANGUAGE_KEY: string = 'language';
+  private static readonly DEFAULT_CURRENCY: string = 'Euro';
+  private static readonly DEFAULT_LANGUAGE: string = 'English';
 
   constructor(private observableService: ObservableService,
-              private basicDataUpdateService: BasicDataUpdateService, private emergentDataUpdateService: EmergentDataUpdateService) {}
+              private basicDataUpdateService: BasicDataUpdateService,
+              private emergentDataUpdateService: EmergentDataUpdateService,
+              private matrixEmergentDataService: MatrixEmergentDataService) {}
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
@@ -62,6 +70,15 @@ export class MatrixClientService implements ClientInterface {
     // Start the Client
     this.matrixClient.startClient();
 
+    // Set settings to default values if non existent
+    const currencyEventContent = this.matrixClient.getAccountDataFromServer(MatrixClientService.CURRENCY_KEY); // content of the matrix event
+    const languageEventContent = this.matrixClient.getAccountDataFromServer(MatrixClientService.LANGUAGE_KEY);
+
+    if ((await currencyEventContent) == null) await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
+      {'currency': MatrixClientService.DEFAULT_CURRENCY}); // TODO: find a way to avoid Magic number here
+    if ((await languageEventContent) == null) await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
+      {'language': MatrixClientService.DEFAULT_LANGUAGE});
+
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
@@ -72,7 +89,8 @@ export class MatrixClientService implements ClientInterface {
     // move to the end of the method?
     // Call Observable Service
     this.observableService.setUp(this.matrixClient);
-    
+    this.matrixEmergentDataService.setClient(this.matrixClient);
+
     return new SuccessfulResponse();
 
     // TODO: Initialization of Data
@@ -84,6 +102,7 @@ export class MatrixClientService implements ClientInterface {
       this.loggedIn = false;
       MatrixClientService.prepared = false;
       this.observableService.tearDown();
+      this.matrixEmergentDataService.setClient(undefined);
     }
 
     // User was already logged out

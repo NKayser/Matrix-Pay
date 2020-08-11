@@ -26,12 +26,17 @@ export class ConfirmPaybackModalComponent {
     @Inject(MAT_DIALOG_DATA) public data: ConfirmPaybackDialogData) {
   }
 
-  onCancel(): void {
+  /**
+   * Close the dialog without saving
+   */
+  public onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
-  onSave(): void {
+  /**
+   * Close the dialog and return the data
+   */
+  public onSave(): void {
     this.data.confirm = true;
     this.dialogRef.close(this.data);
   }

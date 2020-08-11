@@ -2,8 +2,13 @@ import { Component, Output, EventEmitter} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
-import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
+import {ClientError, EmergentDataError, GroupError} from '../../ServerCommunication/Response/ErrorTypes';
 import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
+import {MatrixBasicDataService} from "../../ServerCommunication/CommunicationInterface/matrix-basic-data.service";
+import {MatrixEmergentDataService} from "../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service";
+
+// @ts-ignore
+import {MatrixEvent} from "matrix-js-sdk";
 
 
 @Component({
@@ -18,19 +23,23 @@ export class LoginComponent {
   @Output() loggedIn = new EventEmitter<boolean>();
 
   // Manages if the password is shown in the view
-  hide = true;
+  public hidePassword = true;
 
   // gets the input values of the user and checks if they obey all requirements
-  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
-  passwordControl = new FormControl('', [Validators.required]);
+  public matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
+  public passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService) {
+  constructor(clientService: MatrixClientService,
+              private emergentDataService: MatrixEmergentDataService,
+              private basicDataService: MatrixBasicDataService) {
     this.clientService = clientService;
   }
 
 
-  // login the user with the current values if matrixUrl and password
-  async login(): Promise<void> {
+  /**
+   * login the user
+   */
+  public async login(): Promise<void> {
 
       // check all formControls to make sure all values are correct
       this.matrixUrlControl.markAllAsTouched();
@@ -49,20 +58,23 @@ export class LoginComponent {
           console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
 
-        // console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
-
         // Tell AppComponent, that user is logged in
+        // TODO make sure that this only gets emitted when the dataModel was created
         this.loggedIn.emit(true);
       }
   }
 
-  // get the error message for the password form
-  getPasswordErrorMessage(): string{
+  /**
+   * Get the error message if the password is invalid
+   */
+  public getPasswordErrorMessage(): string{
     return 'Please enter a password';
   }
 
-  // get the error message for the matrixUrl form
-  getMatrixUrlErrorMessage(): string{
+  /**
+   * Get the error message if the matrixUrl is invalid
+   */
+  public getMatrixUrlErrorMessage(): string{
     if (this.matrixUrlControl.hasError('required')){
       return 'Please enter a matrixUrl';
     } else {
