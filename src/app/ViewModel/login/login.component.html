@@ -19,10 +19,10 @@
     <div class = "row">
       <mat-form-field appearance="fill" class = "full-width">
         <mat-label>Enter your password</mat-label>
-        <input matInput [type]="hide ? 'password' : 'text'" [formControl]="passwordControl" autocomplete="current-password" placeholder="password" (keyup.enter) = 'login()'>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" [formControl]="passwordControl" autocomplete="current-password" placeholder="password" (keyup.enter) = 'login()'>
         <mat-error *ngIf="passwordControl.invalid">{{getPasswordErrorMessage()}}</mat-error>
-        <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
         </button>
       </mat-form-field>
     </div>

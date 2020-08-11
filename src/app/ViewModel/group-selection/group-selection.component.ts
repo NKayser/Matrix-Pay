@@ -29,19 +29,19 @@ import {ErrorModalComponent} from '../error-modal/error-modal.component';
 export class GroupSelectionComponent implements OnInit{
 
   // saves the currently selected group
-  currentGroup: Group;
+  public currentGroup: Group;
   // save returned data form dialogs
-  createGroupData: GroupCreateDialogData;
-  leaveGroupData: LeaveGroupDialogData;
-  addUserToGroupData: AddMemberToGroupDialogData;
+  private createGroupData: GroupCreateDialogData;
+  private leaveGroupData: LeaveGroupDialogData;
+  private addUserToGroupData: AddMemberToGroupDialogData;
 
-  loadingLeaveGroup = false;
-  loadingAddMember = false;
-  loadingAddGroup = false;
+  public loadingLeaveGroup = false;
+  public loadingAddMember = false;
+  public loadingAddGroup = false;
 
   // this is an array of group names, which gets displayed by the view
   // this should get read from the dataService
-  groups = [];
+  public groups = [];
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
@@ -94,8 +94,11 @@ export class GroupSelectionComponent implements OnInit{
     }
   }
 
-  // Select a specific group and change the view accordingly
-  selectGroup(index: number): void{
+  /**
+   * Select a specific group
+   * @param index the index of the group to select
+   */
+  public selectGroup(index: number): void{
     this.currentGroup = this.groups[index];
   }
 

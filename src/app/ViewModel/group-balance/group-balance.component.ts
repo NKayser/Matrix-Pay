@@ -15,18 +15,18 @@ export class GroupBalanceComponent implements OnChanges {
   // Input is used to pass the current selected group to the balance component
   @Input() group: Group;
 
-  currencyMap = currencyMap;
-  dialogData: ConfirmPaybackDialogData;
+  public currencyMap = currencyMap;
+  private dialogData: ConfirmPaybackDialogData;
 
-  recommendations: Recommendation[] = [];
-  data = [];
+  public recommendations: Recommendation[] = [];
+  public balanceData = [];
 
   /**
    * Calculate the color for each bar in the balance chart and return red or green depending on the balance
    * @param name the name of the data entry
    */
   public getCustomColor = (name) => {
-    for (const entry of this.data){
+    for (const entry of this.balanceData){
       if (entry.name === name){
         if (entry.value >= 0){
           return 'green';
@@ -46,10 +46,10 @@ export class GroupBalanceComponent implements OnChanges {
    */
   ngOnChanges(): void {
     // Initializes the graph with the balances of the members
-    this.data = [];
+    this.balanceData = [];
     const groupMembers = this.group.groupmembers;
     for (const groupMember of groupMembers){
-      this.data.push({name: groupMember.contact.name, value: groupMember.balance});
+      this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance});
     }
 
     this.recommendations = this.group.recommendations;

@@ -13,12 +13,12 @@ import {MatDialog} from '@angular/material/dialog';
 })
 export class HomeComponent implements OnInit {
 
-  usedCurrencies: Set<Currency> = new Set();
-  userContact: Contact;
+  public usedCurrencies: Set<Currency> = new Set();
+  public recommendations: Recommendation[] = [];
+  public currencyMap = currencyMap;
 
-  recommendations: Recommendation[] = [];
-  currencyMap = currencyMap;
-  dialogData: ConfirmPaybackDialogData;
+  private userContact: Contact;
+  private dialogData: ConfirmPaybackDialogData;
 
   constructor(private dataModelService: DataModelService, public dialog: MatDialog) {}
 

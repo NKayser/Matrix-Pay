@@ -18,11 +18,11 @@ export class LoginComponent {
   @Output() loggedIn = new EventEmitter<boolean>();
 
   // Manages if the password is shown in the view
-  hide = true;
+  public hidePassword = true;
 
   // gets the input values of the user and checks if they obey all requirements
-  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
-  passwordControl = new FormControl('', [Validators.required]);
+  public matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
+  public passwordControl = new FormControl('', [Validators.required]);
 
   constructor(clientService: MatrixClientService) {
     this.clientService = clientService;

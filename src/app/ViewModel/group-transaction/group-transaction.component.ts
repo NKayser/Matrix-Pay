@@ -21,17 +21,17 @@ export class GroupTransactionComponent implements OnChanges {
   @Input() group: Group;
 
   // the data that is used to create a transaction
-  data: PaymentDialogData;
-  transactions: Transaction[] = [];
+  private data: PaymentDialogData;
+  public transactions: Transaction[] = [];
 
-  loadingCreateExpense = false;
-  loadingEditExpense = false;
+  public loadingCreateExpense = false;
+  public loadingEditExpense = false;
 
   constructor(public dialog: MatDialog, private dataModelService: DataModelService, private transactionService: TransactionService) {
   }
 
   /**
-   * Update the transaction reference everytime something in the view changes, to make sure that a switch of the selected
+   * Update the transaction reference every time something in the view changes, to make sure that a switch of the selected
    * group switches the transactions
    */
   ngOnChanges(): void {
@@ -83,14 +83,14 @@ export class GroupTransactionComponent implements OnChanges {
   /**
    * Edit an expense by opening a dialog where the user can change the data of the selected transaction and send
    * the edited data via the transactionService to Matrix
-   * @param transaction the transaction that is edited
+   * @param expense the transaction that is edited
    */
-  public editExpense(transaction: Transaction): void{
+  public editExpense(expense: Transaction): void{
 
-    if (transaction.transactionType === TransactionType.EXPENSE){
+    if (expense.transactionType === TransactionType.EXPENSE){
       const dialogRef = this.dialog.open(PaymentModalComponent, {
         width: '350px',
-        data: this.generateEditExpenseData(transaction),
+        data: this.generateEditExpenseData(expense),
       });
 
       dialogRef.afterClosed().subscribe(result => {
@@ -108,7 +108,7 @@ export class GroupTransactionComponent implements OnChanges {
           }
 
           this.loadingEditExpense = true;
-          promiseTimeout(TIMEOUT, this.transactionService.modifyTransaction(this.group.groupId, transaction.transactionId,
+          promiseTimeout(TIMEOUT, this.transactionService.modifyTransaction(this.group.groupId, expense.transactionId,
             this.data.description, this.data.payer.contactId, recipientIds, sendAmounts))
             .then((data) => {
               console.log(data);

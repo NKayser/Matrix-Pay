@@ -16,20 +16,20 @@ import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 export class SettingsComponent implements OnInit {
 
   // save the current language and currency
-  selectedLanguage = Language.ENGLISH;
-  selectedCurrency = Currency.USD;
+  public selectedLanguage = Language.ENGLISH;
+  public selectedCurrency = Currency.USD;
 
   // these variables are there to save changes to the settings, so only changed settings need to be send to matrix
-  oldSelectedLanguage: Language;
-  oldSelectedCurrency: Currency;
+  private oldSelectedLanguage: Language;
+  private oldSelectedCurrency: Currency;
 
   // load mappings
-  currencyMap = currencyMap;
-  languageMap = languageMap;
+  public currencyMap = currencyMap;
+  public languageMap = languageMap;
 
   // track if matrix response is loading
-  loadingLanguage = false;
-  loadingCurrency = false;
+  public loadingLanguage = false;
+  public loadingCurrency = false;
 
   constructor(private dataModelService: DataModelService, private settingsService: SettingsService, public dialog: MatDialog) { }
 
@@ -38,7 +38,7 @@ export class SettingsComponent implements OnInit {
   }
 
   // initialise the setting values
-  initSettings(): void{
+  private initSettings(): void{
 
     // get current setting values from dataModel
     this.selectedLanguage = this.dataModelService.getUser().language;
