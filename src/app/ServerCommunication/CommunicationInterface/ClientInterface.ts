@@ -5,5 +5,6 @@ export interface ClientInterface {
   login(account: string, password: string): Promise<ServerResponse>;
   logout(): Promise<ServerResponse>;
   getClient(): Promise<MatrixClient>;
+  getLoggedInClient(): Promise<MatrixClient>;
   getPreparedClient(): Promise<MatrixClient>;
 }

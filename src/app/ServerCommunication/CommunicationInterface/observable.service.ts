@@ -6,12 +6,15 @@ import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, Currency
 // @ts-ignore
 import {MatrixClient, MatrixEvent, EventTimeline, Room} from 'matrix-js-sdk';
 import {Utils} from '../Response/Utils';
+import {MatrixClientService} from "./matrix-client.service";
+import {ClientInterface} from "./ClientInterface";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ObservableService implements ObservableInterface {
   private matrixClient: MatrixClient;
+  private clientService: ClientInterface;
   private userObservable: Subject<UserType>;
   private groupsObservable: Subject<GroupsType>;
   private balancesObservable: Subject<BalancesType>;
@@ -19,23 +22,28 @@ export class ObservableService implements ObservableInterface {
   private settingsCurrencyObservable: Subject<CurrencyType>;
   // TODO: remove magic numbers
 
-  constructor() {
+  constructor(clientService: MatrixClientService) {
+    this.clientService = clientService;
+
     if (Utils.log) console.log('this is ObservableService');
     this.userObservable = new Subject();
     this.groupsObservable = new Subject();
     this.balancesObservable = new Subject();
     this.recommendationsObservable = new Subject();
     this.settingsCurrencyObservable = new Subject();
+
+    this.setUp();
   }
 
-  public async setUp(matrixClient: MatrixClient): Promise<void> {
-    this.matrixClient = matrixClient;
+  private async setUp(): Promise<void> {
+    // wait until client is set in constructor
+    this.matrixClient = await this.clientService.getLoggedInClient();
     // Getting data about the user
     const userId = this.matrixClient.getUserId();
     // test: does not give the displayName, but the userId
     const name = this.matrixClient.getUser(userId).displayName;
     // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
-    const currencyEventContent = await matrixClient.getAccountDataFromServer('currency') // content of the matrix event
+    const currencyEventContent = await this.matrixClient.getAccountDataFromServer('currency') // content of the matrix event
       .catch(() => {if (Utils.log) console.log('rejected promise while getting account data from server'); });
     if (Utils.log) console.log(currencyEventContent);
     /* When setting language is implemented in login component:
@@ -223,23 +231,23 @@ export class ObservableService implements ObservableInterface {
     });
   }
 
-  getUserObservable(): Observable<UserType> {
+  public getUserObservable(): Observable<UserType> {
     return this.userObservable;
   }
 
-  getGroupsObservable(): Observable<GroupsType> {
+  public getGroupsObservable(): Observable<GroupsType> {
     return this.groupsObservable;
   }
 
-  getBalancesObservable(): Observable<BalancesType> {
+  public getBalancesObservable(): Observable<BalancesType> {
     return this.balancesObservable;
   }
 
-  getRecommendationsObservable(): Observable<RecommendationsType> {
+  public getRecommendationsObservable(): Observable<RecommendationsType> {
     return this.recommendationsObservable;
   }
 
-  getSettingsCurrencyObservable(): Observable<CurrencyType> {
+  public getSettingsCurrencyObservable(): Observable<CurrencyType> {
     return this.settingsCurrencyObservable;
   }
 }
