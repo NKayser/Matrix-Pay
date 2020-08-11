@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import {ClientInterface} from '../CommunicationInterface/ClientInterface';
 import {MatrixClientService} from '../CommunicationInterface/matrix-client.service';
 import {ServerResponse} from '../Response/ServerResponse';
-import {UnsuccessfulResponse} from "../Response/UnsuccessfulResponse";
-import {GroupError} from "../Response/ErrorTypes";
-import {SuccessfulResponse} from "../Response/SuccessfulResponse";
+import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
+import {GroupError} from '../Response/ErrorTypes';
+import {SuccessfulResponse} from '../Response/SuccessfulResponse';
+// @ts-ignore
+import {MatrixEvent} from 'matrix-js-sdk';
 
 @Injectable({
   providedIn: 'root'
@@ -30,16 +32,18 @@ export class TransactionService {
    * @param amounts How much money each recipient received, in Cents. Same order as recipient array. Should all be
    * positive.
    */
+  // TODO: known error: when (setting Recommendations or reading room account data) and then creating Transaction, this error occurs:
+  // Error: This room is configured to use encryption, but your client does not support encryption.
   public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]): Promise<ServerResponse> {
     // TODO: how do we differentiate between Expenses and Paybacks?
     const messageType = recipientIds.length == 1 ? TransactionService.MESSAGE_TYPE_PAYBACK : TransactionService.MESSAGE_TYPE_EXPENSE;
 
     // TODO: different for expense / payback? (arrays / values and no plural)
     const content = {
-      "name": description,
-      "payer": payerId,
-      "recipients": recipientIds,
-      "amounts": amounts
+      'name': description,
+      'payer': payerId,
+      'recipients': recipientIds,
+      'amounts': amounts
     };
 
     return this.sendTransaction(groupId, messageType, content, recipientIds, payerId);
@@ -69,23 +73,23 @@ export class TransactionService {
     let newRecipientIds: string[] = recipientIds;
     let newAmounts: number[] = amounts;
 
-    if (newDescription == undefined) newDescription = oldContent["content"]["name"];
-    if (newPayerId == undefined) newPayerId = oldContent["content"]["payer"];
-    if (newRecipientIds == undefined) newRecipientIds = oldContent["content"]["recipients"];
-    if (newAmounts == undefined) newAmounts = oldContent["content"]["amounts"];
+    if (newDescription == undefined) newDescription = oldContent['content']['name'];
+    if (newPayerId == undefined) newPayerId = oldContent['content']['payer'];
+    if (newRecipientIds == undefined) newRecipientIds = oldContent['content']['recipients'];
+    if (newAmounts == undefined) newAmounts = oldContent['content']['amounts'];
 
     const newMessageType = newRecipientIds.length == 1 ? TransactionService.MESSAGE_TYPE_PAYBACK : TransactionService.MESSAGE_TYPE_EXPENSE;
 
     const newContent = {
-      "new_content": {
-        "name": newDescription,
-        "payer": newPayerId,
-        "recipients": newRecipientIds,
-        "amounts": newAmounts
+      'new_content': {
+        'name': newDescription,
+        'payer': newPayerId,
+        'recipients': newRecipientIds,
+        'amounts': newAmounts
       },
-      "relates_to": {
-        "rel_type": "replace",
-        "event_id": transactionId
+      'relates_to': {
+        'rel_type': 'replace',
+        'event_id': transactionId
       }
     };
 
@@ -103,19 +107,22 @@ export class TransactionService {
       .catch(() => {return new UnsuccessfulResponse(GroupError.InvalidUsers).promise()});
     if (!validIds) return new UnsuccessfulResponse(GroupError.InvalidUsers).promise();
 
+    let response: ServerResponse = new SuccessfulResponse('abc');
+
     // Actually send the event
-    const event = await client.sendEvent(groupId, messageType, content, '')
-      .catch((reason: string) => {return new UnsuccessfulResponse(GroupError.SendEvent, reason).promise()});
+    const event = await client.sendEvent(groupId, messageType, content, '').then(
+        (val: MatrixEvent) => {response = new SuccessfulResponse(val['event_id'])},
+        (reason: string) => {response = new UnsuccessfulResponse(GroupError.SendEvent, reason)});
     console.log(event);
 
     // Return the new event_id
-    return new SuccessfulResponse(event["event_id"]);
+    return await response;
   }
 
   private async areGroupMembers(roomId: string, userIds: string[]): Promise<boolean> {
     const client = await this.matrixClientService.getClient();
     const joined = await client.getJoinedRoomMembers(roomId);
-    const members = Object.keys(joined["joined"]);
+    const members = Object.keys(joined['joined']);
     return userIds.every(val => members.includes(val));
   }
 }

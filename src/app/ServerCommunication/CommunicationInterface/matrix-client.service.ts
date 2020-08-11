@@ -11,6 +11,7 @@ import {ClientError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
 import {BasicDataUpdateService} from '../../Update/basic-data-update.service';
 import {EmergentDataUpdateService} from '../../Update/emergent-data-update.service';
+import {MatrixEmergentDataService} from "./matrix-emergent-data.service";
 
 @Injectable({
   providedIn: 'root'
@@ -29,10 +30,12 @@ export class MatrixClientService implements ClientInterface {
   private static readonly CURRENCY_KEY: string = 'currency';
   private static readonly LANGUAGE_KEY: string = 'language';
   private static readonly DEFAULT_CURRENCY: string = 'Euro';
-  private static readonly DEFAULT_LANGUAGE: string = 'English'
+  private static readonly DEFAULT_LANGUAGE: string = 'English';
 
   constructor(private observableService: ObservableService,
-              private basicDataUpdateService: BasicDataUpdateService, private emergentDataUpdateService: EmergentDataUpdateService) {}
+              private basicDataUpdateService: BasicDataUpdateService,
+              private emergentDataUpdateService: EmergentDataUpdateService,
+              private matrixEmergentDataService: MatrixEmergentDataService) {}
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
@@ -86,6 +89,7 @@ export class MatrixClientService implements ClientInterface {
     // move to the end of the method?
     // Call Observable Service
     this.observableService.setUp(this.matrixClient);
+    this.matrixEmergentDataService.setClient(this.matrixClient);
 
     return new SuccessfulResponse();
 
@@ -98,6 +102,7 @@ export class MatrixClientService implements ClientInterface {
       this.loggedIn = false;
       MatrixClientService.prepared = false;
       this.observableService.tearDown();
+      this.matrixEmergentDataService.setClient(undefined);
     }
 
     // User was already logged out

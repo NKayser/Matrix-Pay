@@ -24,5 +24,13 @@ export enum GroupError {
   InUse,
 
   RoomNotFound,
-  BalanceNotSettled
+  BalanceNotSettled,
+
+  NoRecommendations,
+  InvalidRecommendationId,
+  Unauthorized,
+}
+
+export enum EmergentDataError {
+  Unknown
 }

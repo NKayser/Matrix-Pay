@@ -2,8 +2,13 @@ import { Component, Output, EventEmitter} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
-import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
+import {ClientError, EmergentDataError, GroupError} from '../../ServerCommunication/Response/ErrorTypes';
 import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
+import {MatrixBasicDataService} from "../../ServerCommunication/CommunicationInterface/matrix-basic-data.service";
+import {MatrixEmergentDataService} from "../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service";
+
+// @ts-ignore
+import {MatrixEvent} from "matrix-js-sdk";
 
 
 @Component({
@@ -24,7 +29,9 @@ export class LoginComponent {
   matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
   passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService) {
+  constructor(clientService: MatrixClientService,
+              private emergentDataService: MatrixEmergentDataService,
+              private basicDataService: MatrixBasicDataService) {
     this.clientService = clientService;
   }
 
@@ -48,8 +55,6 @@ export class LoginComponent {
         } else {
           console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
-
-        // console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
 
         // Tell AppComponent, that user is logged in
         this.loggedIn.emit(true);

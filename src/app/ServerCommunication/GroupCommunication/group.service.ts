@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 // @ts-ignore
-import { MatrixClient } from 'matrix-js-sdk';
+import {MatrixClient, Room} from 'matrix-js-sdk';
 
 import {TransactionService} from './transaction.service';
 import {MatrixClientService} from '../CommunicationInterface/matrix-client.service';
@@ -9,7 +9,7 @@ import {ServerResponse} from '../Response/ServerResponse';
 import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {GroupError} from '../Response/ErrorTypes';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
-import {Group} from "../../DataModel/Group/Group";
+import {MatrixEmergentDataService} from '../CommunicationInterface/matrix-emergent-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,12 +24,22 @@ export class GroupService {
   private static readonly ERRCODE_UNRECOGNIZED: string = 'M_UNRECOGNIZED';
   private static readonly ERRCODE_INVALID_PARAM: string = 'M_INVALID_PARAM';
   private static readonly CURRENCY_KEY: string = 'currency';
+  private static readonly RECOMMENDATIONS_KEY: string = 'recommendations';
+  private static readonly ACCOUNT_DATA_KEY: string = 'accountData';
+  private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways
 
-  constructor(transactionService: TransactionService, matrixClientService: MatrixClientService) {
+  constructor(transactionService: TransactionService,
+              matrixClientService: MatrixClientService,
+              private matrixEmergentDataService: MatrixEmergentDataService) {
     this.transactionService = transactionService;
     this.matrixClientService = matrixClientService;
   }
 
+  /**
+   *
+   * @param groupId
+   * @param userId
+   */
   public async addMember(groupId: string, userId: string): Promise<ServerResponse> {
     const client: MatrixClient = await this.matrixClientService.getPreparedClient();
     let response: ServerResponse;
@@ -57,47 +67,59 @@ export class GroupService {
     return await response;
   }
 
+  /**
+   *
+   * @param groupId
+   * @param recommendationId
+   */
+  // TODO: almost works. Sometimes there is a weird encryption error when creating the transaction.
   public async confirmRecommendation(groupId: string, recommendationId: number): Promise<ServerResponse> {
     // TODO: seperate into private methods and avoid magic numbers
-    const client: MatrixClient = await this.matrixClientService.getClient();
+    const client: MatrixClient = await this.matrixClientService.getPreparedClient();
 
     // Part 1: Find the right recommendation
-    const accountDataEvents = await client.getRoom(groupId)['account_data']['events'];
-    let recommendations = null;
+    const room = client.getRoom(groupId);
+    const accountDataEvent = room[GroupService.ACCOUNT_DATA_KEY][GroupService.RECOMMENDATIONS_KEY];
 
-    for (const event of accountDataEvents['type']) {
-      if (event['type'] == 'recommendations') {
-        recommendations = event;
-      }
-    }
+    if (accountDataEvent == undefined) return new UnsuccessfulResponse(GroupError.NoRecommendations,
+      'no recommendations have been saved yet');
 
-    if (recommendations == null) {
-      return new UnsuccessfulResponse(0, 'recommendation not found');
-    }
+    const recommendations = accountDataEvent.getOriginalContent();
 
     if (!Number.isInteger(recommendationId) || recommendationId < 0
       || recommendationId >= recommendations['amounts'].length) {
-      return new UnsuccessfulResponse(0, 'invalid recommendation id');
+      return new UnsuccessfulResponse(GroupError.InvalidRecommendationId, 'invalid recommendation id');
     }
 
     // Part 1.5: Read data from Recommendation
-    const recipient = recommendations['recipients'][recommendationId];
-    const payer = recommendations['payers'][recommendationId];
-    const amount = recommendations['amounts'][recommendationId];
+    const amounts: number[] = recommendations['amounts'];
+    const payers: string[] = recommendations['payers'];
+    const recipients: string[] = recommendations['recipients'];
 
+    const amount = amounts[recommendationId];
+    const payer = payers[recommendationId];
+    const recipient = recipients[recommendationId];
+
+    // check if user is the payer of the recommendation. Should already be the case
     if (payer != await client.getUserId()) {
-      return new UnsuccessfulResponse(0, 'user not payer of recommendation');
+      return new UnsuccessfulResponse(GroupError.Unauthorized, 'user must be payer of the recommendation');
     }
 
     // Part 2: Create Payback
-    const transaction = await this.createTransaction(groupId, 'Payback', payer, [recipient], [amount]);
+    const description = 'Payback from ' + payer + ' to ' + recipient + ' for ' + amount;
+    const transaction: ServerResponse = await this.createTransaction(groupId, description, payer, [recipient], [amount]);
     if (!transaction.wasSuccessful()) {
       return transaction;
     }
+    const transactionId: string = transaction.getValue();
+
+    amounts.splice(recommendationId, 1);
+    payers.splice(recommendationId, 1);
+    recipients.splice(recommendationId, 1);
 
     // Part 3: delete Recommendation
-    recommendations.splice(recommendationId, 1);
-    return await client.setRoomAccountData(groupId, 'recommendations', recommendations);
+    await this.matrixEmergentDataService.setRecommendations(groupId, amounts, payers, recipients, transactionId);
+    return new SuccessfulResponse(transactionId);
   }
 
   /**
@@ -147,15 +169,34 @@ export class GroupService {
     return new SuccessfulResponse(roomId);
   }
 
+  /**
+   *
+   * @param groupId
+   * @param description
+   * @param payerId
+   * @param recipientIds
+   * @param amounts
+   */
   public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]): Promise<ServerResponse> {
     return this.transactionService.createTransaction(groupId, description, payerId, recipientIds, amounts);
   }
 
+  /**
+   * Load older room events.
+   *
+   * @param groupId
+   */
   public async fetchHistory(groupId: string): Promise<ServerResponse> {
-    // TODO: implementation unclear. Is syncing already being done automatically in background (-> UpdateService would see this)
-    return undefined;
+    const client: MatrixClient = await this.matrixClientService.getPreparedClient();
+    const room: Room = await client.getRoom(groupId);
+    const scrollbackResponse: any = await client.scrollback(room, GroupService.SCROLLBACK_LIMIT);
+    return new SuccessfulResponse();
   }
 
+  /**
+   *
+   * @param groupId
+   */
   public async leaveGroup(groupId: string): Promise<ServerResponse> {
     const client: MatrixClient = await this.matrixClientService.getPreparedClient();
 
@@ -178,6 +219,15 @@ export class GroupService {
     return new SuccessfulResponse();
   }
 
+  /**
+   *
+   * @param groupId
+   * @param transactionId
+   * @param description
+   * @param payerId
+   * @param recipientIds
+   * @param amounts
+   */
   public async modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string,
                            recipientIds: string[], amounts: number[]): Promise<ServerResponse> {
     return this.transactionService.modifyTransaction(groupId, transactionId, description, payerId, recipientIds, amounts);

@@ -120,18 +120,17 @@ export class DataModelService {
    * @param transactions  Array of new transactions that should be regarded in the calculation.
    * @param lastTransactionId  ID of the last transaction that is regarded by the calculation.
    */
-  public calculateBalances(groupId: string, transactions: Transaction[], lastTransactionId: string): void {
+  public async calculateBalances(groupId: string, transactions: Transaction[], lastTransactionId: string): Promise<void> {
     const group = this.getGroup(groupId);
 
     const problem = this.balanceCalculator.calculateBalances(group.groupmembers, transactions);
-    const response = this.matrixEmergentData.setBalances(groupId, problem.getBalances(), problem.getUsers(), lastTransactionId);
+    const response = await this.matrixEmergentData.setBalances(groupId, problem.getBalances(), problem.getUsers(), lastTransactionId);
     this.status.newResponse(response);
     if (!response.wasSuccessful()) {
       // Do some Error stuff
-    }
-    else {
+    } else {
       const solution = this.greedyOptimisation.calculateOptimisation(problem);
-      const response2 = this.matrixEmergentData.setRecommendations(groupId, solution.getAmounts(), solution.getPayerIds(),
+      const response2 = await this.matrixEmergentData.setRecommendations(groupId, solution.getAmounts(), solution.getPayerIds(),
         solution.getRecipientIds(), lastTransactionId);
       this.status.newResponse(response2);
       if (!response2.wasSuccessful()) {
