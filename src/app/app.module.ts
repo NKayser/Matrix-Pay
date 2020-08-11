@@ -9,12 +9,13 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatDialogModule} from '@angular/material/dialog';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatListModule} from '@angular/material/list';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -36,6 +37,7 @@ import { LeaveGroupModalComponent } from './ViewModel/leave-group-modal/leave-gr
 import { CreateGroupModalComponent } from './ViewModel/create-group-modal/create-group-modal.component';
 import { AddMemberToGroupModalComponent } from './ViewModel/add-user-to-group-modal/add-member-to-group-modal.component';
 import { ConfirmPaybackModalComponent } from './ViewModel/confirm-payback-modal/confirm-payback-modal.component';
+import { ErrorModalComponent } from './ViewModel/error-modal/error-modal.component';
 
 
 @NgModule({
@@ -54,31 +56,33 @@ import { ConfirmPaybackModalComponent } from './ViewModel/confirm-payback-modal/
     LeaveGroupModalComponent,
     CreateGroupModalComponent,
     AddMemberToGroupModalComponent,
-    ConfirmPaybackModalComponent
+    ConfirmPaybackModalComponent,
+    ErrorModalComponent
   ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatCardModule,
-    FormsModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatRadioModule,
-    ReactiveFormsModule,
-    LayoutModule,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatListModule,
-    MatTabsModule,
-    MatDialogModule,
-    AppRoutingModule,
-    NgxChartsModule,
-    MatSlideToggleModule,
-    MatCheckboxModule
-  ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatCardModule,
+        FormsModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatRadioModule,
+        ReactiveFormsModule,
+        LayoutModule,
+        MatToolbarModule,
+        MatSidenavModule,
+        MatListModule,
+        MatTabsModule,
+        MatDialogModule,
+        AppRoutingModule,
+        NgxChartsModule,
+        MatSlideToggleModule,
+        MatCheckboxModule,
+        MatProgressSpinnerModule
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })

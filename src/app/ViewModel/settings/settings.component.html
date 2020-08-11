@@ -24,6 +24,7 @@
 <div>
 
   <button mat-raised-button color="primary" (click)="applySettings()">Apply</button>
+  <mat-spinner *ngIf="loadingCurrency || loadingLanguage"></mat-spinner>
 
 </div>
 

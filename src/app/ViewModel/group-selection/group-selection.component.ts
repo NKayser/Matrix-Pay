@@ -60,7 +60,6 @@ export class GroupSelectionComponent implements OnInit{
     const m1 = testGroup.groupmembers[0];
     m1.balance = 5;
     console.log(m1.balance + ' ' + m1.contact.contactId);
-    testGroup.addGroupmember(m1);
     testGroup.addGroupmember(m2);
     testGroup.addGroupmember(m3);
     testGroup.addTransaction(new Transaction(TransactionType.EXPENSE, 't1', 't1', new Date(2020, 10, 5), testGroup,

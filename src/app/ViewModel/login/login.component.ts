@@ -52,6 +52,7 @@ export class LoginComponent {
         // console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
 
         // Tell AppComponent, that user is logged in
+        // TODO make sure that this only gets emitted when the dataModel was created
         this.loggedIn.emit(true);
       }
   }

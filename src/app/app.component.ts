@@ -8,7 +8,7 @@ import {Router} from '@angular/router';
 })
 export class AppComponent {
   title = 'Angular-MatrixMicroPayments-App';
-  loggedIn = true;
+  loggedIn = false;
 
   constructor(private router: Router) {
   }

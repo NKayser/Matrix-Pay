@@ -2,6 +2,10 @@ import {Component, OnInit} from '@angular/core';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 import {Language, languageMap} from '../../DataModel/Utils/Language';
+import {SettingsService} from '../../ServerCommunication/SettingsCommunication/settings.service';
+import {MatDialog} from '@angular/material/dialog';
+import {ErrorModalComponent} from '../error-modal/error-modal.component';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 
 
 @Component({
@@ -23,7 +27,11 @@ export class SettingsComponent implements OnInit {
   currencyMap = currencyMap;
   languageMap = languageMap;
 
-  constructor(private dataModelService: DataModelService) { }
+  // track if matrix response is loading
+  loadingLanguage = false;
+  loadingCurrency = false;
+
+  constructor(private dataModelService: DataModelService, private settingsService: SettingsService, public dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.initSettings();
@@ -45,14 +53,43 @@ export class SettingsComponent implements OnInit {
   applySettings(): void{
     if (this.oldSelectedLanguage !== this.selectedLanguage){
       this.oldSelectedLanguage = this.selectedLanguage;
-      console.log(this.selectedLanguage);
+
+      this.loadingLanguage = true;
+      // TODO Discuss string format for languages
+
+      promiseTimeout(TIMEOUT, this.settingsService.changeLanguage(this.selectedLanguage.toString())).then((data) => {
+        console.log(data);
+        if (!data.wasSuccessful()){
+          this.openErrorModal('error language 1: ' + data.getMessage());
+        }
+        this.loadingLanguage = false;
+      }, (err) => {
+        this.openErrorModal('error language 2: ' + err);
+        this.loadingCurrency = false;
+      });
     }
+
     if (this.oldSelectedCurrency !== this.selectedCurrency){
       this.oldSelectedCurrency = this.selectedCurrency;
-      console.log(this.selectedCurrency);
+
+      this.loadingCurrency = true;
+      // TODO Discuss string format for currencies
+      promiseTimeout(TIMEOUT, this.settingsService.changeCurrency(this.selectedCurrency.toString())).then((data) => {
+        if (!data.wasSuccessful()){
+          this.openErrorModal('error currency 1: ' + data.getMessage());
+        }
+        this.loadingCurrency = false;
+      }, (err) => {
+        this.openErrorModal('error currency 2: ' + err);
+        this.loadingCurrency = false;
+      });
     }
   }
 
-
-
+  private openErrorModal(message: string): void{
+    this.dialog.open(ErrorModalComponent, {
+      width: '300px',
+      data: {errorMessage: message}
+    });
+  }
 }
