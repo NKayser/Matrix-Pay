@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
 import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType} from './parameterTypes';
 // @ts-ignore
-import {MatrixClient, MatrixEvent, EventTimeline, Room} from 'matrix-js-sdk';
+import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWindow, Room} from 'matrix-js-sdk';
 import {Utils} from '../Response/Utils';
 import {MatrixClientService} from "./matrix-client.service";
 import {ClientInterface} from "./ClientInterface";
@@ -21,6 +21,7 @@ export class ObservableService implements ObservableInterface {
   private recommendationsObservable: Subject<RecommendationsType>;
   private settingsCurrencyObservable: Subject<CurrencyType>;
   // TODO: remove magic numbers
+  private window: TimelineWindow; // for testing, is only extended backwards
 
   constructor(clientService: MatrixClientService) {
     this.clientService = clientService;
@@ -33,6 +34,21 @@ export class ObservableService implements ObservableInterface {
     this.settingsCurrencyObservable = new Subject();
 
     this.setUp();
+  }
+  
+  public scroll(): void {
+    console.log(this.window.canPaginate(EventTimeline.BACKWARDS));
+    const tl = this.window.getTimelineIndex(EventTimeline.BACKWARDS);
+    if (!tl) {
+      console.log('TimelineWindow: no timeline yet');
+    }
+    if (tl.index > tl.minIndex()) {
+      console.log('canPaginate');
+    }
+    console.log('neighboring timeline or pagination token available: ' +  Boolean(tl.timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS) ||
+      tl.timeline.getPaginationToken(EventTimeline.BACKWARDS)));
+    this.window.paginate(EventTimeline.BACKWARDS, 10);
+    console.log('scrolled');
   }
 
   private async setUp(): Promise<void> {
@@ -131,6 +147,17 @@ export class ObservableService implements ObservableInterface {
     // TODO: listen for name changes
 
     if (Utils.log) console.log('ObservableService is listening to Matrix');
+    
+    // for testing
+    // tslint:disable-next-line:max-line-length
+    const testTimelineSet = new EventTimelineSet(this.matrixClient.getRoom('!qdoSbhLsXpmnyIPFTr:dsn.tm.kit.edu') /* Privat Allgemein */, { "timelineSupport": true });
+    testTimelineSet.addTimeline();
+    console.log(testTimelineSet.getTimelines());
+    this.window = new TimelineWindow(this.matrixClient, testTimelineSet);
+    console.log(this.window.getEvents());
+    console.log(this.window.getTimelineIndex(EventTimeline.BACKWARDS));
+
+    console.log('ObservableService is listening to Matrix');
 
     // Fires whenever new user-scoped account_data is added.
     this.matrixClient.on('accountData', (event, oldEvent) => {
@@ -189,6 +216,7 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('Room.timeline',
       (event, room, toStartOfTimeline, removed, data) => {
       // if (Utils.log) console.log('got a timeline change. event type: '  + event.getType());
+      console.log('got a timeline change. event type: '  + event.getType());
       // Maybe fetch transactions seperately
       // do we need this check?
       if (!toStartOfTimeline && data.liveEvent) {
@@ -199,11 +227,24 @@ export class ObservableService implements ObservableInterface {
           }
           /*case ('m.room.message'): {
             if (Utils.log) console.log('got message. name: ' + event.event.content.body);
+            console.log('got payback. name: ' + event.getContent().name +  ' date: ' + event.getDate());
+            break;
+          }
+          /* ('m.room.message'): {
+            console.log('got message. name: ' + event.event.content.body);
             break;
           }*/
         }
       } else {
         if (Utils.log) console.log('got old timeline event');
+
+        switch (event.getType()) {
+          // Only for the history! New rooms are detected elsewhere.
+          case ('m.room.create'): {
+            console.log('got room creation. creator: ' + event.getContent().creator + ' date: ' + event.getDate());
+            break;
+          }
+        }
       }
     });
 
