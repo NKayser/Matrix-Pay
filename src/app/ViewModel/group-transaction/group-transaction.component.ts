@@ -6,6 +6,9 @@ import {Group} from '../../DataModel/Group/Group';
 import {TransactionType} from '../../DataModel/Group/TransactionType';
 import {Contact} from '../../DataModel/Group/Contact';
 import {DataModelService} from '../../DataModel/data-model.service';
+import {TransactionService} from '../../ServerCommunication/GroupCommunication/transaction.service';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {ErrorModalComponent} from '../error-modal/error-modal.component';
 
 @Component({
   selector: 'app-group-transaction',
@@ -18,18 +21,28 @@ export class GroupTransactionComponent implements OnChanges {
   @Input() group: Group;
 
   // the data that is used to create a transaction
-  data: PaymentDialogData;
-  transactions: Transaction[] = [];
+  private data: PaymentDialogData;
+  public transactions: Transaction[] = [];
 
-  constructor(public dialog: MatDialog, private dataModelService: DataModelService) {
+  public loadingCreateExpense = false;
+  public loadingEditExpense = false;
+
+  constructor(public dialog: MatDialog, private dataModelService: DataModelService, private transactionService: TransactionService) {
   }
 
+  /**
+   * Update the transaction reference every time something in the view changes, to make sure that a switch of the selected
+   * group switches the transactions
+   */
   ngOnChanges(): void {
     this.transactions = this.group.transactions;
   }
 
-  // open a dialog window, when it gets closed check if you got data and save it accordingly
-  createExpense(): void {
+  /**
+   * Creates an expense by opening a dialog where the user can input all necessary details
+   * and send the data to matrix via the transactionService
+   */
+  public createExpense(): void {
     const dialogRef = this.dialog.open(PaymentModalComponent, {
       width: '350px',
       data: this.generateCreateExpenseData(),
@@ -38,26 +51,76 @@ export class GroupTransactionComponent implements OnChanges {
     dialogRef.afterClosed().subscribe(result => {
       this.data = result;
       if (this.data !== undefined){
-        // TODO Send Data to matrix here
-        console.log(this.data.description);
+
+        const recipientIds = [];
+        const sendAmounts = [];
+        for (let i = 0; i < this.data.recipients.length; i++){
+          if (this.data.isAdded[i] === true){
+            recipientIds.push(this.data.recipients[i].contactId);
+            sendAmounts.push(this.data.amount[i]);
+          }
+
+        }
+
+        this.loadingCreateExpense = true;
+        promiseTimeout(TIMEOUT, this.transactionService.createTransaction(this.group.groupId, this.data.description,
+          this.data.payer.contactId, recipientIds, sendAmounts))
+          .then((data) => {
+            console.log(data);
+            if (!data.wasSuccessful()){
+              this.openErrorModal('error create transaction 1: ' + data.getMessage());
+            }
+            this.loadingCreateExpense = false;
+          }, (err) => {
+            this.openErrorModal('error create Transaction 2: ' + err);
+            this.loadingCreateExpense = false;
+          });
       }
 
     });
   }
 
-  editExpense(transaction: Transaction): void{
+  /**
+   * Edit an expense by opening a dialog where the user can change the data of the selected transaction and send
+   * the edited data via the transactionService to Matrix
+   * @param expense the transaction that is edited
+   */
+  public editExpense(expense: Transaction): void{
 
-    if (transaction.transactionType === TransactionType.EXPENSE){
+    if (expense.transactionType === TransactionType.EXPENSE){
       const dialogRef = this.dialog.open(PaymentModalComponent, {
         width: '350px',
-        data: this.generateEditExpenseData(transaction),
+        data: this.generateEditExpenseData(expense),
       });
 
       dialogRef.afterClosed().subscribe(result => {
         this.data = result;
         if (this.data !== undefined){
-          // TODO Send Data to matrix here
-          console.log(this.data.description);
+
+          const recipientIds = [];
+          const sendAmounts = [];
+          for (let i = 0; i < this.data.recipients.length; i++){
+            if (this.data.isAdded[i] === true){
+              recipientIds.push(this.data.recipients[i].contactId);
+              sendAmounts.push(this.data.amount[i]);
+            }
+
+          }
+
+          this.loadingEditExpense = true;
+          promiseTimeout(TIMEOUT, this.transactionService.modifyTransaction(this.group.groupId, expense.transactionId,
+            this.data.description, this.data.payer.contactId, recipientIds, sendAmounts))
+            .then((data) => {
+              console.log(data);
+              if (!data.wasSuccessful()){
+                this.openErrorModal('error edit transaction 1: ' + data.getMessage());
+              }
+              this.loadingEditExpense = false;
+            }, (err) => {
+              this.openErrorModal('error edit Transaction 2: ' + err);
+              this.loadingEditExpense = false;
+            });
+
         }
 
       });
@@ -113,7 +176,13 @@ export class GroupTransactionComponent implements OnChanges {
     return 0;
   }
 
-
+  // opens the error modal
+  private openErrorModal(message: string): void{
+    this.dialog.open(ErrorModalComponent, {
+      width: '300px',
+      data: {errorMessage: message}
+    });
+  }
 
   fetchHistory(): void{
 

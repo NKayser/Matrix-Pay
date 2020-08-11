@@ -1,8 +1,9 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Group} from '../../DataModel/Group/Group';
 
 export interface LeaveGroupDialogData {
-  group: string;
+  group: Group;
   leave: boolean;
 }
 
@@ -21,12 +22,17 @@ export class LeaveGroupModalComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  onCancel(): void {
+  /**
+   * Close the dialog without returning the data
+   */
+  public onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
-  onSave(): void {
+  /**
+   * Close the dialog and return the data
+   */
+  public onSave(): void {
     this.dialogRef.close({leave: true, group: this.data.group});
   }
 

@@ -14,15 +14,18 @@ import {Utils} from "../../ServerCommunication/Response/Utils";
 })
 export class HomeComponent implements OnInit {
 
-  usedCurrencies: Set<Currency> = new Set();
-  userContact: Contact;
+  public usedCurrencies: Set<Currency> = new Set();
+  public recommendations: Recommendation[] = [];
+  public currencyMap = currencyMap;
 
-  recommendations: Recommendation[] = [];
-  currencyMap = currencyMap;
-  dialogData: ConfirmPaybackDialogData;
+  private userContact: Contact;
+  private dialogData: ConfirmPaybackDialogData;
 
   constructor(private dataModelService: DataModelService, public dialog: MatDialog) {}
 
+  /**
+   * Get reference to the recommendations and user
+   */
   ngOnInit(): void {
 
     this.userContact = this.dataModelService.getUser().contact;
@@ -36,7 +39,10 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  // Calculate the total Balances of the User
+  /**
+   * Calculate the total balance for the user for the selected Currency
+   * @param currency the currency for which the balances should be calculated
+   */
   public getTotalBalance(currency: Currency): number{
     const groups = this.dataModelService.getGroups();
     let balance = 0;
@@ -57,6 +63,10 @@ export class HomeComponent implements OnInit {
     return balance;
   }
 
+  /**
+   * Confirm the payback
+   * @param recommendationIndex the Index of the recommendation that should be confirmed
+   */
   confirmPayback(recommendationIndex: number): void {
 
     const currentRec = this.recommendations[recommendationIndex];

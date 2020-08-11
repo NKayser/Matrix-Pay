@@ -20,6 +20,7 @@
 <div>
 
 
+  <mat-spinner *ngIf="loadingEditExpense || loadingCreateExpense"></mat-spinner>
   <!--Button to open the create Transaction Dialog-->
   <button mat-raised-button class="createButton" color="primary" (click)="createExpense()">create Transaction</button>
 

@@ -21,8 +21,10 @@ export class NavigationMenuComponent {
 
   constructor(private breakpointObserver: BreakpointObserver) {}
 
-  // Emit that the user logged out
-  logout(): void{
+  /**
+   * Send output if the user logged out
+   */
+  public logout(): void{
     this.loggedOut.emit(false);
   }
 

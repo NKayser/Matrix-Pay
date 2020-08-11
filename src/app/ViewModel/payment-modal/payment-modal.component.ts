@@ -22,7 +22,7 @@ export class PaymentModalComponent implements OnInit{
 
   // Save the FormControls which check the amounts of the recipients
   formControlAmount: FormControl[];
-  // Save the FormControl which check the description TODO Add regex
+  // Save the FormControl which check the description
   formControlDescription: FormControl;
   // Helper variable if the form is valid
   formInvalid = false;
@@ -32,9 +32,9 @@ export class PaymentModalComponent implements OnInit{
     @Inject(MAT_DIALOG_DATA) public data: PaymentDialogData) {
   }
 
-  /*
-  * Init all formControls for the Amount, because we need to know the amount of recipients before we can create them
-  * */
+  /**
+   * Init all formControls for the Amount, because we need to know the amount of recipients before we can create them
+   */
   ngOnInit(): void {
     this.formControlAmount = new Array<FormControl>(this.data.amount.length);
     for (let i = 0; i < this.data.amount.length; i++){
@@ -45,8 +45,10 @@ export class PaymentModalComponent implements OnInit{
     // this.formControlPayer = new FormControl(this.data.payer.name, [Validators.required]);
   }
 
-  // Checks if all inputs of the form are valid
-  checkForm(): boolean {
+  /**
+   * Check if all inputs of all forms a valid
+   */
+  public checkForm(): boolean {
 
     let tempValid = false;
     for (let i = 0; i < this.data.amount.length; i++){
@@ -63,12 +65,16 @@ export class PaymentModalComponent implements OnInit{
   }
 
 
-  // Close the dialog without saving
+  /**
+   * Close the dialog without returning the data
+   */
   onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
+  /**
+   * Close the dialog and return the data
+   */
   onSave(): void {
 
     this.formInvalid = this.checkForm();
@@ -94,20 +100,24 @@ export class PaymentModalComponent implements OnInit{
 
   }
 
-  // Return error messages
-  getInvalidNumberErrorMessage(): string{
+  /**
+   * Return an error message if the number in amount is invalid
+   */
+  public getInvalidNumberErrorMessage(): string{
     return 'Not a valid number';
   }
 
-  getInvalidDescriptionErrorMessage(): string{
+  /**
+   * Return an error message if the description is invalid
+   */
+  public getInvalidDescriptionErrorMessage(): string{
     return 'Not a valid number';
   }
 
-  getInvalidPayerErrorMessage(): string{
-    return 'Not a valid number';
-  }
-
-  getInvalidFormErrorMessage(): string{
+  /**
+   * Return an error message if there is an error in the form
+   */
+  public getInvalidFormErrorMessage(): string{
     return 'Not all inputs are valid';
   }
 
