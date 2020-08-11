@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
 import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType} from './parameterTypes';
 // @ts-ignore
-import {MatrixClient, MatrixEvent, EventTimeline, Room} from 'matrix-js-sdk';
+import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWindow, Room} from 'matrix-js-sdk';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +17,7 @@ export class ObservableService implements ObservableInterface {
   private recommendationsObservable: Subject<RecommendationsType>;
   private settingsCurrencyObservable: Subject<CurrencyType>;
   // TODO: remove magic numbers
+  private window: TimelineWindow; // for testing, is only extended backwards
 
   constructor() {
     console.log('this is ObservableService');
@@ -25,6 +26,21 @@ export class ObservableService implements ObservableInterface {
     this.balancesObservable = new Subject();
     this.recommendationsObservable = new Subject();
     this.settingsCurrencyObservable = new Subject();
+  }
+
+  public scroll(): void {
+    console.log(this.window.canPaginate(EventTimeline.BACKWARDS));
+    const tl = this.window.getTimelineIndex(EventTimeline.BACKWARDS);
+    if (!tl) {
+      console.log('TimelineWindow: no timeline yet');
+    }
+    if (tl.index > tl.minIndex()) {
+      console.log('canPaginate');
+    }
+    console.log('neighboring timeline or pagination token available: ' +  Boolean(tl.timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS) ||
+      tl.timeline.getPaginationToken(EventTimeline.BACKWARDS)));
+    this.window.paginate(EventTimeline.BACKWARDS, 10);
+    console.log('scrolled');
   }
 
   public async setUp(matrixClient: MatrixClient): Promise<void> {
@@ -121,6 +137,15 @@ export class ObservableService implements ObservableInterface {
     // TODO: detect transactions, modified transactions and when the user leaves a room
     // TODO: listen for name changes
 
+    // for testing
+    // tslint:disable-next-line:max-line-length
+    const testTimelineSet = new EventTimelineSet(this.matrixClient.getRoom('!qdoSbhLsXpmnyIPFTr:dsn.tm.kit.edu') /* Privat Allgemein */, { "timelineSupport": true });
+    testTimelineSet.addTimeline();
+    console.log(testTimelineSet.getTimelines());
+    this.window = new TimelineWindow(this.matrixClient, testTimelineSet);
+    console.log(this.window.getEvents());
+    console.log(this.window.getTimelineIndex(EventTimeline.BACKWARDS));
+
     console.log('ObservableService is listening to Matrix');
 
     // Fires whenever new user-scoped account_data is added.
@@ -179,22 +204,29 @@ export class ObservableService implements ObservableInterface {
     // Fires whenever the timeline in a room is updated
     this.matrixClient.on('Room.timeline',
       (event, room, toStartOfTimeline, removed, data) => {
-      // console.log('got a timeline change. event type: '  + event.getType());
+      console.log('got a timeline change. event type: '  + event.getType());
       // Maybe fetch transactions seperately
       // do we need this check?
       if (!toStartOfTimeline && data.liveEvent) {
         switch (event.getType()) {
           case ('payback'): {
-            console.log('got payback. name: ' + event.getContent().name);
+            console.log('got payback. name: ' + event.getContent().name +  ' date: ' + event.getDate());
             break;
           }
-          /*case ('m.room.message'): {
+          /* ('m.room.message'): {
             console.log('got message. name: ' + event.event.content.body);
             break;
           }*/
         }
       } else {
         console.log('got old timeline event');
+        switch (event.getType()) {
+          // Only for the history! New rooms are detected elsewhere.
+          case ('m.room.create'): {
+            console.log('got room creation. creator: ' + event.getContent().creator + ' date: ' + event.getDate());
+            break;
+          }
+        }
       }
     });
 
