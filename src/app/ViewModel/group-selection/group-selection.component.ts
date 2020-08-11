@@ -17,6 +17,9 @@ import {AtomarChange} from '../../DataModel/Group/AtomarChange';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {Activity} from '../../DataModel/Group/Activity';
 import {ActivityType} from '../../DataModel/Group/ActivityType';
+import {GroupService} from '../../ServerCommunication/GroupCommunication/group.service';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {ErrorModalComponent} from '../error-modal/error-modal.component';
 
 @Component({
   selector: 'app-group-selection',
@@ -32,6 +35,10 @@ export class GroupSelectionComponent implements OnInit{
   leaveGroupData: LeaveGroupDialogData;
   addUserToGroupData: AddMemberToGroupDialogData;
 
+  loadingLeaveGroup = false;
+  loadingAddMember = false;
+  loadingAddGroup = false;
+
   // this is an array of group names, which gets displayed by the view
   // this should get read from the dataService
   groups = [];
@@ -42,7 +49,8 @@ export class GroupSelectionComponent implements OnInit{
       shareReplay()
     );
 
-  constructor(private breakpointObserver: BreakpointObserver, public dialog: MatDialog, private dataModelService: DataModelService) {}
+  constructor(private breakpointObserver: BreakpointObserver, public dialog: MatDialog, private dataModelService: DataModelService,
+              private groupService: GroupService) {}
 
   // set default selected group
   ngOnInit(): void{
@@ -95,7 +103,7 @@ export class GroupSelectionComponent implements OnInit{
   leaveGroup(): void{
     const dialogRef = this.dialog.open(LeaveGroupModalComponent, {
       width: '300px',
-      data: {group: '', leave: false}
+      data: {group: this.currentGroup, leave: false}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -103,6 +111,18 @@ export class GroupSelectionComponent implements OnInit{
       if (this.leaveGroupData !== undefined){
         // TODO Send Data to matrix here
         console.log(this.leaveGroupData.leave);
+
+        this.loadingLeaveGroup = true;
+        promiseTimeout(TIMEOUT, this.groupService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
+          console.log(data);
+          if (!data.wasSuccessful()){
+            this.openErrorModal('error leave group 1: ' + data.getMessage());
+          }
+          this.loadingLeaveGroup = false;
+        }, (err) => {
+          this.openErrorModal('error leave group 2: ' + err);
+          this.loadingLeaveGroup = false;
+        });
       }
 
     });
@@ -120,6 +140,19 @@ export class GroupSelectionComponent implements OnInit{
       if (this.createGroupData !== undefined){
         // TODO Send Data to matrix here
         console.log(this.createGroupData.groupName);
+
+        this.loadingAddGroup = true;
+        promiseTimeout(TIMEOUT, this.groupService.createGroup(this.createGroupData.groupName, this.createGroupData.currency.toString()))
+          .then((data) => {
+          console.log(data);
+          if (!data.wasSuccessful()){
+            this.openErrorModal('error add group 1: ' + data.getMessage());
+          }
+          this.loadingAddGroup = false;
+        }, (err) => {
+          this.openErrorModal('error add group 2: ' + err);
+          this.loadingAddGroup = false;
+        });
       }
 
     });
@@ -129,7 +162,7 @@ export class GroupSelectionComponent implements OnInit{
   addMemberToGroup(): void{
     const dialogRef = this.dialog.open(AddMemberToGroupModalComponent, {
       width: '300px',
-      data: {group: '', user: ''}
+      data: {group: this.currentGroup, user: ''}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -137,8 +170,28 @@ export class GroupSelectionComponent implements OnInit{
       if (this.addUserToGroupData !== undefined){
         // TODO Send Data to matrix here
         console.log(this.addUserToGroupData.user);
+
+        this.loadingAddGroup = true;
+        promiseTimeout(TIMEOUT, this.groupService.addMember(this.addUserToGroupData.group.groupId, this.addUserToGroupData.user))
+          .then((data) => {
+            console.log(data);
+            if (!data.wasSuccessful()){
+              this.openErrorModal('error add member 1: ' + data.getMessage());
+            }
+            this.loadingAddGroup = false;
+          }, (err) => {
+            this.openErrorModal('error add member 2: ' + err);
+            this.loadingAddGroup = false;
+          });
       }
 
+    });
+  }
+
+  private openErrorModal(message: string): void{
+    this.dialog.open(ErrorModalComponent, {
+      width: '300px',
+      data: {errorMessage: message}
     });
   }
 

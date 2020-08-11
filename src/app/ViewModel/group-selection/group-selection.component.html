@@ -22,6 +22,7 @@
       </button>
       <mat-label>{{currentGroup.name}}</mat-label>
       <div class="buttonDiv">
+        <mat-spinner *ngIf="loadingAddGroup || loadingLeaveGroup || loadingAddMember" color="accent"></mat-spinner>
         <button mat-raised-button class = "groupButtons" (click)="leaveGroup()">Leave Group</button>
         <button mat-raised-button class = "groupButtons" (click)="addGroup()">Create Group</button>
         <button mat-raised-button class = "groupButtons" (click)="addMemberToGroup()">Add User to Group</button>

@@ -65,7 +65,7 @@ export class SettingsComponent implements OnInit {
         this.loadingLanguage = false;
       }, (err) => {
         this.openErrorModal('error language 2: ' + err);
-        this.loadingCurrency = false;
+        this.loadingLanguage = false;
       });
     }
 
