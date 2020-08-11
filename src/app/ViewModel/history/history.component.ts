@@ -14,6 +14,9 @@ export class HistoryComponent implements OnInit {
   constructor(private dataModelService: DataModelService) {
   }
 
+  /**
+   * get reference to activities of groups merge and sort them
+   */
   ngOnInit(): void {
 
     // TODO this method doesn't adds new activities automatically

@@ -24,19 +24,26 @@ export class AddMemberToGroupModalComponent {
     @Inject(MAT_DIALOG_DATA) public data: AddMemberToGroupDialogData) {
   }
 
-  // cancels that the user gets added to the group
-  onCancel(): void {
+  /**
+   * Closes the dialog without returning the data
+   */
+  public onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
-  onSave(): void {
+  /**
+   * Closes the dialog and returns the data
+   */
+  public onSave(): void {
     if (!this.formControlUser.invalid){
       this.dialogRef.close({user: this.formControlUser.value, group: this.data.group});
     }
   }
 
-  getInvalidUserErrorMessage(): string{
+  /**
+   * Returns error message if the user inputs invalid member
+   */
+  public getInvalidUserErrorMessage(): string{
     return 'Not a valid user name';
   }
 

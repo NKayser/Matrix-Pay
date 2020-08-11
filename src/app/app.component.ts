@@ -13,14 +13,18 @@ export class AppComponent {
   constructor(private router: Router) {
   }
 
-  // Manage that correct site is shown when user gets logged out
-  logout(): void{
+  /**
+   * Manage that correct site is shown when user gets logged out
+   */
+  public logout(): void{
     this.loggedIn = false;
     this.router.navigate(['/login']);
   }
 
-  // Manage that correct site is shown when user gets logged in
-  login(): void{
+  /**
+   * Manage that correct site is shown when user gets logged in
+   */
+  public login(): void{
     this.loggedIn = true;
     this.router.navigate(['/home']);
   }

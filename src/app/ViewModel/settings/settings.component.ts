@@ -49,8 +49,10 @@ export class SettingsComponent implements OnInit {
 
   }
 
-  // corresponds to the changeDefaultCurrency() and changeDefaultLanguage from the PhasenberichtEntwurf
-  applySettings(): void{
+  /**
+   * Apply all changed settings by sending them to matrix
+   */
+  public applySettings(): void{
     if (this.oldSelectedLanguage !== this.selectedLanguage){
       this.oldSelectedLanguage = this.selectedLanguage;
 

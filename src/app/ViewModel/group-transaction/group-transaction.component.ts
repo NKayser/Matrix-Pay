@@ -30,12 +30,19 @@ export class GroupTransactionComponent implements OnChanges {
   constructor(public dialog: MatDialog, private dataModelService: DataModelService, private transactionService: TransactionService) {
   }
 
+  /**
+   * Update the transaction reference everytime something in the view changes, to make sure that a switch of the selected
+   * group switches the transactions
+   */
   ngOnChanges(): void {
     this.transactions = this.group.transactions;
   }
 
-  // open a dialog window, when it gets closed check if you got data and save it accordingly
-  createExpense(): void {
+  /**
+   * Creates an expense by opening a dialog where the user can input all necessary details
+   * and send the data to matrix via the transactionService
+   */
+  public createExpense(): void {
     const dialogRef = this.dialog.open(PaymentModalComponent, {
       width: '350px',
       data: this.generateCreateExpenseData(),
@@ -44,8 +51,6 @@ export class GroupTransactionComponent implements OnChanges {
     dialogRef.afterClosed().subscribe(result => {
       this.data = result;
       if (this.data !== undefined){
-        // TODO Send Data to matrix here
-        console.log(this.data.description);
 
         const recipientIds = [];
         const sendAmounts = [];
@@ -75,7 +80,12 @@ export class GroupTransactionComponent implements OnChanges {
     });
   }
 
-  editExpense(transaction: Transaction): void{
+  /**
+   * Edit an expense by opening a dialog where the user can change the data of the selected transaction and send
+   * the edited data via the transactionService to Matrix
+   * @param transaction the transaction that is edited
+   */
+  public editExpense(transaction: Transaction): void{
 
     if (transaction.transactionType === TransactionType.EXPENSE){
       const dialogRef = this.dialog.open(PaymentModalComponent, {
@@ -86,8 +96,6 @@ export class GroupTransactionComponent implements OnChanges {
       dialogRef.afterClosed().subscribe(result => {
         this.data = result;
         if (this.data !== undefined){
-          // TODO Send Data to matrix here
-          console.log(this.data.description);
 
           const recipientIds = [];
           const sendAmounts = [];
@@ -168,6 +176,7 @@ export class GroupTransactionComponent implements OnChanges {
     return 0;
   }
 
+  // opens the error modal
   private openErrorModal(message: string): void{
     this.dialog.open(ErrorModalComponent, {
       width: '300px',

@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 export interface ErrorDialogData {
@@ -10,17 +10,17 @@ export interface ErrorDialogData {
   templateUrl: './error-modal.component.html',
   styleUrls: ['./error-modal.component.css']
 })
-export class ErrorModalComponent implements OnInit {
+export class ErrorModalComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ErrorModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ErrorDialogData) {
   }
 
-  ngOnInit(): void {
-  }
-
-  onCancel(): void {
+  /**
+   * Close the dialog without returning the data
+   */
+  public onCancel(): void {
     this.dialogRef.close();
   }
 

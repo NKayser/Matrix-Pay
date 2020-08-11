@@ -22,12 +22,17 @@ export class LeaveGroupModalComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  onCancel(): void {
+  /**
+   * Close the dialog without returning the data
+   */
+  public onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
-  onSave(): void {
+  /**
+   * Close the dialog and return the data
+   */
+  public onSave(): void {
     this.dialogRef.close({leave: true, group: this.data.group});
   }
 

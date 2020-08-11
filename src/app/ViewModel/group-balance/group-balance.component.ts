@@ -21,7 +21,11 @@ export class GroupBalanceComponent implements OnChanges {
   recommendations: Recommendation[] = [];
   data = [];
 
-  getCustomColor = (name) => {
+  /**
+   * Calculate the color for each bar in the balance chart and return red or green depending on the balance
+   * @param name the name of the data entry
+   */
+  public getCustomColor = (name) => {
     for (const entry of this.data){
       if (entry.name === name){
         if (entry.value >= 0){
@@ -36,6 +40,10 @@ export class GroupBalanceComponent implements OnChanges {
   constructor(public dialog: MatDialog) {
   }
 
+  /**
+   * Update the balances and recommendations every time something in the viewModel changes
+   * this is necessary to detect the changes of the group form the group-selection-component
+   */
   ngOnChanges(): void {
     // Initializes the graph with the balances of the members
     this.data = [];
@@ -47,7 +55,11 @@ export class GroupBalanceComponent implements OnChanges {
     this.recommendations = this.group.recommendations;
   }
 
-  confirmPayback(recommendationIndex: number): void {
+  /**
+   * Confirm the payback
+   * @param recommendationIndex the index of the recommendation to confirm
+   */
+  public confirmPayback(recommendationIndex: number): void {
 
       const currentRec = this.recommendations[recommendationIndex];
       const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {

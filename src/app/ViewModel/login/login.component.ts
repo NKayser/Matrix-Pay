@@ -29,8 +29,10 @@ export class LoginComponent {
   }
 
 
-  // login the user with the current values if matrixUrl and password
-  async login(): Promise<void> {
+  /**
+   * login the user
+   */
+  public async login(): Promise<void> {
 
       // check all formControls to make sure all values are correct
       this.matrixUrlControl.markAllAsTouched();
@@ -57,13 +59,17 @@ export class LoginComponent {
       }
   }
 
-  // get the error message for the password form
-  getPasswordErrorMessage(): string{
+  /**
+   * Get the error message if the password is invalid
+   */
+  public getPasswordErrorMessage(): string{
     return 'Please enter a password';
   }
 
-  // get the error message for the matrixUrl form
-  getMatrixUrlErrorMessage(): string{
+  /**
+   * Get the error message if the matrixUrl is invalid
+   */
+  public getMatrixUrlErrorMessage(): string{
     if (this.matrixUrlControl.hasError('required')){
       return 'Please enter a matrixUrl';
     } else {

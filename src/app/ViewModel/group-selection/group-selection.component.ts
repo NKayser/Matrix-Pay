@@ -99,8 +99,10 @@ export class GroupSelectionComponent implements OnInit{
     this.currentGroup = this.groups[index];
   }
 
-  // open a leave group dialog and use the returned data to cause a proper reaction
-  leaveGroup(): void{
+  /**
+   * Leave the group that is defined by this.currentGroup
+   */
+  public leaveGroup(): void{
     const dialogRef = this.dialog.open(LeaveGroupModalComponent, {
       width: '300px',
       data: {group: this.currentGroup, leave: false}
@@ -109,7 +111,6 @@ export class GroupSelectionComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.leaveGroupData = result;
       if (this.leaveGroupData !== undefined){
-        // TODO Send Data to matrix here
         console.log(this.leaveGroupData.leave);
 
         this.loadingLeaveGroup = true;
@@ -128,8 +129,10 @@ export class GroupSelectionComponent implements OnInit{
     });
   }
 
-
-  addGroup(): void {
+  /**
+   * Add a group
+   */
+  public addGroup(): void {
     const dialogRef = this.dialog.open(CreateGroupModalComponent, {
       width: '300px',
       data: {groupName: '', currency: this.dataModelService.getUser().currency}
@@ -138,7 +141,6 @@ export class GroupSelectionComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.createGroupData = result;
       if (this.createGroupData !== undefined){
-        // TODO Send Data to matrix here
         console.log(this.createGroupData.groupName);
 
         this.loadingAddGroup = true;
@@ -158,8 +160,10 @@ export class GroupSelectionComponent implements OnInit{
     });
   }
 
-  // open a dialog to add a new member to the group and get back the member matrix url
-  addMemberToGroup(): void{
+  /**
+   * Add a member to the group that is defined by this.currentGroup
+   */
+  public addMemberToGroup(): void{
     const dialogRef = this.dialog.open(AddMemberToGroupModalComponent, {
       width: '300px',
       data: {group: this.currentGroup, user: ''}
@@ -168,7 +172,6 @@ export class GroupSelectionComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.addUserToGroupData = result;
       if (this.addUserToGroupData !== undefined){
-        // TODO Send Data to matrix here
         console.log(this.addUserToGroupData.user);
 
         this.loadingAddGroup = true;
