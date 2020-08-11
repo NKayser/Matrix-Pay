@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
 import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType} from './parameterTypes';
 // @ts-ignore
-import {MatrixClient, MatrixEvent, EventTimeline} from 'matrix-js-sdk';
+import {MatrixClient, MatrixEvent, EventTimeline, Room} from 'matrix-js-sdk';
 
 @Injectable({
   providedIn: 'root'
@@ -29,10 +29,10 @@ export class ObservableService implements ObservableInterface {
 
   public async setUp(matrixClient: MatrixClient): Promise<void> {
     this.matrixClient = matrixClient;
-    // Create the User in DataModel
+    // Getting data about the user
     const userId = this.matrixClient.getUserId();
     // test: does not give the displayName, but the userId
-    const user = this.matrixClient.getUser(userId).displayName;
+    const name = this.matrixClient.getUser(userId).displayName;
     // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
     const currencyEventContent = await matrixClient.getAccountDataFromServer('currency') // content of the matrix event
       .catch(() => {console.log('rejected promise while getting account data from server'); });
@@ -42,12 +42,76 @@ export class ObservableService implements ObservableInterface {
        console.log(languageEventContent);*/
     this.userObservable.next({contactId: userId, name,
       currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
+    // Get data about the rooms and transfer the information to BasicDataUpdateService,
+    // so that future events can be stored in an existing group.
+    await this.getRooms();
     // start the matrix listeners
     this.listenToMatrix();
   }
 
   public async tearDown(): Promise<void> {
   // TODO: implement
+  }
+
+  private async getRooms(): Promise<void> {
+    // We have to wait until the initial sync is done, because we want to get the rooms from the local store.
+    // This implies that the matrix listeners do not detect the events retrieved by the initial sync
+    // because they already are in the local store.
+    const syncPromise = new Promise((resolve, reject) => {
+      this.matrixClient.on('sync', (state, payload) => {
+        if (state === 'SYNCING') {
+          resolve();
+        } else if (state === 'ERROR'){
+          console.log('error while syncing');
+        }
+      });
+    });
+    await syncPromise;
+
+    const rooms = this.matrixClient.getRooms(); // returns an array of sdk-Rooms, empty if there are none
+    console.log(rooms);
+    // forin does not work (does not get correct references of individual rooms), no idea why
+    for (let i = 0; i < rooms.length; i++) {
+      this.getRoomData(rooms[i]);
+    }
+  }
+
+  private getRoomData(room: Room): void {
+    console.log(room);
+    const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
+    const groupId = room.roomId;
+    const groupName = room.name;
+    let userIds = [];
+    let userNames = [];
+    for (const id in members) {
+      userIds.push(id);
+      userNames.push(members[id].name);
+    }
+    // currency is detected a second time by the other event listener (not any more),
+    // but needed here for the observable (in DataModel for the group constructor)
+    const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents("currency", " ");
+    let currency: string;
+    console.log(currencyEvent);
+    // See the sdk code of getStateEvents() for explanation
+    if (currencyEvent === null) {
+      // no such event type or no valid events with this event type and state key
+      console.log('no currency set');
+    } else if (Array.isArray(currencyEvent)) {
+      // extra check because currencyEvent === [] did not work
+      if (currencyEvent.length === 0) {
+        console.log('no currency set');
+      } else {
+        // event type ok, stateKey undefined (should not happen because we set stateKey to " ".)
+        console.log('stateKey undefinded');
+      }
+    } else {
+      currency = currencyEvent.getContent().currency;
+      console.log(currencyEvent.getContent().currency);
+    }
+    console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames);
+    // As long as we do not filter for paygroups, set currency to 'EURO' for testing
+    this.groupsObservable.next({groupId, groupName, /*currency*/ currency: 'EURO', userIds,
+      userNames, isLeave: false});
   }
 
   private async listenToMatrix(): Promise<void> {
@@ -109,39 +173,7 @@ export class ObservableService implements ObservableInterface {
       if (!(members[this.matrixClient.getUserId()].membership === 'join')) {
         return;
       }
-      const groupId = room.roomId;
-      const groupName = room.name;
-      let userIds = [];
-      let userNames = [];
-      for (const id in members) {
-        userIds.push(id);
-        userNames.push(members[id].name);
-      }
-      // currency is detected a second time by the other event listener,
-      // but needed here for the observable (in DataModel for the group constructor)
-      const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents("currency", " ");
-      let currency: string;
-      console.log(currencyEvent);
-      // See the sdk code of getStateEvents() for explanation
-      if (currencyEvent === null) {
-        // no such event type or no valid events with this event type and state key
-        console.log('no currency set');
-      } else if (Array.isArray(currencyEvent)) {
-        // extra check because currencyEvent === [] did not work
-        if (currencyEvent.length === 0) {
-          console.log('no currency set');
-        } else {
-        // event type ok, stateKey undefined (should not happen because we set stateKey to " ".)
-        console.log('stateKey undefinded');
-        }
-      } else {
-        currency = currencyEvent.getContent().currency;
-        console.log(currencyEvent.getContent().currency);
-      }
-      console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames);
-      // As long as we do not filter for paygroups, set currency to 'EURO' for testing
-      this.groupsObservable.next({groupId, groupName, /*currency*/ currency: 'EURO', userIds,
-        userNames, isLeave: false});
+      this.getRoomData(room);
     });
 
     // Fires whenever the timeline in a room is updated
@@ -176,6 +208,7 @@ export class ObservableService implements ObservableInterface {
       } else if (oldMembership === 'join' && member.membership === 'leave') {
         isLeave = true;
       }
+      console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave);
       // TODO: call next() on observable
     });
 
