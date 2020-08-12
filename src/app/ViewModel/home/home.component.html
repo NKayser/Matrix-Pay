@@ -1,19 +1,27 @@
 <div>
-  <mat-list>
+  <!--<mat-list>
     <mat-list-item *ngFor="let currency of usedCurrencies">
       <mat-card class="center">
         <mat-label class="balance_label">Balance {{currencyMap[currency]}}</mat-label>
         <mat-label class="balance_number" [ngStyle]="{'color' : (getTotalBalance(currency) >= 0) ? 'green' : 'red'}" >{{getTotalBalance(currency)}}</mat-label>
       </mat-card>
     </mat-list-item>
-  </mat-list>
+  </mat-list>-->
+  <mat-grid-list cols="4" rowHeight="2:1">
+    <mat-grid-tile *ngFor="let currency of usedCurrencies">
+      <mat-card class="center">
+        <mat-label class="balance_label">Balance {{currencyMap[currency]}}</mat-label>
+        <mat-label class="balance_number" [ngStyle]="{'color' : (getTotalBalance(currency) >= 0) ? 'green' : 'red'}" >{{getTotalBalance(currency)}}</mat-label>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
 
 </div>
 
 <mat-divider class="divider"></mat-divider>
 
 <div class="payback_div">
-  <mat-list>
+  <!--<mat-list>
     <mat-list-item *ngFor="let recommendation of recommendations, index as i">
       <mat-card>
         <div class="approve_div">
@@ -24,5 +32,18 @@
         <mat-label class="approve_amount">{{recommendation.payer.amount}}{{currencyMap[recommendation.group.currency]}}</mat-label>
       </mat-card>
     </mat-list-item>
-  </mat-list>
+  </mat-list>-->
+  <mat-grid-list cols="4" rowHeight="2:1">
+    <mat-grid-tile *ngFor="let recommendation of recommendations, index as i">
+      <mat-card>
+        <div class="approve_div">
+          <mat-label class="approve_person">{{recommendation.payer.contact.name}}</mat-label>
+          <mat-label class="approve_group">{{recommendation.group.name}}</mat-label>
+          <button mat-raised-button color="primary" class="approve_button" (click)="confirmPayback(i)">Approve Payback</button>
+        </div>
+        <mat-label class="approve_amount">{{recommendation.payer.amount}}{{currencyMap[recommendation.group.currency]}}</mat-label>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+  <mat-spinner *ngIf="loadingConfirmPayback" [diameter]="30"></mat-spinner>
 </div>

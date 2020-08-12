@@ -1,14 +1,11 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Contact} from '../../DataModel/Group/Contact';
-import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
+import {currencyMap} from '../../DataModel/Utils/Currency';
+import {Recommendation} from '../../DataModel/Group/Recommendation';
 
 
 export interface ConfirmPaybackDialogData {
-  group: string;
-  recipient: Contact;
-  amount: number;
-  currency: Currency;
+  recommendation: Recommendation;
   confirm: boolean;
 }
 

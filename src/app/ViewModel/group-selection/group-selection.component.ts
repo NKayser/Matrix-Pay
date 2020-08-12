@@ -18,8 +18,7 @@ import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {Activity} from '../../DataModel/Group/Activity';
 import {ActivityType} from '../../DataModel/Group/ActivityType';
 import {GroupService} from '../../ServerCommunication/GroupCommunication/group.service';
-import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
-import {ErrorModalComponent} from '../error-modal/error-modal.component';
+import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
 
 @Component({
   selector: 'app-group-selection',
@@ -76,7 +75,15 @@ export class GroupSelectionComponent implements OnInit{
       new AtomarChange(c3, 15), [new AtomarChange(c2, 15)], m1));
     const r1 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
     const r2 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
-    testGroup.setRecommendations([r1, r2]);
+    const r3 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
+    const r4 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
+    const r5 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
+    const r6 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
+    const r7 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
+    const r8 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
+    const r9 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
+    const r10 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
+    testGroup.setRecommendations([r1, r2, r2, r3, r4, r5, r6, r7, r8, r9, r10]);
     const a1 = new Activity(ActivityType.CONTACTLEFTGROUP, testGroup, c1, new Date());
     const a2 = new Activity(ActivityType.GROUPCREATION, testGroup, c1, new Date());
     const a3 = new Activity(ActivityType.NEWCONTACTINGROUP, testGroup, c1, new Date());
@@ -120,11 +127,11 @@ export class GroupSelectionComponent implements OnInit{
         promiseTimeout(TIMEOUT, this.groupService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
           console.log(data);
           if (!data.wasSuccessful()){
-            this.openErrorModal('error leave group 1: ' + data.getMessage());
+            openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
           }
           this.loadingLeaveGroup = false;
         }, (err) => {
-          this.openErrorModal('error leave group 2: ' + err);
+          openErrorModal('error leave group 2: ' + err, this.dialog);
           this.loadingLeaveGroup = false;
         });
       }
@@ -151,11 +158,11 @@ export class GroupSelectionComponent implements OnInit{
           .then((data) => {
           console.log(data);
           if (!data.wasSuccessful()){
-            this.openErrorModal('error add group 1: ' + data.getMessage());
+            openErrorModal('error add group 1: ' + data.getMessage(), this.dialog);
           }
           this.loadingAddGroup = false;
         }, (err) => {
-          this.openErrorModal('error add group 2: ' + err);
+          openErrorModal('error add group 2: ' + err, this.dialog);
           this.loadingAddGroup = false;
         });
       }
@@ -182,22 +189,15 @@ export class GroupSelectionComponent implements OnInit{
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){
-              this.openErrorModal('error add member 1: ' + data.getMessage());
+              openErrorModal('error add member 1: ' + data.getMessage(), this.dialog);
             }
             this.loadingAddGroup = false;
           }, (err) => {
-            this.openErrorModal('error add member 2: ' + err);
+            openErrorModal('error add member 2: ' + err, this.dialog);
             this.loadingAddGroup = false;
           });
       }
 
-    });
-  }
-
-  private openErrorModal(message: string): void{
-    this.dialog.open(ErrorModalComponent, {
-      width: '300px',
-      data: {errorMessage: message}
     });
   }
 

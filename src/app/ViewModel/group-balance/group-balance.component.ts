@@ -4,6 +4,8 @@ import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {currencyMap} from '../../DataModel/Utils/Currency';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmPaybackDialogData, ConfirmPaybackModalComponent} from '../confirm-payback-modal/confirm-payback-modal.component';
+import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 
 @Component({
   selector: 'app-group-balance',
@@ -17,6 +19,8 @@ export class GroupBalanceComponent implements OnChanges {
 
   public currencyMap = currencyMap;
   private dialogData: ConfirmPaybackDialogData;
+
+  public loadingConfirmPayback = false;
 
   public recommendations: Recommendation[] = [];
   public balanceData = [];
@@ -37,7 +41,7 @@ export class GroupBalanceComponent implements OnChanges {
     }
   }
 
-  constructor(public dialog: MatDialog) {
+  constructor(public dialog: MatDialog, public matrixBasicDataService: MatrixBasicDataService) {
   }
 
   /**
@@ -64,15 +68,25 @@ export class GroupBalanceComponent implements OnChanges {
       const currentRec = this.recommendations[recommendationIndex];
       const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
         width: '350px',
-        data: {group: this.group.name, confirm: false, recipient: currentRec.recipient.contact, amount: currentRec.recipient.amount,
-          currency: this.group.currency}
+        data: {recommendation: currentRec, confirm: false}
       });
 
       dialogRef.afterClosed().subscribe(result => {
         this.dialogData = result;
         if (this.dialogData !== undefined){
-          // TODO Send Data to matrix here
-          console.log(this.dialogData);
+          this.loadingConfirmPayback = true;
+          // TODO Missing recommendationId
+          promiseTimeout(TIMEOUT, this.matrixBasicDataService.confirmPayback(this.dialogData.recommendation.group.groupId, 0))
+            .then((data) => {
+              console.log(data);
+              if (!data.wasSuccessful()){
+                openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
+              }
+              this.loadingConfirmPayback = false;
+            }, (err) => {
+              openErrorModal('error confirm payback 2: ' + err, this.dialog);
+              this.loadingConfirmPayback = false;
+            });
         }
       });
   }

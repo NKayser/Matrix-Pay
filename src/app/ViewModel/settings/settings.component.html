@@ -23,8 +23,8 @@
 
 <div>
 
-  <button mat-raised-button color="primary" (click)="applySettings()">Apply</button>
-  <mat-spinner *ngIf="loadingCurrency || loadingLanguage"></mat-spinner>
+  <button class="first" mat-raised-button color="primary" (click)="applySettings()">Apply</button>
+  <mat-spinner class="second" *ngIf="loadingCurrency || loadingLanguage" [diameter]="30"></mat-spinner>
 
 </div>
 

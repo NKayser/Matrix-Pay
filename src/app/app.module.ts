@@ -38,6 +38,7 @@ import { CreateGroupModalComponent } from './ViewModel/create-group-modal/create
 import { AddMemberToGroupModalComponent } from './ViewModel/add-user-to-group-modal/add-member-to-group-modal.component';
 import { ConfirmPaybackModalComponent } from './ViewModel/confirm-payback-modal/confirm-payback-modal.component';
 import { ErrorModalComponent } from './ViewModel/error-modal/error-modal.component';
+import {MatGridListModule} from '@angular/material/grid-list';
 
 
 @NgModule({
@@ -81,7 +82,8 @@ import { ErrorModalComponent } from './ViewModel/error-modal/error-modal.compone
         NgxChartsModule,
         MatSlideToggleModule,
         MatCheckboxModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatGridListModule
     ],
   providers: [],
   bootstrap: [AppComponent]

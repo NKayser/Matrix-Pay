@@ -2,13 +2,13 @@ import { Component, Output, EventEmitter} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
-import {ClientError, EmergentDataError, GroupError} from '../../ServerCommunication/Response/ErrorTypes';
+import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
 import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
-import {MatrixBasicDataService} from "../../ServerCommunication/CommunicationInterface/matrix-basic-data.service";
-import {MatrixEmergentDataService} from "../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service";
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {MatrixEmergentDataService} from '../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 
 // @ts-ignore
-import {MatrixEvent} from "matrix-js-sdk";
+import {MatrixEvent} from 'matrix-js-sdk';
 
 
 @Component({
@@ -24,6 +24,7 @@ export class LoginComponent {
 
   // Manages if the password is shown in the view
   public hidePassword = true;
+  public loadingLogIn = false;
 
   // gets the input values of the user and checks if they obey all requirements
   public matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
@@ -40,6 +41,8 @@ export class LoginComponent {
    * login the user
    */
   public async login(): Promise<void> {
+
+      this.loadingLogIn = true;
 
       // check all formControls to make sure all values are correct
       this.matrixUrlControl.markAllAsTouched();
@@ -58,6 +61,7 @@ export class LoginComponent {
           console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
 
+        this.loadingLogIn = false;
         // Tell AppComponent, that user is logged in
         // TODO make sure that this only gets emitted when the dataModel was created
         this.loggedIn.emit(true);

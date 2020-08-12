@@ -7,8 +7,8 @@ import {TransactionType} from '../../DataModel/Group/TransactionType';
 import {Contact} from '../../DataModel/Group/Contact';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {TransactionService} from '../../ServerCommunication/GroupCommunication/transaction.service';
-import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
-import {ErrorModalComponent} from '../error-modal/error-modal.component';
+import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {currencyMap} from '../../DataModel/Utils/Currency';
 
 @Component({
   selector: 'app-group-transaction',
@@ -26,6 +26,8 @@ export class GroupTransactionComponent implements OnChanges {
 
   public loadingCreateExpense = false;
   public loadingEditExpense = false;
+
+  public currencyMap = currencyMap;
 
   constructor(public dialog: MatDialog, private dataModelService: DataModelService, private transactionService: TransactionService) {
   }
@@ -68,11 +70,11 @@ export class GroupTransactionComponent implements OnChanges {
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){
-              this.openErrorModal('error create transaction 1: ' + data.getMessage());
+              openErrorModal('error create transaction 1: ' + data.getMessage(), this.dialog);
             }
             this.loadingCreateExpense = false;
           }, (err) => {
-            this.openErrorModal('error create Transaction 2: ' + err);
+            openErrorModal('error create Transaction 2: ' + err, this.dialog);
             this.loadingCreateExpense = false;
           });
       }
@@ -113,11 +115,11 @@ export class GroupTransactionComponent implements OnChanges {
             .then((data) => {
               console.log(data);
               if (!data.wasSuccessful()){
-                this.openErrorModal('error edit transaction 1: ' + data.getMessage());
+                openErrorModal('error edit transaction 1: ' + data.getMessage(), this.dialog);
               }
               this.loadingEditExpense = false;
             }, (err) => {
-              this.openErrorModal('error edit Transaction 2: ' + err);
+              openErrorModal('error edit Transaction 2: ' + err, this.dialog);
               this.loadingEditExpense = false;
             });
 
@@ -174,14 +176,6 @@ export class GroupTransactionComponent implements OnChanges {
     }
 
     return 0;
-  }
-
-  // opens the error modal
-  private openErrorModal(message: string): void{
-    this.dialog.open(ErrorModalComponent, {
-      width: '300px',
-      data: {errorMessage: message}
-    });
   }
 
   fetchHistory(): void{

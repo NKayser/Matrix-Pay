@@ -4,8 +4,7 @@ import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 import {Language, languageMap} from '../../DataModel/Utils/Language';
 import {SettingsService} from '../../ServerCommunication/SettingsCommunication/settings.service';
 import {MatDialog} from '@angular/material/dialog';
-import {ErrorModalComponent} from '../error-modal/error-modal.component';
-import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
 
 
 @Component({
@@ -62,11 +61,11 @@ export class SettingsComponent implements OnInit {
       promiseTimeout(TIMEOUT, this.settingsService.changeLanguage(this.selectedLanguage.toString())).then((data) => {
         console.log(data);
         if (!data.wasSuccessful()){
-          this.openErrorModal('error language 1: ' + data.getMessage());
+          openErrorModal('error language 1: ' + data.getMessage(), this.dialog);
         }
         this.loadingLanguage = false;
       }, (err) => {
-        this.openErrorModal('error language 2: ' + err);
+        openErrorModal('error language 2: ' + err, this.dialog);
         this.loadingLanguage = false;
       });
     }
@@ -78,20 +77,13 @@ export class SettingsComponent implements OnInit {
       // TODO Discuss string format for currencies
       promiseTimeout(TIMEOUT, this.settingsService.changeCurrency(this.selectedCurrency.toString())).then((data) => {
         if (!data.wasSuccessful()){
-          this.openErrorModal('error currency 1: ' + data.getMessage());
+          openErrorModal('error currency 1: ' + data.getMessage(), this.dialog);
         }
         this.loadingCurrency = false;
       }, (err) => {
-        this.openErrorModal('error currency 2: ' + err);
+        openErrorModal('error currency 2: ' + err, this.dialog);
         this.loadingCurrency = false;
       });
     }
-  }
-
-  private openErrorModal(message: string): void{
-    this.dialog.open(ErrorModalComponent, {
-      width: '300px',
-      data: {errorMessage: message}
-    });
   }
 }

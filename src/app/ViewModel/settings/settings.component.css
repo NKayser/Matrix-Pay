@@ -1,0 +1,7 @@
+.first {
+  float:left;
+  margin-right: 5px;
+}
+.second {
+  overflow: hidden;
+}

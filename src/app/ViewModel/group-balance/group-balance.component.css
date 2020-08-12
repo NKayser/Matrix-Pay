@@ -5,6 +5,18 @@
   margin-top: 10px;
 }
 
+.first {
+  float:bottom;
+  margin-bottom: 5px;
+}
+.second {
+  overflow: hidden;
+}
+
+.item{
+  margin-top: 50px;
+}
+
 /*Controls the person label on the approve Payback cards*/
 .approve_person {
   font-size: 120%;
@@ -35,5 +47,6 @@
 
 /*Controls the div, that contains all Payback cards*/
 .payback_div{
+  display: block;
   margin-top: 30px;
 }
