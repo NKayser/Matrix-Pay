@@ -35,7 +35,8 @@ export class ObservableService implements ObservableInterface {
 
     this.setUp();
   }
-  
+
+  // for testing
   public scroll(): void {
     console.log(this.window.canPaginate(EventTimeline.BACKWARDS));
     const tl = this.window.getTimelineIndex(EventTimeline.BACKWARDS);
@@ -69,7 +70,7 @@ export class ObservableService implements ObservableInterface {
       currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
     // Get data about the rooms and transfer the information to BasicDataUpdateService,
     // so that future events can be stored in an existing group.
-    await this.getRooms();
+    // await this.getRooms();
     // start the matrix listeners
     this.listenToMatrix();
   }
@@ -78,6 +79,7 @@ export class ObservableService implements ObservableInterface {
   // TODO: implement
   }
 
+  // probably nor needed anymore
   private async getRooms(): Promise<void> {
     // We have to wait until the initial sync is done, because we want to get the rooms from the local store.
     // This implies that the matrix listeners do not detect the events retrieved by the initial sync
@@ -97,11 +99,12 @@ export class ObservableService implements ObservableInterface {
     console.log(rooms);
     // forin does not work (does not get correct references of individual rooms), no idea why
     for (let i = 0; i < rooms.length; i++) {
-      this.getRoomData(rooms[i]);
+      this.processNewRoom(rooms[i]);
     }
   }
 
-  private getRoomData(room: Room): void {
+  private processNewRoom(room: Room): void {
+    // TODO: check whether it is a MatrixPay room
     console.log(room);
     const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
     const groupId = room.roomId;
@@ -135,27 +138,27 @@ export class ObservableService implements ObservableInterface {
     }
     console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames);
     // As long as we do not filter for paygroups, set currency to 'EURO' for testing
-    this.groupsObservable.next({groupId, groupName, /*currency*/ currency: 'EURO', userIds,
-      userNames, isLeave: false});
+    this.groupsObservable.next({
+      groupId, groupName, /*currency*/ currency: 'EURO', userIds,
+      userNames, isLeave: false
+    });
+
+    // Get all transactions in the newly joined room.
+    // The things written into the local store of the client will eventually be detected by the listeners.
+
+    const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet(), {"timelineSupport": true});
+    timelineWindow.load();
+    if (!timelineWindow.canPaginate()) { console.log('pagination in room ' + room.name + ' failed'); }
   }
+
 
   private async listenToMatrix(): Promise<void> {
     // listen to Matrix Events, use next() on Subjects
-    // TODO: add dates where necessary
     // TODO: error handling
-    // TODO: detect transactions, modified transactions and when the user leaves a room
+    // TODO: detect transactions, modified transactions
     // TODO: listen for name changes
 
     if (Utils.log) console.log('ObservableService is listening to Matrix');
-    
-    // for testing
-    // tslint:disable-next-line:max-line-length
-    const testTimelineSet = new EventTimelineSet(this.matrixClient.getRoom('!qdoSbhLsXpmnyIPFTr:dsn.tm.kit.edu') /* Privat Allgemein */, { "timelineSupport": true });
-    testTimelineSet.addTimeline();
-    console.log(testTimelineSet.getTimelines());
-    this.window = new TimelineWindow(this.matrixClient, testTimelineSet);
-    console.log(this.window.getEvents());
-    console.log(this.window.getTimelineIndex(EventTimeline.BACKWARDS));
 
     console.log('ObservableService is listening to Matrix');
 
@@ -202,15 +205,17 @@ export class ObservableService implements ObservableInterface {
       }
     });
 
+    /*
+    // now done in 'Room.membership'-Listener so that a date can be retrieved with event.getDate()
     // Fires whenever invited to a room or joining a room
-    // TODO: check whether it is a MatrixPay room
-    this.matrixClient.on('Room', room => {
+        this.matrixClient.on('Room', room => {
       const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
       if (!(members[this.matrixClient.getUserId()].membership === 'join')) {
         return;
       }
-      this.getRoomData(room);
+      this.processNewRoom(room);
     });
+    */
 
     // Fires whenever the timeline in a room is updated
     this.matrixClient.on('Room.timeline',
@@ -229,15 +234,10 @@ export class ObservableService implements ObservableInterface {
             if (Utils.log) console.log('got message. name: ' + event.event.content.body);
             console.log('got payback. name: ' + event.getContent().name +  ' date: ' + event.getDate());
             break;
-          }
-          /* ('m.room.message'): {
-            console.log('got message. name: ' + event.event.content.body);
-            break;
           }*/
         }
       } else {
         if (Utils.log) console.log('got old timeline event');
-
         switch (event.getType()) {
           // Only for the history! New rooms are detected elsewhere.
           case ('m.room.create'): {
@@ -252,16 +252,28 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('RoomMember.membership', (event, member, oldMembership) => {
       const userId = member.userId;
       const groupId = member.roomId;
-      let isLeave: boolean;
-      if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
-        isLeave = false;
-      } else if (oldMembership === 'join' && member.membership === 'leave') {
-        isLeave = true;
+      if (userId === this.matrixClient.getUserId()) {
+        if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
+          this.processNewRoom(this.matrixClient.getRoomo(groupId));
+          // TODO call next() on observable for activity
+          console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
+        } else if (oldMembership === 'join' && member.membership === 'leave') {
+          console.log('user left the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
+          // TODO: call next() on observable
+        }
+      } else {
+        let isLeave: boolean;
+        if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
+          isLeave = false;
+        } else if (oldMembership === 'join' && member.membership === 'leave') {
+          isLeave = true;
+        }
+        console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
+        // TODO: call next() on observable
       }
-      console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave);
-      // TODO: call next() on observable
     });
 
+    // probably not needed
     // Fires whenever the event dictionary in room state is updated.
     this.matrixClient.on('RoomState.events', (event, state, prevEvent) => {
       if (event.getType() === 'currency') {
