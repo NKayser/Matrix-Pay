@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
 import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType} from './parameterTypes';
 // @ts-ignore
-import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWindow, Room} from 'matrix-js-sdk';
+import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWindow, Room, Filter, FilterComponent} from 'matrix-js-sdk';
 import {Utils} from '../Response/Utils';
 import {MatrixClientService} from "./matrix-client.service";
 import {ClientInterface} from "./ClientInterface";
@@ -55,6 +55,7 @@ export class ObservableService implements ObservableInterface {
   private async setUp(): Promise<void> {
     // wait until client is set in constructor
     this.matrixClient = await this.clientService.getLoggedInClient();
+
     // Getting data about the user
     const userId = this.matrixClient.getUserId();
     // test: does not give the displayName, but the userId
@@ -68,11 +69,28 @@ export class ObservableService implements ObservableInterface {
        if (Utils.log) console.log(languageEventContent);*/
     this.userObservable.next({contactId: userId, name,
       currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
-    // Get data about the rooms and transfer the information to BasicDataUpdateService,
-    // so that future events can be stored in an existing group.
-    // await this.getRooms();
+
+    // wait until initial sync is done
+    const syncPromise = new Promise((resolve, reject) => {
+      this.matrixClient.on('sync', (state, payload) => {
+        if (state === 'SYNCING') {
+          resolve();
+        } else if (state === 'ERROR'){
+          console.log('error while syncing');
+        }
+      });
+    });
+    await syncPromise;
+    console.log(this.matrixClient.getSyncStateData());
+
+    // Get data about the rooms (and transfer the information to BasicDataUpdateService,
+    // so that future events can be stored in an existing group)
+    // more importantly: initialise the timelines (in processNewRoom) for backpagination.
+    await this.getRooms();
+
     // start the matrix listeners
     this.listenToMatrix();
+
   }
 
   public async tearDown(): Promise<void> {
@@ -84,7 +102,8 @@ export class ObservableService implements ObservableInterface {
     // We have to wait until the initial sync is done, because we want to get the rooms from the local store.
     // This implies that the matrix listeners do not detect the events retrieved by the initial sync
     // because they already are in the local store.
-    const syncPromise = new Promise((resolve, reject) => {
+    // Waiting is now done in setUp().
+    /*const syncPromise = new Promise((resolve, reject) => {
       this.matrixClient.on('sync', (state, payload) => {
         if (state === 'SYNCING') {
           resolve();
@@ -93,7 +112,7 @@ export class ObservableService implements ObservableInterface {
         }
       });
     });
-    await syncPromise;
+    await syncPromise;*/
 
     const rooms = this.matrixClient.getRooms(); // returns an array of sdk-Rooms, empty if there are none
     console.log(rooms);
@@ -103,9 +122,9 @@ export class ObservableService implements ObservableInterface {
     }
   }
 
-  private processNewRoom(room: Room): void {
+  private async processNewRoom(room: Room): Promise<void> {
     // TODO: check whether it is a MatrixPay room
-    console.log(room);
+    // console.log(room);
     const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
     const groupId = room.roomId;
     const groupName = room.name;
@@ -145,10 +164,35 @@ export class ObservableService implements ObservableInterface {
 
     // Get all transactions in the newly joined room.
     // The things written into the local store of the client will eventually be detected by the listeners.
-
-    const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet(), {"timelineSupport": true});
+    /*console.log('---window---');
+    const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet(), {timelineSupport: true});
     timelineWindow.load();
-    if (!timelineWindow.canPaginate()) { console.log('pagination in room ' + room.name + ' failed'); }
+    if (!timelineWindow.canPaginate(EventTimeline.BACKWARDS)) { console.log('pagination in room ' + room.name + ' failed'); }
+    console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));*/
+
+    console.log('---new timelineSet---');
+    // TODO: set the content of the filter
+    const filterDefinition: object = {room: {}};
+    const filter: Filter = await this.matrixClient.createFilter({});
+    console.log(filter);
+    filter.setDefinition(filterDefinition);
+    // TypeError: matrix_js_sdk__WEBPACK_IMPORTED_MODULE_3__.FilterComponent is not a constructor
+    // filter._room_timeline_filter = new FilterComponent({});
+    const ownTimelineSet = room.getOrCreateFilteredTimelineSet(filter);
+    // TypeError: timelineFilter.getRoomTimelineFilterComponent is not a function
+    // let ownTimelineSet = this.createFilteredTimelineSetWithoutPopulatingIt(room, this.matrixClient.createFilter({}));
+    console.log(ownTimelineSet);
+    const ownTimelineWindow = new TimelineWindow(this.matrixClient, ownTimelineSet);
+    ownTimelineWindow.load();
+    console.log(ownTimelineWindow.canPaginate(EventTimeline.BACKWARDS));
+    ownTimelineWindow.paginate(EventTimeline.BACKWARDS, 2);
+    /*await this.matrixClient.paginateEventTimeline(ownTimeline, {backwards: true, limit: 2})
+      .then(moreEvents => {
+        if (!moreEvents) {
+          return;
+        }
+      });*/
+
   }
 
 
@@ -254,7 +298,7 @@ export class ObservableService implements ObservableInterface {
       const groupId = member.roomId;
       if (userId === this.matrixClient.getUserId()) {
         if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
-          this.processNewRoom(this.matrixClient.getRoomo(groupId));
+          this.processNewRoom(this.matrixClient.getRoom(groupId));
           // TODO call next() on observable for activity
           console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
@@ -282,6 +326,50 @@ export class ObservableService implements ObservableInterface {
         // TODO: call next() on observable
       }
     });
+  }
+
+  // similar to Room.prototype.getOrCreateFilteredTimelineSet
+  private createFilteredTimelineSetWithoutPopulatingIt(room: Room, filter: Filter): void {
+    const opts = {timelineSupport: true, filter: filter};
+    const timelineSet = new EventTimelineSet(room, opts);
+    /* not sure what that does
+    room.reEmitter.reEmit(timelineSet, ["Room.timeline", "Room.timelineReset"]);
+    room._filteredTimelineSets[filter.filterId] = timelineSet;
+    room._timelineSets.push(timelineSet);*/
+
+    const unfilteredLiveTimeline = room.getLiveTimeline();
+
+    // find the earliest unfiltered timeline
+    let timeline = unfilteredLiveTimeline;
+    while (timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS)) {
+      timeline = timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS);
+    }
+
+    timelineSet.getLiveTimeline().setPaginationToken(
+      timeline.getPaginationToken(EventTimeline.BACKWARDS),
+      EventTimeline.BACKWARDS,
+    );
+
+    return timelineSet;
+  }
+
+  private canPaginateWithHelpfulLog(window: TimelineWindow, direction: string): boolean {
+    const tl = window.getTimelineIndex(direction);
+    if (!tl) {
+      console.log("TimelineWindow: no timeline yet");
+      return false;
+    }
+    if (direction === EventTimeline.BACKWARDS) {
+      if (tl.index > tl.minIndex()) {
+        return true;
+      }
+    } else {
+      if (tl.index < tl.maxIndex()) {
+        return true;
+      }
+    }
+    return Boolean(tl.timeline.getNeighbouringTimeline(direction) ||
+      tl.timeline.getPaginationToken(direction));
   }
 
   public getUserObservable(): Observable<UserType> {
