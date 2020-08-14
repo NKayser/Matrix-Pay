@@ -3,7 +3,6 @@ import {ObservableInterface} from '../ServerCommunication/CommunicationInterface
 import {ObservableService} from '../ServerCommunication/CommunicationInterface/observable.service';
 import {DataModelService} from '../DataModel/data-model.service';
 import {Currency} from '../DataModel/Utils/Currency';
-import {User} from '../DataModel/User/User';
 import {Contact} from '../DataModel/Group/Contact';
 import {Language} from '../DataModel/Utils/Language';
 import {Groupmember} from "../DataModel/Group/Groupmember";
@@ -58,44 +57,35 @@ export class BasicDataUpdateService {
     );
   }
 
-  private updateGroupMember(): Promise<void>{
-    const group = this.dataModel.getGroup(param.groupId);
-    const newMember = new Groupmember(new Contact(param.contactId, param.name));
-    group.addGroupmember(newMember);
+  private async updateGroupMember(): Promise<void> {
+    this.observables.getGroupMembershipObservable().subscribe( param => {
+      if (Utils.log) console.log('BasicDataUpdateService got member ' + param.name);
+      const group = this.dataModel.getGroup(param.groupId);
+      const newMember = new Groupmember(new Contact(param.userId, param.name), group);
+      group.addGroupmember(newMember);
+    });
   }
 
-  private updateNewGroupTransactions() Promise<void>{
+  private async updateNewGroupTransactions(): Promise<void> {
+  this.observables.getNewTransactionObservable().subscribe( param => {
+    if (Utils.log) console.log('BasicDataUpdateService got new transaction ' + param.transactionId);
+
     const group = this.dataModel.getGroup(param.groupId);
-    let payer: AtomarChange;
+    let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
     let recipients: AtomarChange[];
-    for (groupmember of group.groupmembers){
-      if (param.payerId === groupmember.contact.contactId){
-        payer = new AtomarChange(groupmember.contact, param.payerAmount);
-        break;
-      }
+    for (let i = 0; i < param.recipientIds.length; i++) {
+      recipients.push(new AtomarChange(group.getGroupmember(param.recipientIds[i]).contact, param.recipientAmount[i]));
     }
-    for (int i = 0; i < param.recipientIds.length; i++){
-      for (groupmember of group.groupmembers){
-        if (param.recipientIds[i] === groupmember.contact.contactId){
-          recipients.push(new AtomarChange(groupmember.contact, param.recipientAmount[i]));
-          break;
-        }
-      }
-    }
-    let sender: Groupmember;
-    for (groupmember of group.groupmembers){
-      if (param.senderId === groupmember.contact.contactId){
-        sender = groupmember;
-        break;
-      }
-    }
+    let sender = group.getGroupmember(param.senderId);
     const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
-      param.name, param.creationDate, group,payer, recipients, sender);
+      param.name, param.creationDate, group, payer, recipients, sender);
     group.addTransaction(newTransaction);
+  }
+  );
   }
 
   private currencyStringToEnum(currencyString: string): Currency {
-    let currencyEnum: Currency;
+    let currencyEnum: Currency = Currency.EUR;
     switch (currencyString) {
       case ('EURO'): {
         currencyEnum = Currency.EUR;
@@ -125,7 +115,7 @@ export class BasicDataUpdateService {
   }
 
   private transactionStringToEnum(transactionString: string): TransactionType {
-    let transactionType: TransactionType;
+    let transactionType: TransactionType = TransactionType.EXPENSE;
     switch (transactionString) {
       case ('EXPENSE'): {
         transactionType = TransactionType.EXPENSE;
