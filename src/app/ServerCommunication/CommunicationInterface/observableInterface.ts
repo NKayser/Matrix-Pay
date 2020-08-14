@@ -22,11 +22,11 @@ export interface ObservableInterface {
 
   getNewTransactionObservable(): Observable<TransactionType>;
 
- /* getModifiedTransactionObservable(): Observable<string>;
+  getModifiedTransactionObservable(): Observable<string>;
 
   getSettingsLanguageObservable(): Observable<string>;
 
-  */
+
 
   getSettingsCurrencyObservable(): Observable<CurrencyType>;
 

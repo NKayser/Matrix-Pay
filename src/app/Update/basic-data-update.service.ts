@@ -19,20 +19,15 @@ export class BasicDataUpdateService {
 
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     if (Utils.log) console.log('This is BasicDataUpdateService');
-    this.observables = observables;
+    this.observables = observables; // TODO imlement observableInterface
     this.createUser();
   }
 
   public createUser(): void {
     this.observables.getUserObservable().subscribe(param => {
       if (Utils.log) console.log('call user constructor');
-      this.datamodel.initializeUserThisSession(param.contactId, param.name, this.currencyStringToEnum(param.currency),
+      this.dataModel.initializeUserThisSession(param.contactId, param.name, this.currencyStringToEnum(param.currency),
         this.languageStringToEnum(param.language))
-      /*new User(new Contact(param.contactId, param.name),
-        this.currencyStringToEnum(param.currency), this.languageStringToEnum(param.language));
-      // invoke all methods
-      this.updateDefaultCurrency();
-      this.addGroup();*/
     });
   }
 
@@ -100,7 +95,7 @@ export class BasicDataUpdateService {
   }
 
   private languageStringToEnum(languageString: string): Language {
-    let languageEnum: Language;
+    let languageEnum: Language = Language.ENGLISH;
     switch (languageString) {
       case ('GERMAN'): {
         languageEnum = Language.GERMAN;
