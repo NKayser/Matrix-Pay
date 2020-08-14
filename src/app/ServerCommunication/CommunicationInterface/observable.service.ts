@@ -6,8 +6,8 @@ import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, Currency
 // @ts-ignore
 import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWindow, Room, Filter, FilterComponent} from 'matrix-js-sdk';
 import {Utils} from '../Response/Utils';
-import {MatrixClientService} from "./matrix-client.service";
-import {ClientInterface} from "./ClientInterface";
+import {MatrixClientService} from './matrix-client.service';
+import {ClientInterface} from './ClientInterface';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +26,7 @@ export class ObservableService implements ObservableInterface {
   constructor(clientService: MatrixClientService) {
     this.clientService = clientService;
 
-    if (Utils.log) console.log('this is ObservableService');
+    if (Utils.log) { console.log('this is ObservableService'); }
     this.userObservable = new Subject();
     this.groupsObservable = new Subject();
     this.balancesObservable = new Subject();
@@ -34,6 +34,17 @@ export class ObservableService implements ObservableInterface {
     this.settingsCurrencyObservable = new Subject();
 
     this.setUp();
+  }
+
+  private static async until(condition: () => boolean, interval: number, timeout?: number): Promise<boolean> {
+    let time: number = 0;
+    while (condition() == false) {
+      if (timeout != undefined && time >= timeout) return Promise.reject();
+      await new Promise(resolve => setTimeout(resolve, interval));
+      console.log('waiting for client to be logged in or prepared. ' + time);
+      time += interval;
+    }
+    return true;
   }
 
   // for testing
@@ -53,8 +64,11 @@ export class ObservableService implements ObservableInterface {
   }
 
   private async setUp(): Promise<void> {
-    // wait until client is set in constructor
+    // get the client (logged in, but before /sync)
     this.matrixClient = await this.clientService.getLoggedInClient();
+
+    // start the client, initial sync
+    this.matrixClient.startClient({initialSyncLimit: 4, includeArchivedRooms: true});
 
     // Getting data about the user
     const userId = this.matrixClient.getUserId();
@@ -62,13 +76,14 @@ export class ObservableService implements ObservableInterface {
     const name = this.matrixClient.getUser(userId).displayName;
     // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
     const currencyEventContent = await this.matrixClient.getAccountDataFromServer('currency') // content of the matrix event
-      .catch(() => {if (Utils.log) console.log('rejected promise while getting account data from server'); });
-    if (Utils.log) console.log(currencyEventContent);
+      .catch(() => {if (Utils.log) { console.log('rejected promise while getting account data from server'); } });
+    if (Utils.log) { console.log(currencyEventContent); }
     /* When setting language is implemented in login component:
        const languageEventContent = await matrixClient.getAccountDataFromServer('language');
        if (Utils.log) console.log(languageEventContent);*/
     this.userObservable.next({contactId: userId, name,
       currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
+
 
     // wait until initial sync is done
     const syncPromise = new Promise((resolve, reject) => {
@@ -83,14 +98,13 @@ export class ObservableService implements ObservableInterface {
     await syncPromise;
     console.log(this.matrixClient.getSyncStateData());
 
+    // start the matrix listeners
+    this.listenToMatrix();
+
     // Get data about the rooms (and transfer the information to BasicDataUpdateService,
     // so that future events can be stored in an existing group)
     // more importantly: initialise the timelines (in processNewRoom) for backpagination.
     await this.getRooms();
-
-    // start the matrix listeners
-    this.listenToMatrix();
-
   }
 
   public async tearDown(): Promise<void> {
@@ -99,6 +113,7 @@ export class ObservableService implements ObservableInterface {
 
   // probably nor needed anymore
   private async getRooms(): Promise<void> {
+    // TODO: macke sure we get all members (see Client-Server-API 8.1 Lazy-loading room members)
     // We have to wait until the initial sync is done, because we want to get the rooms from the local store.
     // This implies that the matrix listeners do not detect the events retrieved by the initial sync
     // because they already are in the local store.
@@ -128,15 +143,15 @@ export class ObservableService implements ObservableInterface {
     const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
     const groupId = room.roomId;
     const groupName = room.name;
-    let userIds = [];
-    let userNames = [];
+    const userIds = [];
+    const userNames = [];
     for (const id in members) {
       userIds.push(id);
       userNames.push(members[id].name);
     }
     // currency is detected a second time by the other event listener (not any more),
     // but needed here for the observable (in DataModel for the group constructor)
-    const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents("currency", " ");
+    const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('currency', ' ');
     let currency: string;
     console.log(currencyEvent);
     // See the sdk code of getStateEvents() for explanation
@@ -162,15 +177,19 @@ export class ObservableService implements ObservableInterface {
       userNames, isLeave: false
     });
 
-    // Get all transactions in the newly joined room.
     // The things written into the local store of the client will eventually be detected by the listeners.
-    /*console.log('---window---');
-    const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet(), {timelineSupport: true});
-    timelineWindow.load();
-    if (!timelineWindow.canPaginate(EventTimeline.BACKWARDS)) { console.log('pagination in room ' + room.name + ' failed'); }
-    console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));*/
+    if (room.roomId == '!qdoSbhLsXpmnyIPFTr:dsn.tm.kit.edu') {
+      console.log('---window---');
+      const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
+      timelineWindow.load();
+      console.log(timelineWindow.getEvents());
+      if (!timelineWindow.canPaginate(EventTimeline.FORWARDS)) {
+        console.log('pagination in room ' + room.name + ' failed');
+      }
+      console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
+    }
 
-    console.log('---new timelineSet---');
+    /*console.log('---new timelineSet---');
     // TODO: set the content of the filter
     const filterDefinition: object = {room: {}};
     const filter: Filter = await this.matrixClient.createFilter({});
@@ -185,7 +204,7 @@ export class ObservableService implements ObservableInterface {
     const ownTimelineWindow = new TimelineWindow(this.matrixClient, ownTimelineSet);
     ownTimelineWindow.load();
     console.log(ownTimelineWindow.canPaginate(EventTimeline.BACKWARDS));
-    ownTimelineWindow.paginate(EventTimeline.BACKWARDS, 2);
+    ownTimelineWindow.paginate(EventTimeline.BACKWARDS, 2);  */
     /*await this.matrixClient.paginateEventTimeline(ownTimeline, {backwards: true, limit: 2})
       .then(moreEvents => {
         if (!moreEvents) {
@@ -195,6 +214,18 @@ export class ObservableService implements ObservableInterface {
 
   }
 
+  private paginateBackwardsUntilTheEnd(window: TimelineWindow): void {
+    window.paginate(EventTimeline.BACKWARDS, 10)
+      .then(gotMoreEvents => {
+          if (gotMoreEvents) {
+            this.paginateBackwardsUntilTheEnd(window);
+          } else {
+            return;
+          }
+        }
+      );
+  }
+
 
   private async listenToMatrix(): Promise<void> {
     // listen to Matrix Events, use next() on Subjects
@@ -202,7 +233,7 @@ export class ObservableService implements ObservableInterface {
     // TODO: detect transactions, modified transactions
     // TODO: listen for name changes
 
-    if (Utils.log) console.log('ObservableService is listening to Matrix');
+    if (Utils.log) { console.log('ObservableService is listening to Matrix'); }
 
     console.log('ObservableService is listening to Matrix');
 
@@ -211,12 +242,12 @@ export class ObservableService implements ObservableInterface {
       // if (Utils.log) console.log('got account data change' + event.getType());
       switch (event.getType()) {
         case ('currency'): {
-          if (Utils.log) console.log('got currency change to ' + event.getContent().currency);
+          if (Utils.log) { console.log('got currency change to ' + event.getContent().currency); }
           this.settingsCurrencyObservable.next({currency: event.getContent().currency});
           break;
         }
         case ('language'): {
-          if (Utils.log) console.log('got language change to ' + event.getContent().language);
+          if (Utils.log) { console.log('got language change to ' + event.getContent().language); }
           // TODO: call next() on observable
         }
       }
@@ -232,7 +263,7 @@ export class ObservableService implements ObservableInterface {
           const balances = content.balances;
           const contacts = content.contacts;
           const last_transaction = content.last_transaction;
-          if (Utils.log) console.log('got balances change in room ' + room.name + ' userIds: ' + contacts + ' amounts: ' + balances);
+          if (Utils.log) { console.log('got balances change in room ' + room.name + ' userIds: ' + contacts + ' amounts: ' + balances); }
           // TODO: call next() on observable
           break;
         }
@@ -271,7 +302,7 @@ export class ObservableService implements ObservableInterface {
       if (!toStartOfTimeline && data.liveEvent) {
         switch (event.getType()) {
           case ('payback'): {
-            if (Utils.log) console.log('got payback. name: ' + event.getContent().name);
+            if (Utils.log) { console.log('got payback. name: ' + event.getContent().name); }
             break;
           }
           /*case ('m.room.message'): {
@@ -281,7 +312,7 @@ export class ObservableService implements ObservableInterface {
           }*/
         }
       } else {
-        if (Utils.log) console.log('got old timeline event');
+        if (Utils.log) { console.log('got old timeline event'); }
         switch (event.getType()) {
           // Only for the history! New rooms are detected elsewhere.
           case ('m.room.create'): {
@@ -309,11 +340,13 @@ export class ObservableService implements ObservableInterface {
         let isLeave: boolean;
         if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
           isLeave = false;
+          console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
+          // TODO: call next() on observable
         } else if (oldMembership === 'join' && member.membership === 'leave') {
           isLeave = true;
+          console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
+          // TODO: call next() on observable
         }
-        console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
-        // TODO: call next() on observable
       }
     });
 
@@ -322,7 +355,7 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('RoomState.events', (event, state, prevEvent) => {
       if (event.getType() === 'currency') {
         const newCurrency = event.getContent().currency;
-        if (Utils.log) console.log('got change of room currency. room: ' + state.roomId + ' new currency: ' + newCurrency);
+        if (Utils.log) { console.log('got change of room currency. room: ' + state.roomId + ' new currency: ' + newCurrency); }
         // TODO: call next() on observable
       }
     });
@@ -330,7 +363,7 @@ export class ObservableService implements ObservableInterface {
 
   // similar to Room.prototype.getOrCreateFilteredTimelineSet
   private createFilteredTimelineSetWithoutPopulatingIt(room: Room, filter: Filter): void {
-    const opts = {timelineSupport: true, filter: filter};
+    const opts = {timelineSupport: true, filter};
     const timelineSet = new EventTimelineSet(room, opts);
     /* not sure what that does
     room.reEmitter.reEmit(timelineSet, ["Room.timeline", "Room.timelineReset"]);
@@ -356,7 +389,7 @@ export class ObservableService implements ObservableInterface {
   private canPaginateWithHelpfulLog(window: TimelineWindow, direction: string): boolean {
     const tl = window.getTimelineIndex(direction);
     if (!tl) {
-      console.log("TimelineWindow: no timeline yet");
+      console.log('TimelineWindow: no timeline yet');
       return false;
     }
     if (direction === EventTimeline.BACKWARDS) {
