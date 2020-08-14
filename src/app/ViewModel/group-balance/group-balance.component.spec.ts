@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GroupBalanceComponent } from './group-balance.component';
+import {MatDialog} from '@angular/material/dialog';
 
 describe('GroupBalanceComponent', () => {
   let component: GroupBalanceComponent;
@@ -8,7 +9,13 @@ describe('GroupBalanceComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GroupBalanceComponent ]
+      declarations: [ GroupBalanceComponent ],
+      providers: [
+        {
+          provide: MatDialog,
+          useValue: []
+        }
+      ]
     })
     .compileComponents();
   }));

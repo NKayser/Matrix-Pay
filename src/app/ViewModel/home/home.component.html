@@ -1,4 +1,4 @@
-<div>
+<div class="balance">
   <!--<mat-list>
     <mat-list-item *ngFor="let currency of usedCurrencies">
       <mat-card class="center">
@@ -7,7 +7,7 @@
       </mat-card>
     </mat-list-item>
   </mat-list>-->
-  <mat-grid-list cols="4" rowHeight="2:1">
+  <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)" rowHeight="2:1">
     <mat-grid-tile *ngFor="let currency of usedCurrencies">
       <mat-card class="center">
         <mat-label class="balance_label">Balance {{currencyMap[currency]}}</mat-label>
@@ -33,7 +33,7 @@
       </mat-card>
     </mat-list-item>
   </mat-list>-->
-  <mat-grid-list cols="4" rowHeight="2:1">
+  <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)" rowHeight="2:1">
     <mat-grid-tile *ngFor="let recommendation of recommendations, index as i">
       <mat-card>
         <div class="approve_div">

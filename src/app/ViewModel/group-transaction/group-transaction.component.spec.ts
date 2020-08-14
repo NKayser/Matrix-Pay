@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GroupTransactionComponent } from './group-transaction.component';
+import {MatDialog} from '@angular/material/dialog';
 
 describe('GroupTransactionComponent', () => {
   let component: GroupTransactionComponent;
@@ -8,7 +9,13 @@ describe('GroupTransactionComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GroupTransactionComponent ]
+      declarations: [ GroupTransactionComponent ],
+      providers: [
+        {
+          provide: MatDialog,
+          useValue: []
+        }
+      ]
     })
     .compileComponents();
   }));

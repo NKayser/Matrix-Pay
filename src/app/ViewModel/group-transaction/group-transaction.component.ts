@@ -7,8 +7,9 @@ import {TransactionType} from '../../DataModel/Group/TransactionType';
 import {Contact} from '../../DataModel/Group/Contact';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {TransactionService} from '../../ServerCommunication/GroupCommunication/transaction.service';
-import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {currencyMap} from '../../DataModel/Utils/Currency';
+import {DialogProviderService} from '../dialog-provider.service';
 
 @Component({
   selector: 'app-group-transaction',
@@ -29,7 +30,8 @@ export class GroupTransactionComponent implements OnChanges {
 
   public currencyMap = currencyMap;
 
-  constructor(public dialog: MatDialog, private dataModelService: DataModelService, private transactionService: TransactionService) {
+  constructor(public dialog: MatDialog, private dataModelService: DataModelService, private transactionService: TransactionService,
+              private dialogProviderService: DialogProviderService) {
   }
 
   /**
@@ -70,11 +72,11 @@ export class GroupTransactionComponent implements OnChanges {
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){
-              openErrorModal('error create transaction 1: ' + data.getMessage(), this.dialog);
+              this.dialogProviderService.openErrorModal('error create transaction 1: ' + data.getMessage(), this.dialog);
             }
             this.loadingCreateExpense = false;
           }, (err) => {
-            openErrorModal('error create Transaction 2: ' + err, this.dialog);
+            this.dialogProviderService.openErrorModal('error create Transaction 2: ' + err, this.dialog);
             this.loadingCreateExpense = false;
           });
       }
@@ -115,11 +117,11 @@ export class GroupTransactionComponent implements OnChanges {
             .then((data) => {
               console.log(data);
               if (!data.wasSuccessful()){
-                openErrorModal('error edit transaction 1: ' + data.getMessage(), this.dialog);
+                this.dialogProviderService.openErrorModal('error edit transaction 1: ' + data.getMessage(), this.dialog);
               }
               this.loadingEditExpense = false;
             }, (err) => {
-              openErrorModal('error edit Transaction 2: ' + err, this.dialog);
+              this.dialogProviderService.openErrorModal('error edit Transaction 2: ' + err, this.dialog);
               this.loadingEditExpense = false;
             });
 

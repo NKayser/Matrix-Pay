@@ -8,6 +8,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { NavigationMenuComponent } from './navigation-menu.component';
+import {MatDialog} from '@angular/material/dialog';
 
 describe('NavigationMenuComponent', () => {
   let component: NavigationMenuComponent;
@@ -16,6 +17,12 @@ describe('NavigationMenuComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [NavigationMenuComponent],
+      providers: [
+        {
+          provide: MatDialog,
+          useValue: []
+        }
+      ],
       imports: [
         NoopAnimationsModule,
         LayoutModule,

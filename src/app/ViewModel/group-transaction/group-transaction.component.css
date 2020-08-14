@@ -17,16 +17,25 @@
   overflow: hidden;
 }
 
-
-.leftTransaction {
-  margin-right: 50px;
-}
-
 .title{
-  font-size: 30px;
+  font-size: 20px;
+  margin-right: 130px;
 }
 
-.payed_text {
+.description{
+  margin-right: 130px;
+  color: gray;
+}
+
+.description_left{
+  margin-right: 20px;
+}
+
+.payed_amount {
+  position: absolute;
+  right: 20px;
+  top: 30px;
+  font-size: 60px;
 }
 
 

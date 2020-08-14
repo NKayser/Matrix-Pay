@@ -8,7 +8,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTabsModule} from '@angular/material/tabs';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatSidenavModule} from '@angular/material/sidenav';
@@ -39,6 +39,7 @@ import { AddMemberToGroupModalComponent } from './ViewModel/add-user-to-group-mo
 import { ConfirmPaybackModalComponent } from './ViewModel/confirm-payback-modal/confirm-payback-modal.component';
 import { ErrorModalComponent } from './ViewModel/error-modal/error-modal.component';
 import {MatGridListModule} from '@angular/material/grid-list';
+import {DialogProviderService} from './ViewModel/dialog-provider.service';
 
 
 @NgModule({
@@ -83,9 +84,13 @@ import {MatGridListModule} from '@angular/material/grid-list';
         MatSlideToggleModule,
         MatCheckboxModule,
         MatProgressSpinnerModule,
-        MatGridListModule
+        MatGridListModule,
     ],
-  providers: [],
+  providers: [
+    { provide: MatDialogRef, useValue: {} },
+    { provide: MAT_DIALOG_DATA, useValue: [] },
+    DialogProviderService,
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

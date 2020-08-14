@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ConfirmPaybackModalComponent } from './confirm-payback-modal.component';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 describe('ConfirmPaybackModalComponent', () => {
   let component: ConfirmPaybackModalComponent;
@@ -8,7 +9,17 @@ describe('ConfirmPaybackModalComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ConfirmPaybackModalComponent ]
+      declarations: [ ConfirmPaybackModalComponent ],
+      providers: [
+        {
+          provide: MatDialogRef,
+          useValue: []
+        },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: []
+        }
+      ]
     })
     .compileComponents();
   }));

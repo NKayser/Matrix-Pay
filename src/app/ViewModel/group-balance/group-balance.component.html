@@ -1,6 +1,6 @@
 <div>
 
-  <div class="first">
+  <div  class="center">
     <ngx-charts-bar-horizontal
     [results]="balanceData"
     [xAxis]="true"
@@ -11,8 +11,10 @@
     </ngx-charts-bar-horizontal>
   </div>
 
-  <div class="second">
-    <mat-list>
+  <mat-divider></mat-divider>
+
+  <div class="divider">
+    <!--<mat-list>
       <mat-list-item *ngFor="let recommendation of recommendations, index as i" class="item">
         <mat-card>
           <div class="approve_div">
@@ -22,8 +24,8 @@
           <mat-label class="approve_amount">{{recommendation.payer.amount}}{{currencyMap[group.currency]}}</mat-label>
         </mat-card>
       </mat-list-item>
-    </mat-list>
-    <!--<mat-grid-list cols="4" rowHeight="2:1">
+    </mat-list>-->
+   <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)" rowHeight="2:1">
       <mat-grid-tile *ngFor="let recommendation of recommendations, index as i">
         <mat-card>
           <div class="approve_div">
@@ -33,7 +35,7 @@
           <mat-label class="approve_amount">{{recommendation.payer.amount}}{{currencyMap[group.currency]}}</mat-label>
         </mat-card>
       </mat-grid-tile>
-    </mat-grid-list>-->
+    </mat-grid-list>
     <mat-spinner *ngIf="loadingConfirmPayback" [diameter]="30"></mat-spinner>
 
   </div>

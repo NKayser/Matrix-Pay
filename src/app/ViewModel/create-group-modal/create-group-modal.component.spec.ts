@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CreateGroupModalComponent } from './create-group-modal.component';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 describe('CreateGroupModalComponent', () => {
   let component: CreateGroupModalComponent;
@@ -8,7 +9,17 @@ describe('CreateGroupModalComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CreateGroupModalComponent ]
+      declarations: [ CreateGroupModalComponent ],
+      providers: [
+        {
+          provide: MatDialogRef,
+          useValue: []
+        },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: []
+        }
+      ]
     })
     .compileComponents();
   }));

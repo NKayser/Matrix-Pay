@@ -4,7 +4,8 @@ import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 import {Language, languageMap} from '../../DataModel/Utils/Language';
 import {SettingsService} from '../../ServerCommunication/SettingsCommunication/settings.service';
 import {MatDialog} from '@angular/material/dialog';
-import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {DialogProviderService} from '../dialog-provider.service';
 
 
 @Component({
@@ -30,7 +31,8 @@ export class SettingsComponent implements OnInit {
   public loadingLanguage = false;
   public loadingCurrency = false;
 
-  constructor(private dataModelService: DataModelService, private settingsService: SettingsService, public dialog: MatDialog) { }
+  constructor(private dataModelService: DataModelService, private settingsService: SettingsService, public dialog: MatDialog,
+              private dialogProviderService: DialogProviderService) { }
 
   ngOnInit(): void {
     this.initSettings();
@@ -61,11 +63,11 @@ export class SettingsComponent implements OnInit {
       promiseTimeout(TIMEOUT, this.settingsService.changeLanguage(this.selectedLanguage.toString())).then((data) => {
         console.log(data);
         if (!data.wasSuccessful()){
-          openErrorModal('error language 1: ' + data.getMessage(), this.dialog);
+          this.dialogProviderService.openErrorModal('error language 1: ' + data.getMessage(), this.dialog);
         }
         this.loadingLanguage = false;
       }, (err) => {
-        openErrorModal('error language 2: ' + err, this.dialog);
+        this.dialogProviderService.openErrorModal('error language 2: ' + err, this.dialog);
         this.loadingLanguage = false;
       });
     }
@@ -77,11 +79,11 @@ export class SettingsComponent implements OnInit {
       // TODO Discuss string format for currencies
       promiseTimeout(TIMEOUT, this.settingsService.changeCurrency(this.selectedCurrency.toString())).then((data) => {
         if (!data.wasSuccessful()){
-          openErrorModal('error currency 1: ' + data.getMessage(), this.dialog);
+          this.dialogProviderService.openErrorModal('error currency 1: ' + data.getMessage(), this.dialog);
         }
         this.loadingCurrency = false;
       }, (err) => {
-        openErrorModal('error currency 2: ' + err, this.dialog);
+        this.dialogProviderService.openErrorModal('error currency 2: ' + err, this.dialog);
         this.loadingCurrency = false;
       });
     }

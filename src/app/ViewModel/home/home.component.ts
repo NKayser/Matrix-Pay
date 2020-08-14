@@ -5,9 +5,10 @@ import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 import {Contact} from '../../DataModel/Group/Contact';
 import {ConfirmPaybackDialogData, ConfirmPaybackModalComponent} from '../confirm-payback-modal/confirm-payback-modal.component';
 import {MatDialog} from '@angular/material/dialog';
-import {Utils} from '../../ServerCommunication/Response/Utils';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
-import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {DialogProviderService} from '../dialog-provider.service';
+import {gridListResize} from '../gridListResizer';
 
 @Component({
   selector: 'app-home',
@@ -25,8 +26,11 @@ export class HomeComponent implements OnInit {
   private userContact: Contact;
   private dialogData: ConfirmPaybackDialogData;
 
+  public breakpoint: number;
+
   constructor(private dataModelService: DataModelService, public dialog: MatDialog,
-              private matrixBasicDataService: MatrixBasicDataService) {}
+              private matrixBasicDataService: MatrixBasicDataService,
+              private dialogProviderService: DialogProviderService) {}
 
   /**
    * Get reference to the recommendations and user
@@ -42,6 +46,12 @@ export class HomeComponent implements OnInit {
 
       this.usedCurrencies.add(group.currency);
     }
+
+    this.breakpoint = gridListResize(window.innerWidth, 2200, 4);
+  }
+
+  onResize(event): void {
+    this.breakpoint = gridListResize(event.target.innerWidth, 2200, 4);
   }
 
   /**
@@ -91,11 +101,11 @@ export class HomeComponent implements OnInit {
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){
-              openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
+              this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
             }
             this.loadingConfirmPayback = false;
           }, (err) => {
-            openErrorModal('error confirm payback 2: ' + err, this.dialog);
+            this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
             this.loadingConfirmPayback = false;
           });
       }

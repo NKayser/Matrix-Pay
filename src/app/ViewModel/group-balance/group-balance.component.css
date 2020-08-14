@@ -5,16 +5,18 @@
   margin-top: 10px;
 }
 
-.first {
-  float:bottom;
-  margin-bottom: 5px;
-}
-.second {
-  overflow: hidden;
+.center {
+  /*display:grid is supper important to support the chart resize and correct behaviour of components below*/
+  display: grid;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 50px;
 }
 
 .item{
   margin-top: 50px;
+  margin-bottom: 50px;
 }
 
 /*Controls the person label on the approve Payback cards*/

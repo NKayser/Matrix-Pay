@@ -8,6 +8,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { GroupSelectionComponent } from './group-selection.component';
+import {MatDialog} from '@angular/material/dialog';
 
 describe('GroupSelectionComponent', () => {
   let component: GroupSelectionComponent;
@@ -16,6 +17,12 @@ describe('GroupSelectionComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [GroupSelectionComponent],
+      providers: [
+        {
+          provide: MatDialog,
+          useValue: []
+        }
+      ],
       imports: [
         NoopAnimationsModule,
         LayoutModule,

@@ -1,30 +1,34 @@
-<!--language dropdown and label-->
-<div>
 
-  <mat-label>Language</mat-label>
+<div class="absolute">
 
-  <mat-form-field appearance="fill">
-    <mat-select [(ngModel)]="selectedLanguage">
-      <mat-option *ngFor="let language of languageMap, index as i" [value]="i">{{language}}</mat-option>
-    </mat-select>
-  </mat-form-field>
-</div>
+  <!--language dropdown and label-->
+  <div>
+    <mat-label class="settings_label">Language</mat-label>
 
-<!--currency dropdown and label-->
-<div>
-  <mat-label>Currency</mat-label>
+    <mat-form-field appearance="fill">
+      <mat-select [(ngModel)]="selectedLanguage">
+        <mat-option *ngFor="let language of languageMap, index as i" [value]="i">{{language}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
-  <mat-form-field appearance="fill">
-    <mat-select [(ngModel)]="selectedCurrency">
-      <mat-option *ngFor="let currency of currencyMap, index as j" [value]="j">{{currency}}</mat-option>
-    </mat-select>
-  </mat-form-field>
-</div>
+  <!--currency dropdown and label-->
+  <div>
+    <mat-label class="settings_label">Currency</mat-label>
 
-<div>
+    <mat-form-field appearance="fill">
+      <mat-select [(ngModel)]="selectedCurrency">
+        <mat-option *ngFor="let currency of currencyMap, index as j" [value]="j">{{currency}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
-  <button class="first" mat-raised-button color="primary" (click)="applySettings()">Apply</button>
-  <mat-spinner class="second" *ngIf="loadingCurrency || loadingLanguage" [diameter]="30"></mat-spinner>
+  <div>
+
+    <button class="first" mat-raised-button color="primary" (click)="applySettings()">Apply</button>
+    <mat-spinner class="second" *ngIf="loadingCurrency || loadingLanguage" [diameter]="30"></mat-spinner>
+
+  </div>
 
 </div>
 

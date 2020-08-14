@@ -5,3 +5,14 @@
 .second {
   overflow: hidden;
 }
+
+.absolute{
+  position: absolute;
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
+.settings_label{
+  font-size: 15px;
+  margin-right: 10px;
+}

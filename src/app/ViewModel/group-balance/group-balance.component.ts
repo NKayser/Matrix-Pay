@@ -4,8 +4,10 @@ import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {currencyMap} from '../../DataModel/Utils/Currency';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmPaybackDialogData, ConfirmPaybackModalComponent} from '../confirm-payback-modal/confirm-payback-modal.component';
-import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {DialogProviderService} from '../dialog-provider.service';
+import {gridListResize} from '../gridListResizer';
 
 @Component({
   selector: 'app-group-balance',
@@ -25,6 +27,9 @@ export class GroupBalanceComponent implements OnChanges {
   public recommendations: Recommendation[] = [];
   public balanceData = [];
 
+  // used to resize the gridList
+  public breakpoint: number;
+
   /**
    * Calculate the color for each bar in the balance chart and return red or green depending on the balance
    * @param name the name of the data entry
@@ -41,7 +46,8 @@ export class GroupBalanceComponent implements OnChanges {
     }
   }
 
-  constructor(public dialog: MatDialog, public matrixBasicDataService: MatrixBasicDataService) {
+  constructor(public dialog: MatDialog, public matrixBasicDataService: MatrixBasicDataService,
+              private dialogProviderService: DialogProviderService) {
   }
 
   /**
@@ -57,6 +63,12 @@ export class GroupBalanceComponent implements OnChanges {
     }
 
     this.recommendations = this.group.recommendations;
+
+    this.breakpoint = gridListResize(window.innerWidth, 1920, 3);
+  }
+
+  onResize(event): void {
+    this.breakpoint = gridListResize(event.target.innerWidth, 1920, 3);
   }
 
   /**
@@ -80,11 +92,11 @@ export class GroupBalanceComponent implements OnChanges {
             .then((data) => {
               console.log(data);
               if (!data.wasSuccessful()){
-                openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
+                this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
               }
               this.loadingConfirmPayback = false;
             }, (err) => {
-              openErrorModal('error confirm payback 2: ' + err, this.dialog);
+              this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
               this.loadingConfirmPayback = false;
             });
         }

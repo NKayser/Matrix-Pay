@@ -18,7 +18,8 @@ import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {Activity} from '../../DataModel/Group/Activity';
 import {ActivityType} from '../../DataModel/Group/ActivityType';
 import {GroupService} from '../../ServerCommunication/GroupCommunication/group.service';
-import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {DialogProviderService} from '../dialog-provider.service';
 
 @Component({
   selector: 'app-group-selection',
@@ -49,7 +50,7 @@ export class GroupSelectionComponent implements OnInit{
     );
 
   constructor(private breakpointObserver: BreakpointObserver, public dialog: MatDialog, private dataModelService: DataModelService,
-              private groupService: GroupService) {}
+              private groupService: GroupService, private dialogProviderService: DialogProviderService) {}
 
   // set default selected group
   ngOnInit(): void{
@@ -71,7 +72,8 @@ export class GroupSelectionComponent implements OnInit{
     testGroup.addGroupmember(m3);
     testGroup.addTransaction(new Transaction(TransactionType.EXPENSE, 't1', 't1', new Date(2020, 10, 5), testGroup,
       new AtomarChange(c1, 10), [new AtomarChange(c2, 10)], m1));
-    testGroup.addTransaction(new Transaction(TransactionType.EXPENSE, 't2', 'another one', new Date(2020, 10, 13), testGroup,
+    testGroup.addTransaction(new Transaction(TransactionType.EXPENSE, 't2', 'another onesodgaoebhpoejgeojgeorj',
+      new Date(2020, 10, 13), testGroup,
       new AtomarChange(c3, 15), [new AtomarChange(c2, 15)], m1));
     const r1 = new Recommendation(testGroup, new AtomarChange(c1, 10), new AtomarChange(c2, -10));
     const r2 = new Recommendation(testGroup, new AtomarChange(c3, 15), new AtomarChange(c1, -15));
@@ -127,11 +129,11 @@ export class GroupSelectionComponent implements OnInit{
         promiseTimeout(TIMEOUT, this.groupService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
           console.log(data);
           if (!data.wasSuccessful()){
-            openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
+            this.dialogProviderService.openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
           }
           this.loadingLeaveGroup = false;
         }, (err) => {
-          openErrorModal('error leave group 2: ' + err, this.dialog);
+          this.dialogProviderService.openErrorModal('error leave group 2: ' + err, this.dialog);
           this.loadingLeaveGroup = false;
         });
       }
@@ -158,12 +160,12 @@ export class GroupSelectionComponent implements OnInit{
           .then((data) => {
           console.log(data);
           if (!data.wasSuccessful()){
-            openErrorModal('error add group 1: ' + data.getMessage(), this.dialog);
+            this.dialogProviderService.openErrorModal('error add group 1: ' + data.getMessage(), this.dialog);
           }
           this.loadingAddGroup = false;
         }, (err) => {
-          openErrorModal('error add group 2: ' + err, this.dialog);
-          this.loadingAddGroup = false;
+            this.dialogProviderService.openErrorModal('error add group 2: ' + err, this.dialog);
+            this.loadingAddGroup = false;
         });
       }
 
@@ -189,11 +191,11 @@ export class GroupSelectionComponent implements OnInit{
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){
-              openErrorModal('error add member 1: ' + data.getMessage(), this.dialog);
+              this.dialogProviderService.openErrorModal('error add member 1: ' + data.getMessage(), this.dialog);
             }
             this.loadingAddGroup = false;
           }, (err) => {
-            openErrorModal('error add member 2: ' + err, this.dialog);
+            this.dialogProviderService.openErrorModal('error add member 2: ' + err, this.dialog);
             this.loadingAddGroup = false;
           });
       }

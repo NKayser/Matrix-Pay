@@ -3,8 +3,9 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
-import {openErrorModal, promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {MatDialog} from '@angular/material/dialog';
+import {DialogProviderService} from '../dialog-provider.service';
 
 @Component({
   selector: 'app-navigation-menu',
@@ -24,7 +25,8 @@ export class NavigationMenuComponent {
       shareReplay()
     );
 
-  constructor(private breakpointObserver: BreakpointObserver, private matrixClientService: MatrixClientService, public dialog: MatDialog) {}
+  constructor(private breakpointObserver: BreakpointObserver, private matrixClientService: MatrixClientService, public dialog: MatDialog,
+              private dialogProviderService: DialogProviderService) {}
 
   /**
    * Send output if the user logged out
@@ -35,13 +37,13 @@ export class NavigationMenuComponent {
     promiseTimeout(TIMEOUT, this.matrixClientService.logout())
       .then((data) => {
         if (!data.wasSuccessful()){
-          openErrorModal('error logout 1: ' + data.getMessage(), this.dialog);
+          this.dialogProviderService.openErrorModal('error logout 1: ' + data.getMessage(), this.dialog);
         } else {
           this.loggedOut.emit(false);
         }
         this.loadingLogout = false;
       }, (err) => {
-        openErrorModal('error logout 2: ' + err, this.dialog);
+        this.dialogProviderService.openErrorModal('error logout 2: ' + err, this.dialog);
         this.loadingLogout = false;
       });
   }
