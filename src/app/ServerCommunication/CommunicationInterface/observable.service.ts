@@ -20,8 +20,12 @@ export class ObservableService implements ObservableInterface {
   private balancesObservable: Subject<BalancesType>;
   private recommendationsObservable: Subject<RecommendationsType>;
   private settingsCurrencyObservable: Subject<CurrencyType>;
-  // TODO: remove magic numbers
   private window: TimelineWindow; // for testing, is only extended backwards
+  // TODO: replace "object" with arrays of the interfaces in parameterTypes as soon as they are finished
+  private oldRoomCreations: object;
+  private oldRoomMembershipChanges: object;
+  private transactions: object;
+  // TODO: remove magic numbers
 
   constructor(clientService: MatrixClientService) {
     this.clientService = clientService;
@@ -68,7 +72,7 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient = await this.clientService.getLoggedInClient();
 
     // start the client, initial sync
-    this.matrixClient.startClient({initialSyncLimit: 4, includeArchivedRooms: true});
+    this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
 
     // Getting data about the user
     const userId = this.matrixClient.getUserId();
@@ -178,15 +182,13 @@ export class ObservableService implements ObservableInterface {
     });
 
     // The things written into the local store of the client will eventually be detected by the listeners.
-    if (room.roomId == '!qdoSbhLsXpmnyIPFTr:dsn.tm.kit.edu') {
+    if (room.roomId == '!ckyzttSWpiMwtNphYR:dsn.tm.kit.edu') {
       console.log('---window---');
       const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
       timelineWindow.load();
       console.log(timelineWindow.getEvents());
-      if (!timelineWindow.canPaginate(EventTimeline.FORWARDS)) {
-        console.log('pagination in room ' + room.name + ' failed');
-      }
       console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
+      this.paginateBackwardsUntilTheEnd(timelineWindow);
     }
 
     /*console.log('---new timelineSet---');
@@ -296,28 +298,50 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('Room.timeline',
       (event, room, toStartOfTimeline, removed, data) => {
       // if (Utils.log) console.log('got a timeline change. event type: '  + event.getType());
-      console.log('got a timeline change. event type: '  + event.getType());
-      // Maybe fetch transactions seperately
-      // do we need this check?
-      if (!toStartOfTimeline && data.liveEvent) {
+      if (!data.liveEvent) {
+        // Process the events retrieved by backpagination
+        switch (event.getType()) {
+          case ('payback'): {
+            if (Utils.log) console.log('got an old payback. name: ' + event.getContent().name);
+            // TODO: push in array (this.transactions.push({...});)
+            break;
+          }
+          case ('expense'): {
+            if (Utils.log) console.log('got an old expense. name: ' + event.getContent().name);
+            // TODO: push in array (this.transactions.push({...});)
+            break;
+          }
+          case ('m.room.create'): {
+            if (Utils.log) console.log('got an old room creation. room: ' + room.name + ' creator: ' + event.getContent().creator + ' date: ' + event.getDate());
+            // TODO: push in array (this.oldRoomCreations.push({...});)
+            break;
+          }
+          case ('m.room.member'): {
+            // use getPrevContent() if necessary
+            if (event.getContent().membership === 'join') {
+              if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' joined the room ' + room.name);
+              // TODO: push in array (this.oldMembershipChanges.push({...});)
+            }
+            if (event.getContent().membership === 'leave') {
+              if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' left the room ' + room.name);
+              // TODO: push in array (this.oldMembershipChanges.push({...});)
+            }
+            break;
+          }
+        }
+      }
+      // only data.liveEvent instead of !toStartOfTimeline && data.liveEvent ? yes
+      if (data.liveEvent) {
+        // Process the events retrieved by /sync
         switch (event.getType()) {
           case ('payback'): {
             if (Utils.log) { console.log('got payback. name: ' + event.getContent().name); }
+            // TODO: call next() on observable
             break;
           }
-          /*case ('m.room.message'): {
-            if (Utils.log) console.log('got message. name: ' + event.event.content.body);
-            console.log('got payback. name: ' + event.getContent().name +  ' date: ' + event.getDate());
-            break;
-          }*/
-        }
-      } else {
-        if (Utils.log) { console.log('got old timeline event'); }
-        switch (event.getType()) {
-          // Only for the history! New rooms are detected elsewhere.
-          case ('m.room.create'): {
-            console.log('got room creation. creator: ' + event.getContent().creator + ' date: ' + event.getDate());
-            break;
+          case ('expense'): {
+            if (Utils.log) { console.log('got expense. name: ' + event.getContent().name); }
+            // TODO: call next() on observable
           }
         }
       }
