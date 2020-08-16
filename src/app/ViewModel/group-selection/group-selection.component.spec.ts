@@ -70,14 +70,14 @@ describe('GroupSelectionComponent', () => {
     expect(spy1).toHaveBeenCalledTimes(0);
   });
 
-  it('check add member group', () => {
+  it('check add member to group', () => {
     component.ngOnInit();
     spy1 = spyOn(groupService, 'addMember');
     component.addMemberToGroup();
     expect(spy1).toHaveBeenCalled();
   });
 
-  it('check create group group', () => {
+  it('check create group', () => {
     component.ngOnInit();
     spy1 = spyOn(groupService, 'createGroup');
     component.addGroup();

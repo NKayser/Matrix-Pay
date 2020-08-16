@@ -1,71 +1,31 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GroupBalanceComponent } from './group-balance.component';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {BrowserAnimationsModule, NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {LayoutModule} from '@angular/cdk/layout';
-import {BrowserModule} from '@angular/platform-browser';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatIconModule} from '@angular/material/icon';
-import {MatCardModule} from '@angular/material/card';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {MatSelectModule} from '@angular/material/select';
-import {MatRadioModule} from '@angular/material/radio';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatSidenavModule} from '@angular/material/sidenav';
-import {MatListModule} from '@angular/material/list';
-import {MatTabsModule} from '@angular/material/tabs';
-import {AppRoutingModule} from '../app-routing/app-routing.module';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatGridListModule} from '@angular/material/grid-list';
+import {MatDialog} from '@angular/material/dialog';
+import {MockDialog} from '../_mockServices/MockDialog';
+import {Currency} from '../../DataModel/Utils/Currency';
+import {Group} from '../../DataModel/Group/Group';
+import {Recommendation} from '../../DataModel/Group/Recommendation';
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
 
 describe('GroupBalanceComponent', () => {
   let component: GroupBalanceComponent;
   let fixture: ComponentFixture<GroupBalanceComponent>;
+  let matrixBasicDataService: MatrixBasicDataService;
+  let spy1: any;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ GroupBalanceComponent ],
       providers: [
-        {
-          provide: MatDialog,
-          useValue: []
-        }
-      ],
-      imports: [
-        NoopAnimationsModule,
-        LayoutModule,
-        BrowserModule,
-        BrowserAnimationsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatIconModule,
-        MatCardModule,
-        FormsModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatRadioModule,
-        ReactiveFormsModule,
-        LayoutModule,
-        MatToolbarModule,
-        MatSidenavModule,
-        MatListModule,
-        MatTabsModule,
-        MatDialogModule,
-        AppRoutingModule,
-        NgxChartsModule,
-        MatSlideToggleModule,
-        MatCheckboxModule,
-        MatProgressSpinnerModule,
-        MatGridListModule,
+        { provide: MatDialog, useValue: MockDialog },
+        { provide: MatrixBasicDataService, useClass: MockMatrixBasicDataService}
       ]
     })
     .compileComponents();
+
+    matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
   }));
 
   beforeEach(() => {
@@ -76,5 +36,30 @@ describe('GroupBalanceComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('check for input', () => {
+    const group1 = new Group('1', '1', Currency.USD);
+    group1.setRecommendations([new Recommendation(group1, null, null)]);
+    component.group = group1;
+    component.ngOnChanges();
+    expect(component.recommendations).toEqual(group1.recommendations);
+
+    const group2 = new Group('2', '2', Currency.USD);
+    group2.setRecommendations([new Recommendation(group2, null, null)]);
+    component.group = group2;
+    component.ngOnChanges();
+    expect(component.recommendations).toEqual(group2.recommendations);
+  });
+
+  it('cancel recommendation', () => {
+    const group1 = new Group('1', '1', Currency.USD);
+    group1.setRecommendations([new Recommendation(group1, null, null)]);
+    component.group = group1;
+
+    spy1 = spyOn(matrixBasicDataService, 'confirmPayback');
+    component.confirmPayback(0);
+    expect(spy1).toHaveBeenCalledTimes(0);
+
   });
 });

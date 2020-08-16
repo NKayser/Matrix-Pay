@@ -87,18 +87,24 @@ export class GroupBalanceComponent implements OnChanges {
         this.dialogData = result;
         if (this.dialogData !== undefined){
           this.loadingConfirmPayback = true;
-          // TODO Missing recommendationId
-          promiseTimeout(TIMEOUT, this.matrixBasicDataService.confirmPayback(this.dialogData.recommendation.group.groupId, 0))
-            .then((data) => {
-              console.log(data);
-              if (!data.wasSuccessful()){
-                this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
-              }
-              this.loadingConfirmPayback = false;
-            }, (err) => {
-              this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
-              this.loadingConfirmPayback = false;
-            });
+
+          if (this.dialogData.confirm === true){
+
+            // TODO Missing recommendationId
+            promiseTimeout(TIMEOUT, this.matrixBasicDataService.confirmPayback(this.dialogData.recommendation.group.groupId, 0))
+              .then((data) => {
+                console.log(data);
+                if (!data.wasSuccessful()){
+                  this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
+                }
+                this.loadingConfirmPayback = false;
+              }, (err) => {
+                this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
+                this.loadingConfirmPayback = false;
+              });
+          }
+
+
         }
       });
   }
