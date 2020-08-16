@@ -13,20 +13,6 @@ import {ClientInterface} from './ClientInterface';
   providedIn: 'root'
 })
 export class ObservableService implements ObservableInterface {
-  private matrixClient: MatrixClient;
-  private clientService: ClientInterface;
-  private userObservable: Subject<UserType>;
-  private groupsObservable: Subject<GroupsType>;
-  private balancesObservable: Subject<BalancesType>;
-  private recommendationsObservable: Subject<RecommendationsType>;
-  private settingsCurrencyObservable: Subject<CurrencyType>;
-  private window: TimelineWindow; // for testing, is only extended backwards
-  // TODO: replace "object" with arrays of the interfaces in parameterTypes as soon as they are finished
-  private oldRoomCreations: object;
-  private oldRoomMembershipChanges: object;
-  private transactions: object;
-  private oldTransactionChanges: object;
-  // TODO: remove magic numbers
 
   constructor(clientService: MatrixClientService) {
     this.clientService = clientService;
@@ -37,9 +23,37 @@ export class ObservableService implements ObservableInterface {
     this.balancesObservable = new Subject();
     this.recommendationsObservable = new Subject();
     this.settingsCurrencyObservable = new Subject();
+    this.groupMembershipObservable = new Subject();
+    this.newTransactionObservable = new Subject();
+    this.modifiedTransactionsObservable = new Subject();
+    this.multipleNewTransactionsObservable = new Subject();
+    this.settingsLanguageObservable = new Subject();
 
     this.setUp();
   }
+  // TODO: remove magic numbers
+
+  private static TRANSACTION_TYPE_PAYBACK = 'PAYBACK';
+  private static TRANSACTION_TYPE_EXPENSE = 'EXPENSE';
+  private matrixClient: MatrixClient;
+  private clientService: ClientInterface;
+  private userObservable: Subject<UserType>;
+  private groupsObservable: Subject<GroupsType>;
+  private balancesObservable: Subject<BalancesType>;
+  private recommendationsObservable: Subject<RecommendationsType>;
+  private settingsCurrencyObservable: Subject<CurrencyType>;
+  private settingsLanguageObservable: Subject<LanguageType>;
+  private groupMembershipObservable: Subject<GroupMemberType>;
+  private modifiedTransactionsObservable: Subject<TransactionType>;
+  private multipleNewTransactionsObservable: Subject<TransactionType[]>;
+  private newTransactionObservable: Subject<TransactionType>;
+  private window: TimelineWindow; // for testing, is only extended backwards
+  // TODO: replace "object" with arrays of the interfaces in parameterTypes as soon as they are finished
+  // maybe get rid of these
+  /*private oldRoomCreations: object;
+  private oldRoomMembershipChanges: GroupMemberType[];
+  private oldModifiedTransactions: TransactionType[];*/
+  private transactions: TransactionType[];
 
   private static async until(condition: () => boolean, interval: number, timeout?: number): Promise<boolean> {
     let time: number = 0;
@@ -190,6 +204,7 @@ export class ObservableService implements ObservableInterface {
       console.log(timelineWindow.getEvents());
       console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
       this.paginateBackwardsUntilTheEnd(timelineWindow);
+      this.multipleNewTransactionsObservable.next(this.transactions);
     }
 
     /*console.log('---new timelineSet---');
@@ -233,8 +248,6 @@ export class ObservableService implements ObservableInterface {
   private async listenToMatrix(): Promise<void> {
     // listen to Matrix Events, use next() on Subjects
     // TODO: error handling
-    // TODO: detect transactions, modified transactions
-    // TODO: listen for name changes
 
     if (Utils.log) { console.log('ObservableService is listening to Matrix'); }
 
@@ -251,11 +264,13 @@ export class ObservableService implements ObservableInterface {
         }
         case ('language'): {
           if (Utils.log) { console.log('got language change to ' + event.getContent().language); }
-          // TODO: call next() on observable
+          this.settingsLanguageObservable.next({language: event.getContent().language});
+          break;
         }
       }
     });
 
+    // not necessary in current version
     // Fires whenever room account data changes
     this.matrixClient.on('Room.accountData', (event, room, oldEvent) => {
       // if (Utils.log) console.log('got account data change' + event.getType());
@@ -303,19 +318,20 @@ export class ObservableService implements ObservableInterface {
         // Process the events retrieved by backpagination
         switch (event.getType()) {
           case ('payback'): {
+            // If the event has been replaced, getContent() returns the content of the replacing event.
             if (!event.isRelation()) {
-              // If the event has been replaced, getContent() returns the content of the replacing event.
               if (Utils.log) console.log('got an old payback. name: ' + event.getContent().name);
-              // TODO: push in array (this.transactions.push({...});)
+              this.transactions.push(this.getPaybackFromEvent(room, event));
             } else if (event.isRelation('m.replace')) {
               if (Utils.log) console.log('got an old editing of a payback. name: ' + event.getContent().name);
-              // TODO: push in array (this.oldTransactionChanges.push({...});)
+              // this.oldModifiedTransactions.push(transaction);
+              this.modifiedTransactionsObservable.next(this.getPaybackFromEvent(room, event));
             }
             break;
           }
           case ('expense'): {
             if (Utils.log) console.log('got an old expense. name: ' + event.getContent().name);
-            // TODO: push in array (this.transactions.push({...});)
+            this.transactions.push(this.getExpenseFromEvent(room, event));
             break;
           }
           case ('m.room.create'): {
@@ -325,14 +341,19 @@ export class ObservableService implements ObservableInterface {
           }
           case ('m.room.member'): {
             // use getPrevContent() if necessary
+            let isLeave: boolean;
             if (event.getContent().membership === 'join') {
               if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' joined the room ' + room.name);
-              // TODO: push in array (this.oldMembershipChanges.push({...});)
+              isLeave = false;
             }
             if (event.getContent().membership === 'leave') {
               if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' left the room ' + room.name);
-              // TODO: push in array (this.oldMembershipChanges.push({...});)
+              isLeave = true;
             }
+            // this.oldRoomMembershipChanges.push({groupId: room.roomId, userId: event.getStateKey(),
+            //  date: event.getDate(), isLeave, name: undefined /* should not be passed here */});
+            this.groupMembershipObservable.next({groupId: room.roomId, userId: event.getStateKey(),
+              date: event.getDate(), isLeave, name: undefined /* should not be passed here */});
             break;
           }
         }
@@ -349,16 +370,16 @@ export class ObservableService implements ObservableInterface {
               // will be received through the replacing event.
               // However, using using getContent() won't hurt.
               if (Utils.log) { console.log('got payback. name: ' + event.getContent().name); }
-              // TODO: call next() on observable
+              this.newTransactionObservable.next(this.getPaybackFromEvent(room, event));
             } else if (event.isRelation('m.replace')) {
               if (Utils.log) { console.log('got editing of payback. name: ' + event.getContent().name); }
-              // TODO: call next() on observable
+              this.modifiedTransactionsObservable.next(this.getPaybackFromEvent(room, event));
             }
             break;
           }
           case ('expense'): {
             if (Utils.log) { console.log('got expense. name: ' + event.getContent().name); }
-            // TODO: call next() on observable
+            this.newTransactionObservable.next(this.getExpenseFromEvent(room, event));
           }
         }
       }
@@ -375,19 +396,19 @@ export class ObservableService implements ObservableInterface {
           console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
           console.log('user left the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
-          // TODO: call next() on observable
+          this.groupsObservable.next({groupId, isLeave: true,
+            currency: undefined, groupName: undefined, userNames: undefined, userIds: undefined});
         }
       } else {
         let isLeave: boolean;
         if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
           isLeave = false;
           console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
-          // TODO: call next() on observable
         } else if (oldMembership === 'join' && member.membership === 'leave') {
           isLeave = true;
           console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
-          // TODO: call next() on observable
         }
+        this.groupMembershipObservable.next({groupId, isLeave, userId, date: event.getDate(), name: undefined})
       }
     });
 
@@ -400,6 +421,34 @@ export class ObservableService implements ObservableInterface {
         // TODO: call next() on observable
       }
     });
+  }
+
+  private getExpenseFromEvent(room, event): TransactionType {
+    const content = event.getContent();
+    return {transactionType: ObservableService.TRANSACTION_TYPE_EXPENSE,
+      transactionId: event.getId(),
+      name: event.content.name,
+      creationDate: event.getDate(),
+      groupId: room.roomId,
+      payerId: content.payerId,
+      payerAmount: content.amounts,
+      recipientIds: content.recipientIds,
+      recipientAmounts: content.amounts,
+      senderId: event.getSender};
+  }
+
+  private getPaybackFromEvent(room, event): TransactionType {
+    const content = event.getContent();
+    return {transactionType: ObservableService.TRANSACTION_TYPE_PAYBACK,
+      transactionId: event.getId(),
+      name: event.content.name,
+      creationDate: event.getDate(),
+      groupId: room.roomId,
+      payerId: content.payerId,
+      payerAmount: undefined, // should be calculated in BasicDataUpdateService
+      recipientIds: content.recipientIds,
+      recipientAmounts: content.amounts,
+      senderId: event.getSender};
   }
 
   // similar to Room.prototype.getOrCreateFilteredTimelineSet
@@ -466,23 +515,23 @@ export class ObservableService implements ObservableInterface {
     return this.settingsCurrencyObservable;
   }
 
-  getGroupMembershipObservable(): Observable<GroupMemberType> {
-    return undefined;
+  public getGroupMembershipObservable(): Observable<GroupMemberType> {
+    return this.groupMembershipObservable;
   }
 
-  getModifiedTransactionObservable(): Observable<TransactionType> {
-    return undefined;
+  public getModifiedTransactionObservable(): Observable<TransactionType> {
+    return this.modifiedTransactionsObservable;
   }
 
-  getMultipleNewTransactionsObservable(): Observable<TransactionType[]> {
-    return undefined;
+  public getMultipleNewTransactionsObservable(): Observable<TransactionType[]> {
+    return this.multipleNewTransactionsObservable;
   }
 
-  getNewTransactionObservable(): Observable<TransactionType> {
-    return undefined;
+  public getNewTransactionObservable(): Observable<TransactionType> {
+    return this.newTransactionObservable;
   }
 
-  getSettingsLanguageObservable(): Observable<LanguageType> {
-    return undefined;
+  public getSettingsLanguageObservable(): Observable<LanguageType> {
+    return this.settingsLanguageObservable;
   }
 }
