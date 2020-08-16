@@ -57,7 +57,7 @@ export class GroupSelectionComponent implements OnInit{
 
 
     // TODO Remove test code
-    const c1 = this.dataModelService.initializeUserFirstTime('c1', 'Alice').contact;
+    /*const c1 = this.dataModelService.initializeUserFirstTime('c1', 'Alice').contact;
     this.dataModelService.getUser().createGroup('1', 'gruppe1', Currency.EUR);
     this.dataModelService.getUser().createGroup('2', 'gruppe2', Currency.USD);
     const c2 = new Contact('c2', 'Bob');
@@ -93,7 +93,7 @@ export class GroupSelectionComponent implements OnInit{
     testGroup.addActivity(a1);
     testGroup.addActivity(a2);
     testGroup.addActivity(a3);
-    testGroup.addActivity(a4);
+    testGroup.addActivity(a4);*/
     // TODO test code ends here
 
     // get all groups and select the first group as default
@@ -123,19 +123,22 @@ export class GroupSelectionComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.leaveGroupData = result;
       if (this.leaveGroupData !== undefined){
-        console.log(this.leaveGroupData.leave);
 
-        this.loadingLeaveGroup = true;
-        promiseTimeout(TIMEOUT, this.groupService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
-          console.log(data);
-          if (!data.wasSuccessful()){
-            this.dialogProviderService.openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
-          }
-          this.loadingLeaveGroup = false;
-        }, (err) => {
-          this.dialogProviderService.openErrorModal('error leave group 2: ' + err, this.dialog);
-          this.loadingLeaveGroup = false;
-        });
+        if (this.leaveGroupData.leave === true){
+          this.loadingLeaveGroup = true;
+          promiseTimeout(TIMEOUT, this.groupService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
+            console.log(data);
+            if (!data.wasSuccessful()){
+              this.dialogProviderService.openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
+            }
+            this.loadingLeaveGroup = false;
+          }, (err) => {
+            this.dialogProviderService.openErrorModal('error leave group 2: ' + err, this.dialog);
+            this.loadingLeaveGroup = false;
+          });
+        }
+
+
       }
 
     });
@@ -156,7 +159,8 @@ export class GroupSelectionComponent implements OnInit{
         console.log(this.createGroupData.groupName);
 
         this.loadingAddGroup = true;
-        promiseTimeout(TIMEOUT, this.groupService.createGroup(this.createGroupData.groupName, this.createGroupData.currency.toString()))
+        promiseTimeout(TIMEOUT, this.groupService.createGroup(this.createGroupData.groupName, this.createGroupData.currency.toString(),
+          this.createGroupData.groupName))
           .then((data) => {
           console.log(data);
           if (!data.wasSuccessful()){

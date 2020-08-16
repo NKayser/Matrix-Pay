@@ -9,19 +9,26 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { GroupSelectionComponent } from './group-selection.component';
 import {MatDialog} from '@angular/material/dialog';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {MockDataModelService} from '../_mockServices/MockDataModelService';
+import {GroupService} from '../../ServerCommunication/GroupCommunication/group.service';
+import {MockGroupService} from '../_mockServices/MockGroupService';
+import {MockDialog} from '../_mockServices/MockDialog';
 
 describe('GroupSelectionComponent', () => {
   let component: GroupSelectionComponent;
   let fixture: ComponentFixture<GroupSelectionComponent>;
+  let dataModelService: DataModelService;
+  let groupService: GroupService;
+  let spy1: any;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [GroupSelectionComponent],
       providers: [
-        {
-          provide: MatDialog,
-          useValue: []
-        }
+        { provide: MatDialog, useValue: MockDialog },
+        { provide: DataModelService, useClass: MockDataModelService},
+        { provide: GroupService, useClass: MockGroupService }
       ],
       imports: [
         NoopAnimationsModule,
@@ -33,6 +40,9 @@ describe('GroupSelectionComponent', () => {
         MatToolbarModule,
       ]
     }).compileComponents();
+
+    dataModelService = TestBed.inject(DataModelService);
+    groupService = TestBed.inject(GroupService);
   }));
 
   beforeEach(() => {
@@ -41,7 +51,36 @@ describe('GroupSelectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should compile', () => {
+  /*it('should compile', () => {
     expect(component).toBeTruthy();
+  });*/
+
+  it('currentGroupSet', () => {
+    component.ngOnInit();
+    expect(component.currentGroup.groupId).toEqual('1');
+    expect(component.groups.length).toEqual(2);
+    component.selectGroup(1);
+    expect(component.currentGroup.groupId).toEqual('2');
+  });
+
+  it('check leave group cancel', () => {
+    component.ngOnInit();
+    spy1 = spyOn(groupService, 'leaveGroup');
+    component.leaveGroup();
+    expect(spy1).toHaveBeenCalledTimes(0);
+  });
+
+  it('check add member group', () => {
+    component.ngOnInit();
+    spy1 = spyOn(groupService, 'addMember');
+    component.addMemberToGroup();
+    expect(spy1).toHaveBeenCalled();
+  });
+
+  it('check create group group', () => {
+    component.ngOnInit();
+    spy1 = spyOn(groupService, 'createGroup');
+    component.addGroup();
+    expect(spy1).toHaveBeenCalled();
   });
 });

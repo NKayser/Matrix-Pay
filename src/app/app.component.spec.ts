@@ -24,15 +24,4 @@ describe('AppComponent', () => {
     const app = fixture.componentInstance;
     expect(app.title).toEqual('Angular-MatrixMicroPayments-App');
   });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('Angular-MatrixMicroPayments-App app is running!');
-  });
-
-  it('should pass this test', () => {
-    expect(1).toEqual(1);
-  });
 });
