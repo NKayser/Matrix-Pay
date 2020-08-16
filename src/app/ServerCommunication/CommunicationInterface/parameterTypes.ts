@@ -1,9 +1,3 @@
-import {Currency} from "../../DataModel/Utils/Currency";
-import {Language} from "../../DataModel/Utils/Language";
-import {Group} from "../../DataModel/Group/Group";
-import {AtomarChange} from "../../DataModel/Group/AtomarChange";
-import {Groupmember} from "../../DataModel/Group/Groupmember";
-
 export interface UserType {
   contactId: string;
   name: string;
@@ -45,6 +39,10 @@ export interface CurrencyType{
   currency: string;
 }
 
+export interface LanguageType{
+  language: string;
+}
+
 export interface TransactionType{
   transactionType: string;
   transactionId: string;
@@ -54,6 +52,6 @@ export interface TransactionType{
   payerId: string,
   payerAmount: number;
   recipientIds: string[];
-  recipientsAmounts: string[];
+  recipientAmounts: number[];
   senderId: string;
 }

@@ -6,7 +6,7 @@ import {
   RecommendationsType,
   CurrencyType,
   UserType,
-  TransactionType
+  TransactionType, LanguageType
 } from './parameterTypes';
 
 export interface ObservableInterface {
@@ -22,9 +22,11 @@ export interface ObservableInterface {
 
   getNewTransactionObservable(): Observable<TransactionType>;
 
-  getModifiedTransactionObservable(): Observable<string>;
+  getMultipleNewTransactionsObservable(): Observable<TransactionType[]>
 
-  getSettingsLanguageObservable(): Observable<string>;
+  getModifiedTransactionObservable(): Observable<TransactionType>;
+
+  getSettingsLanguageObservable(): Observable<LanguageType>;
 
 
 

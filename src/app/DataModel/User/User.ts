@@ -104,4 +104,14 @@ export class User {
     group.addGroupmember(new Groupmember(this._contact, group));
     return group;
   }
+
+  /**
+   * Removes a group from the array of groups of the user.
+   * @param groupId  ID of he group that should be removed.
+   */
+  public removeGroup(groupId: string) {
+    this._groups.forEach( (item, index) => {
+      if (item.groupId === groupId) { this._groups.splice(index, 1); }
+    });
+  }
 }
