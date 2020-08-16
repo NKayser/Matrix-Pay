@@ -139,6 +139,15 @@ export class Group {
     return null;
   }
 
+  public getGroupmember(contactId: string): Groupmember {
+    for (const groupmember of this._groupmembers) {
+      if (groupmember.contact.contactId === contactId) {
+        return groupmember;
+      }
+    }
+    return null;
+  }
+
   /**
    * Sets the array with current Recommendations for the group. Since recommendations only make sense as a whole, single recommendations
    * cannot be added.
