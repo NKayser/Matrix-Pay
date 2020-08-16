@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ObservableInterface} from './observableInterface';
 import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
-import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType} from './parameterTypes';
+import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType, TransactionType, LanguageType} from './parameterTypes';
 // @ts-ignore
 import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWindow, Room, Filter, FilterComponent} from 'matrix-js-sdk';
 import {Utils} from '../Response/Utils';
@@ -464,5 +464,25 @@ export class ObservableService implements ObservableInterface {
 
   public getSettingsCurrencyObservable(): Observable<CurrencyType> {
     return this.settingsCurrencyObservable;
+  }
+
+  getGroupMembershipObservable(): Observable<GroupMemberType> {
+    return undefined;
+  }
+
+  getModifiedTransactionObservable(): Observable<TransactionType> {
+    return undefined;
+  }
+
+  getMultipleNewTransactionsObservable(): Observable<TransactionType[]> {
+    return undefined;
+  }
+
+  getNewTransactionObservable(): Observable<TransactionType> {
+    return undefined;
+  }
+
+  getSettingsLanguageObservable(): Observable<LanguageType> {
+    return undefined;
   }
 }
