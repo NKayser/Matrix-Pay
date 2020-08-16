@@ -25,6 +25,7 @@ export class ObservableService implements ObservableInterface {
   private oldRoomCreations: object;
   private oldRoomMembershipChanges: object;
   private transactions: object;
+  private oldTransactionChanges: object;
   // TODO: remove magic numbers
 
   constructor(clientService: MatrixClientService) {
@@ -302,8 +303,14 @@ export class ObservableService implements ObservableInterface {
         // Process the events retrieved by backpagination
         switch (event.getType()) {
           case ('payback'): {
-            if (Utils.log) console.log('got an old payback. name: ' + event.getContent().name);
-            // TODO: push in array (this.transactions.push({...});)
+            if (!event.isRelation()) {
+              // If the event has been replaced, getContent() returns the content of the replacing event.
+              if (Utils.log) console.log('got an old payback. name: ' + event.getContent().name);
+              // TODO: push in array (this.transactions.push({...});)
+            } else if (event.isRelation('m.replace')) {
+              if (Utils.log) console.log('got an old editing of a payback. name: ' + event.getContent().name);
+              // TODO: push in array (this.oldTransactionChanges.push({...});)
+            }
             break;
           }
           case ('expense'): {
@@ -335,8 +342,18 @@ export class ObservableService implements ObservableInterface {
         // Process the events retrieved by /sync
         switch (event.getType()) {
           case ('payback'): {
-            if (Utils.log) { console.log('got payback. name: ' + event.getContent().name); }
-            // TODO: call next() on observable
+            if (!event.isRelation()) {
+              // We could consider using getOriginalContent() instead of getContent(), because if this event has been replaced
+              // (replacing event in the same /sync batch),
+              // getContent() returns the content of the replacing event (?), but the information about the replacement
+              // will be received through the replacing event.
+              // However, using using getContent() won't hurt.
+              if (Utils.log) { console.log('got payback. name: ' + event.getContent().name); }
+              // TODO: call next() on observable
+            } else if (event.isRelation('m.replace')) {
+              if (Utils.log) { console.log('got editing of payback. name: ' + event.getContent().name); }
+              // TODO: call next() on observable
+            }
             break;
           }
           case ('expense'): {
