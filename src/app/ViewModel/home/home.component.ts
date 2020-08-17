@@ -88,7 +88,7 @@ export class HomeComponent implements OnInit {
     console.log(currentRec);
     const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
       width: '350px',
-      data: {recommendation: currentRec, confirm: false}
+      data: {recommendation: currentRec}
     });
 
     dialogRef.afterClosed().subscribe(result => {

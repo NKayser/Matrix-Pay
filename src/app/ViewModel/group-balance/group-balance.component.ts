@@ -80,7 +80,7 @@ export class GroupBalanceComponent implements OnChanges {
       const currentRec = this.recommendations[recommendationIndex];
       const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
         width: '350px',
-        data: {recommendation: currentRec, confirm: false}
+        data: {recommendation: currentRec}
       });
 
       dialogRef.afterClosed().subscribe(result => {
@@ -88,21 +88,18 @@ export class GroupBalanceComponent implements OnChanges {
         if (this.dialogData !== undefined){
           this.loadingConfirmPayback = true;
 
-          if (this.dialogData.confirm === true){
-
-            // TODO Missing recommendationId
-            promiseTimeout(TIMEOUT, this.matrixBasicDataService.confirmPayback(this.dialogData.recommendation.group.groupId, 0))
-              .then((data) => {
-                console.log(data);
-                if (!data.wasSuccessful()){
-                  this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
-                }
-                this.loadingConfirmPayback = false;
-              }, (err) => {
-                this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
-                this.loadingConfirmPayback = false;
-              });
-          }
+          // TODO Missing recommendationId
+          promiseTimeout(TIMEOUT, this.matrixBasicDataService.confirmPayback(this.dialogData.recommendation.group.groupId, 0))
+            .then((data) => {
+              console.log(data);
+              if (!data.wasSuccessful()){
+                this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
+              }
+              this.loadingConfirmPayback = false;
+            }, (err) => {
+              this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
+              this.loadingConfirmPayback = false;
+            });
 
 
         }

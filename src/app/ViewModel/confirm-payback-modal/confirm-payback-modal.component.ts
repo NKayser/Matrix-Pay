@@ -6,7 +6,6 @@ import {Recommendation} from '../../DataModel/Group/Recommendation';
 
 export interface ConfirmPaybackDialogData {
   recommendation: Recommendation;
-  confirm: boolean;
 }
 
 @Component({
@@ -34,7 +33,6 @@ export class ConfirmPaybackModalComponent {
    * Close the dialog and return the data
    */
   public onSave(): void {
-    this.data.confirm = true;
     this.dialogRef.close(this.data);
   }
 
