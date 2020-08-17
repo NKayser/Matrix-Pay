@@ -3,11 +3,14 @@ import {ObservableInterface} from '../ServerCommunication/CommunicationInterface
 import {ObservableService} from '../ServerCommunication/CommunicationInterface/observable.service';
 import {DataModelService} from '../DataModel/data-model.service';
 import {Currency} from '../DataModel/Utils/Currency';
-import {User} from '../DataModel/User/User';
 import {Contact} from '../DataModel/Group/Contact';
 import {Language} from '../DataModel/Utils/Language';
 import {Groupmember} from "../DataModel/Group/Groupmember";
 import {Utils} from "../ServerCommunication/Response/Utils";
+import {Transaction} from "../DataModel/Group/Transaction";
+import {TransactionType} from "../DataModel/Group/TransactionType";
+import {TransactionType as TransactionTypeInterface} from "../ServerCommunication/CommunicationInterface/parameterTypes";
+import {AtomarChange} from "../DataModel/Group/AtomarChange";
 
 @Injectable({
   providedIn: 'root'
@@ -17,44 +20,135 @@ export class BasicDataUpdateService {
 
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     if (Utils.log) console.log('This is BasicDataUpdateService');
-    this.observables = observables;
+    this.observables = observables; // TODO imlement observableInterface
     this.createUser();
   }
 
+  /**
+   * Initializes the user in the DataModel at login.
+   */
   public createUser(): void {
     this.observables.getUserObservable().subscribe(param => {
       if (Utils.log) console.log('call user constructor');
-      new User(new Contact(param.contactId, param.name),
-        this.currencyStringToEnum(param.currency), this.languageStringToEnum(param.language));
-      // invoke all methods
-      this.updateDefaultCurrency();
-      this.addGroup();
+      this.dataModel.initializeUserThisSession(param.contactId, param.name, this.currencyStringToEnum(param.currency),
+        this.languageStringToEnum(param.language))
     });
   }
 
+  /**
+   * Creates a group and adds it to the groups in dataModel.groups. Adds all groupmembers to the group.
+   * TODO: create Activity (for both isLeave cases respectively).
+   */
   private async addGroup(): Promise<void> {
     this.observables.getGroupsObservable().subscribe(param => {
       if (!param.isLeave) {
-        if (Utils.log) console.log('new group detected');
+        if (Utils.log) console.log('new group detected:' + param.groupId);
         this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
         const newGroup = this.dataModel.getGroup(param.groupId);
         for (let i = 0; i < param.userIds.length; i++) {
           newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
         }
       }
+      else {
+        if (Utils.log) console.log('group deleted:' + param.groupId);
+        this.dataModel.user.removeGroup(param.groupId)}
     });
   }
 
+  /**
+   * Updates the user's default currency setting in the DataModel.
+   */
   private async updateDefaultCurrency(): Promise<void> {
     this.observables.getSettingsCurrencyObservable().subscribe(param => {
-        if (Utils.log) console.log('BasicDataUpdateService got currency ' + param.currency);
-        this.dataModel.getUser().currency = this.currencyStringToEnum(param.currency);
+      if (Utils.log) console.log('BasicDataUpdateService got currency ' + param.currency);
+      this.dataModel.getUser().currency = this.currencyStringToEnum(param.currency);
+    });
+  }
+
+  /**
+   * Updates the user's language setting in the DataModel.
+   */
+  private async updateDefaultLanguage(): Promise<void> {
+    this.observables.getSettingsLanguageObservable().subscribe(param => {
+      if (Utils.log) console.log('BasicDataUpdateService got language ' + param.language);
+      this.dataModel.getUser().language = this.languageStringToEnum(param.language);
+    });
+  }
+
+  /**
+   * Adds a groupmember to a group if isLeave is false. Removes a groupmember from a group if isLeave is true.
+   * TODO: create an activity.
+   */
+  private async updateGroupMember(): Promise<void> {
+    this.observables.getGroupMembershipObservable().subscribe( param => {
+      if (!param.isLeave) {
+        if (Utils.log) console.log('BasicDataUpdateService got member ' + param.name + '(' + param.userId + ')');
+        const group = this.dataModel.getGroup(param.groupId);
+        if (group.getGroupmember(param.userId) != null) {
+          const newMember = new Groupmember(new Contact(param.userId, param.name), group);
+          group.addGroupmember(newMember);
+        }
       }
-    );
+      else {
+        if (Utils.log) console.log('BasicDataUpdateService removed member ' + param.name + '(' + param.userId + ')');
+        const group = this.dataModel.getGroup(param.groupId);
+        group.removeGroupmember(param.userId);
+      }
+    });
+  }
+
+  private updateSingleTransaction(param: TransactionTypeInterface): Transaction {
+    console.log('BasicDataUpdateService got new transaction ' + param.transactionId);
+      const group = this.dataModel.getGroup(param.groupId);
+      let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
+      let recipients: AtomarChange[] = [];
+      for (let i = 0; i < param.recipientIds.length; i++) {
+        recipients.push(new AtomarChange(group.getGroupmember(param.recipientIds[i]).contact, param.recipientAmounts[i]));
+      }
+      let sender = group.getGroupmember(param.senderId);
+      const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
+        param.name, param.creationDate, group, payer, recipients, sender);
+      group.addTransaction(newTransaction);
+      return newTransaction;
+  }
+
+  /**
+   * Edits an existing transaction of a group in the DataModel.
+   * TODO: create activity.
+   */
+  private async updateModifiedGroupTransaction(): Promise<void> {
+    this.observables.getModifiedTransactionObservable().subscribe(param => {
+      if (Utils.log) console.log('BasicDataUpdateService modified transaction: ' + param.transactionId);
+      const group = this.dataModel.getGroup(param.groupId);
+      let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
+      let recipients: AtomarChange[] = [];
+      for (let i = 0; i < param.recipientIds.length; i++) {
+        recipients.push(new AtomarChange(group.getGroupmember(param.recipientIds[i]).contact, param.recipientAmounts[i]));
+      }
+      group.editTransaction(param.transactionId, param.name, payer, recipients);
+      // TODO: Edit Balances after editing a transaction.
+    });
+  }
+
+  /**
+   * Adds a number of transactions to a group. Calculates balances for this group afterwards.
+   * TODO: create activity. dont calculate recommendations of all transactions are PAYBACK. remove recommendations from group.
+   */
+  private async updateNewGroupTransactions(): Promise<void> {
+    this.observables.getMultipleNewTransactionsObservable().subscribe(param => {
+      if (Utils.log) console.log('BasicDataUpdateService added transactions');
+      const multipleTransactions: Transaction[] = [];
+      for (const transactionType of param) {
+        let currentTransaction = this.updateSingleTransaction(transactionType);
+        multipleTransactions.push(currentTransaction);
+      }
+      let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
+        param[param.length - 1].groupId);
+    });
   }
 
   private currencyStringToEnum(currencyString: string): Currency {
-    let currencyEnum: Currency;
+    let currencyEnum: Currency = Currency.EUR;
     switch (currencyString) {
       case ('EURO'): {
         currencyEnum = Currency.EUR;
@@ -69,7 +163,7 @@ export class BasicDataUpdateService {
   }
 
   private languageStringToEnum(languageString: string): Language {
-    let languageEnum: Language;
+    let languageEnum: Language = Language.ENGLISH;
     switch (languageString) {
       case ('GERMAN'): {
         languageEnum = Language.GERMAN;
@@ -81,5 +175,20 @@ export class BasicDataUpdateService {
       }
     }
     return languageEnum;
+  }
+
+  private transactionStringToEnum(transactionString: string): TransactionType {
+    let transactionType: TransactionType = TransactionType.EXPENSE;
+    switch (transactionString) {
+      case ('EXPENSE'): {
+        transactionType = TransactionType.EXPENSE;
+        break;
+      }
+      case ('PAYBACK'): {
+        transactionType = TransactionType.PAYBACK;
+        break;
+      }
+    }
+    return transactionType;
   }
 }

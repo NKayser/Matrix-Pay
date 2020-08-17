@@ -30,11 +30,28 @@ export interface GroupsType {
 export interface GroupMemberType{
   groupId: string;
   userId: string;
-  names: string;
+  name: string;
   isLeave: boolean;
   date: Date;
 }
 
 export interface CurrencyType{
   currency: string;
+}
+
+export interface LanguageType{
+  language: string;
+}
+
+export interface TransactionType{
+  transactionType: string;
+  transactionId: string;
+  name: string;
+  creationDate: Date;
+  groupId: string,
+  payerId: string,
+  payerAmount: number;
+  recipientIds: string[];
+  recipientAmounts: number[];
+  senderId: string;
 }

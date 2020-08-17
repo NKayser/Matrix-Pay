@@ -60,8 +60,8 @@ export class MatrixClientService implements ClientInterface {
     });
     MatrixClientService.loggedIn = true;
 
-    // Start the Client
-    this.matrixClient.startClient();
+    // Start the Client (now in ObservableService)
+    // this.matrixClient.startClient({initialSyncLimit: 8});
 
     // Set settings to default values if non existent
     const currencyEventContent = this.matrixClient.getAccountDataFromServer(MatrixClientService.CURRENCY_KEY); // content of the matrix event
@@ -81,8 +81,8 @@ export class MatrixClientService implements ClientInterface {
 
     // move to the end of the method?
     // Call Observable Service
-    //this.observableService.setUp();
-    //this.matrixEmergentDataService.setClient(this.matrixClient);
+    // this.observableService.setUp();
+    // this.matrixEmergentDataService.setClient(this.matrixClient);
 
     return new SuccessfulResponse();
 

@@ -127,13 +127,22 @@ export class Group {
   }
 
   /**
-   * Returns a specific transaction speified by transaction ID. Reuturns null of no transaction of that ID is in the group.
+   * Returns a specific transaction speified by transaction ID. Returns null of no transaction of that ID is in the group.
    * @param transactionId  ID of the transaction that should be returned.
    */
   public getTransaction(transactionId: string): Transaction {
     for (const transaction of this._transactions) {
       if (transaction.transactionId === transactionId) {
         return transaction;
+      }
+    }
+    return null;
+  }
+
+  public getGroupmember(contactId: string): Groupmember {
+    for (const groupmember of this._groupmembers) {
+      if (groupmember.contact.contactId === contactId) {
+        return groupmember;
       }
     }
     return null;

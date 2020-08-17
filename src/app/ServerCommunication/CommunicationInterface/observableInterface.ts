@@ -1,5 +1,13 @@
 import {Observable} from 'rxjs';
-import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType} from './parameterTypes';
+import {
+  GroupsType,
+  BalancesType,
+  GroupMemberType,
+  RecommendationsType,
+  CurrencyType,
+  UserType,
+  TransactionType, LanguageType
+} from './parameterTypes';
 
 export interface ObservableInterface {
   getUserObservable(): Observable<UserType>;
@@ -10,15 +18,17 @@ export interface ObservableInterface {
 
   getRecommendationsObservable(): Observable<RecommendationsType>;
 
- /* getGroupMembershipObservable(): Observable<string>;
+  getGroupMembershipObservable(): Observable<GroupMemberType>;
 
-  getNewTransactionObservable(): Observable<string>;
+  getNewTransactionObservable(): Observable<TransactionType>;
 
-  getModifiedTransactionObservable(): Observable<string>;
+  getMultipleNewTransactionsObservable(): Observable<TransactionType[]>
 
-  getSettingsLanguageObservable(): Observable<string>;
+  getModifiedTransactionObservable(): Observable<TransactionType>;
 
-  */
+  getSettingsLanguageObservable(): Observable<LanguageType>;
+
+
 
   getSettingsCurrencyObservable(): Observable<CurrencyType>;
 
