@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import {DataModelService} from '../../DataModel/data-model.service';
+import {Component, Input, OnInit} from '@angular/core';
 import {Activity} from '../../DataModel/Group/Activity';
 import {ActivityType} from '../../DataModel/Group/ActivityType';
+import {Group} from '../../DataModel/Group/Group';
 
 @Component({
   selector: 'app-history',
@@ -13,7 +13,9 @@ export class HistoryComponent implements OnInit {
   activities: Activity[] = [];
   activityTypes = ActivityType;
 
-  constructor(private dataModelService: DataModelService) {
+  @Input() group: Group;
+
+  constructor() {
   }
 
   /**
@@ -21,7 +23,9 @@ export class HistoryComponent implements OnInit {
    */
   ngOnInit(): void {
 
-    // TODO this method doesn't adds new activities automatically
+    this.activities = this.group.activities;
+
+    /*
     // Either check out other methods or implement a time that refreshes after a fixed time intervall
     const groups = this.dataModelService.getGroups();
 
@@ -31,10 +35,10 @@ export class HistoryComponent implements OnInit {
       }
     }
 
-    this.sortByDate();
+    this.sortByDate();*/
   }
 
-  public fetchHistory(): void{
+  /*public fetchHistory(): void{
 
   }
 
@@ -47,6 +51,6 @@ export class HistoryComponent implements OnInit {
     this.activities.sort((a: Activity, b: Activity) => {
       return this.getTime(a.creationDate) - this.getTime(b.creationDate);
     });
-  }
+  }*/
 
 }

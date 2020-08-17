@@ -29,7 +29,7 @@ export class MockDataModelService {
       const m3 = new Groupmember(c3, testGroup);
       const m1 = testGroup.groupmembers[0];
       m1.balance = 5;
-      testGroup.addGroupmember(m2);
+      /*testGroup.addGroupmember(m2);
       testGroup.addGroupmember(m3);
       testGroup.addTransaction(new Transaction(TransactionType.EXPENSE, 't1', 't1', new Date(2020, 10, 5), testGroup,
       new AtomarChange(c1, 10), [new AtomarChange(c2, 10)], m1));
@@ -55,7 +55,7 @@ export class MockDataModelService {
       testGroup.addActivity(a1);
       testGroup.addActivity(a2);
       testGroup.addActivity(a3);
-      testGroup.addActivity(a4);
+      testGroup.addActivity(a4);*/
 
   }
 

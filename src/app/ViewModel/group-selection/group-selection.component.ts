@@ -30,7 +30,7 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 export class GroupSelectionComponent implements OnInit{
 
   // saves the currently selected group
-  public currentGroup: Group;
+  public currentGroup: Group = new Group('', '', null);
   // save returned data form dialogs
   private createGroupData: GroupCreateDialogData;
   private leaveGroupData: LeaveGroupDialogData;

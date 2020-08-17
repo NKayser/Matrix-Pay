@@ -14,8 +14,8 @@ import {MatrixEvent} from 'matrix-js-sdk';
 export class TransactionService {
   private matrixClientService: ClientInterface;
 
-  private static readonly MESSAGE_TYPE_EXPENSE: string = 'expense';
-  private static readonly MESSAGE_TYPE_PAYBACK: string = 'payback';
+  private static readonly MESSAGE_TYPE_EXPENSE: string = 'com.matrixpay.expense';
+  private static readonly MESSAGE_TYPE_PAYBACK: string = 'com.matrixpay.payback';
 
   constructor(matrixClientService: MatrixClientService) {
     this.matrixClientService = matrixClientService;
@@ -101,20 +101,28 @@ export class TransactionService {
 
   private async sendTransaction(groupId: string, messageType: string, content: object, recipientIds: string[],
                                 payerId: string): Promise<ServerResponse> {
+
+
     const client = await this.matrixClientService.getClient();
+
+    console.log('3');
 
     // Input Validation (check if users exist in room). Should already be done in ViewModel.
     const validIds = await this.areGroupMembers(groupId, recipientIds.concat(payerId))
       .catch(() => {return new UnsuccessfulResponse(GroupError.InvalidUsers).promise()});
     if (!validIds) return new UnsuccessfulResponse(GroupError.InvalidUsers).promise();
 
-    let response: ServerResponse = new SuccessfulResponse('abc');
+    let response: ServerResponse;
 
+
+    console.log('2');
     // Actually send the event
     const event = await client.sendEvent(groupId, messageType, content, '').then(
         (val: MatrixEvent) => {response = new SuccessfulResponse(val['event_id'])},
         (reason: string) => {response = new UnsuccessfulResponse(GroupError.SendEvent, reason)});
-    console.log(event);
+    console.log("x: " + event);
+
+    console.log('1');
 
     // Return the new event_id
     return await response;

@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit {
 
   public loadingConfirmPayback = false;
 
-  private userContact: Contact;
+  public userContact: Contact;
   private dialogData: ConfirmPaybackDialogData;
 
   public breakpoint: number;
@@ -65,9 +65,11 @@ export class HomeComponent implements OnInit {
       if (group.currency === currency){
         // if (Utils.log) console.log(group.groupmembers);
         for (const member of group.groupmembers){
+          console.log(member);
           // if (Utils.log) console.log('mem: ' + member.contact.contactId + ' ' + this.userContact.contactId);
           // if (Utils.log) console.log(member.balance);
           if (member.contact.contactId === this.userContact.contactId){
+
             balance += member.balance;
             break;
           }

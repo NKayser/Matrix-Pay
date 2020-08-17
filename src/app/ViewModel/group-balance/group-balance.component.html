@@ -30,7 +30,8 @@
         <mat-card>
           <div class="approve_div">
             <mat-label class="approve_person">{{recommendation.payer.contact.name}}</mat-label>
-            <button mat-raised-button color="primary" class="approve_button" (click)="confirmPayback(i)">Approve Payback</button>
+            <button mat-raised-button *ngIf="recommendation.payer.contact.contactId===userContact.contactId"
+                    color="primary" class="approve_button" (click)="confirmPayback(i)">Approve Payback</button>
           </div>
           <mat-label class="approve_amount">{{recommendation.payer.amount}}{{currencyMap[group.currency]}}</mat-label>
         </mat-card>
