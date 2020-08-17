@@ -2,7 +2,17 @@ import {Injectable} from '@angular/core';
 import {ObservableInterface} from './observableInterface';
 import {Observable} from 'rxjs';
 import {Subject} from 'rxjs'; // Subjects are multicast Observables
-import {GroupsType, BalancesType, GroupMemberType, RecommendationsType, CurrencyType, UserType, TransactionType, LanguageType} from './parameterTypes';
+import {
+  GroupsType,
+  BalancesType,
+  GroupMemberType,
+  RecommendationsType,
+  CurrencyType,
+  UserType,
+  TransactionType,
+  LanguageType,
+  GroupActivityType
+} from './parameterTypes';
 // @ts-ignore
 import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWindow, Room, Filter, FilterComponent} from 'matrix-js-sdk';
 import {Utils} from '../Response/Utils';
@@ -13,6 +23,7 @@ import {ClientInterface} from './ClientInterface';
   providedIn: 'root'
 })
 export class ObservableService implements ObservableInterface {
+
 
   constructor(clientService: MatrixClientService) {
     this.clientService = clientService;
@@ -28,6 +39,7 @@ export class ObservableService implements ObservableInterface {
     this.modifiedTransactionsObservable = new Subject();
     this.multipleNewTransactionsObservable = new Subject();
     this.settingsLanguageObservable = new Subject();
+    this.groupActivityObservable = new Subject();
 
     this.setUp();
   }
@@ -47,6 +59,8 @@ export class ObservableService implements ObservableInterface {
   private modifiedTransactionsObservable: Subject<TransactionType>;
   private multipleNewTransactionsObservable: Subject<TransactionType[]>;
   private newTransactionObservable: Subject<TransactionType>;
+  private groupActivityObservable: Subject<GroupActivityType>;
+
   private window: TimelineWindow; // for testing, is only extended backwards
   // TODO: replace "object" with arrays of the interfaces in parameterTypes as soon as they are finished
   // maybe get rid of these
@@ -533,5 +547,9 @@ export class ObservableService implements ObservableInterface {
 
   public getSettingsLanguageObservable(): Observable<LanguageType> {
     return this.settingsLanguageObservable;
+  }
+
+  public getGroupActivityObservable(): Observable<GroupActivityType> {
+    return this.groupActivityObservable;
   }
 }

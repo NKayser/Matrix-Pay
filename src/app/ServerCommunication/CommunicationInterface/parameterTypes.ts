@@ -27,6 +27,12 @@ export interface GroupsType {
   isLeave: boolean;
 }
 
+export interface GroupActivityType {
+  groupId: string;
+  creatorId: string;
+  creationDate: Date;
+}
+
 export interface GroupMemberType{
   groupId: string;
   userId: string;
