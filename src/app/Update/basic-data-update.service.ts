@@ -156,12 +156,14 @@ export class BasicDataUpdateService {
         if (!param.isLeave) {
           if (Utils.log) console.log('BasicDataUpdateService got member: ' + param.name + ' (' + param.userId + ')');
           const group = this.dataModel.getGroup(param.groupId);
-          if (group.getGroupmember(param.userId) === null) {
+          const member = group.getGroupmember(param.userId);
+          if (member === null) {
             const newMember = new Groupmember(new Contact(param.userId, param.name), group);
             group.addGroupmember(newMember);
-            const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, newMember.contact, param.date);
-            group.addActivity(activity);
           }
+          const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
+          group.addActivity(activity);
+
         }
         else {
           const group = this.dataModel.getGroup(param.groupId);
@@ -187,12 +189,13 @@ export class BasicDataUpdateService {
       if (!groupMember.isLeave) {
         if (Utils.log) console.log('BasicDataUpdateService got member from buffer: ' + groupMember.name + ' (' + groupMember.userId + ')');
         const group = this.dataModel.getGroup(groupMember.groupId);
-        if (group.getGroupmember(groupMember.userId) === null) {
+        const member = group.getGroupmember(groupMember.userId);
+        if (member === null) {
           const newMember = new Groupmember(new Contact(groupMember.userId, groupMember.name), group);
           group.addGroupmember(newMember);
-          const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, newMember.contact, groupMember.date);
-          group.addActivity(activity);
         }
+        const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, groupMember.date);
+        group.addActivity(activity);
       }
       else {
         const group = this.dataModel.getGroup(groupMember.groupId);
