@@ -11,8 +11,8 @@ export interface BasicDataInterface {
     leaveGroup(groupId: string): Promise<ServerResponse>;
 
     // Erstelle eine Transaktion mit den angegebenen Daten.
-    createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]):
-      Promise<ServerResponse>;
+    createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[],
+                      isPayback: boolean): Promise<ServerResponse>;
 
     // Setze die Daten des Payments mit der Id transactionId in der Gruppe mit Id groupId auf die angegebenen Daten.
     modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string,

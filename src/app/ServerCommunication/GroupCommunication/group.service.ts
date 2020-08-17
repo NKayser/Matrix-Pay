@@ -107,7 +107,7 @@ export class GroupService {
 
     // Part 2: Create Payback
     const description = 'Payback from ' + payer + ' to ' + recipient + ' for ' + amount;
-    const transaction: ServerResponse = await this.createTransaction(groupId, description, payer, [recipient], [amount]);
+    const transaction: ServerResponse = await this.createTransaction(groupId, description, payer, [recipient], [amount], true);
     if (!transaction.wasSuccessful()) {
       return transaction;
     }
@@ -177,8 +177,8 @@ export class GroupService {
    * @param recipientIds
    * @param amounts
    */
-  public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]): Promise<ServerResponse> {
-    return this.transactionService.createTransaction(groupId, description, payerId, recipientIds, amounts);
+  public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
+    return this.transactionService.createTransaction(groupId, description, payerId, recipientIds, amounts, isPayback);
   }
 
   /**

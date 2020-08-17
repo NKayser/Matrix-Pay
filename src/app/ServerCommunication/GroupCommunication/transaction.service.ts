@@ -34,9 +34,9 @@ export class TransactionService {
    */
   // TODO: known error: when (setting Recommendations or reading room account data) and then creating Transaction, this error occurs:
   // Error: This room is configured to use encryption, but your client does not support encryption.
-  public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]): Promise<ServerResponse> {
+  public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
     // TODO: how do we differentiate between Expenses and Paybacks?
-    const messageType = recipientIds.length == 1 ? TransactionService.MESSAGE_TYPE_PAYBACK : TransactionService.MESSAGE_TYPE_EXPENSE;
+    const messageType = isPayback ? TransactionService.MESSAGE_TYPE_PAYBACK : TransactionService.MESSAGE_TYPE_EXPENSE;
 
     // TODO: different for expense / payback? (arrays / values and no plural)
     const content = {
