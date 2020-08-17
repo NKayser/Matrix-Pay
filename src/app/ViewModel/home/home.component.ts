@@ -5,7 +5,10 @@ import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 import {Contact} from '../../DataModel/Group/Contact';
 import {ConfirmPaybackDialogData, ConfirmPaybackModalComponent} from '../confirm-payback-modal/confirm-payback-modal.component';
 import {MatDialog} from '@angular/material/dialog';
-import {Utils} from "../../ServerCommunication/Response/Utils";
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
+import {DialogProviderService} from '../dialog-provider.service';
+import {gridListResize} from '../gridListResizer';
 
 @Component({
   selector: 'app-home',
@@ -18,10 +21,16 @@ export class HomeComponent implements OnInit {
   public recommendations: Recommendation[] = [];
   public currencyMap = currencyMap;
 
+  public loadingConfirmPayback = false;
+
   private userContact: Contact;
   private dialogData: ConfirmPaybackDialogData;
 
-  constructor(private dataModelService: DataModelService, public dialog: MatDialog) {}
+  public breakpoint: number;
+
+  constructor(private dataModelService: DataModelService, public dialog: MatDialog,
+              private matrixBasicDataService: MatrixBasicDataService,
+              private dialogProviderService: DialogProviderService) {}
 
   /**
    * Get reference to the recommendations and user
@@ -37,6 +46,12 @@ export class HomeComponent implements OnInit {
 
       this.usedCurrencies.add(group.currency);
     }
+
+    this.breakpoint = gridListResize(window.innerWidth, 2200, 4);
+  }
+
+  onResize(event): void {
+    this.breakpoint = gridListResize(event.target.innerWidth, 2200, 4);
   }
 
   /**
@@ -48,10 +63,10 @@ export class HomeComponent implements OnInit {
     let balance = 0;
     for (const group of groups){
       if (group.currency === currency){
-        if (Utils.log) console.log(group.groupmembers);
+        // if (Utils.log) console.log(group.groupmembers);
         for (const member of group.groupmembers){
-          if (Utils.log) console.log('mem: ' + member.contact.contactId + ' ' + this.userContact.contactId);
-          if (Utils.log) console.log(member.balance);
+          // if (Utils.log) console.log('mem: ' + member.contact.contactId + ' ' + this.userContact.contactId);
+          // if (Utils.log) console.log(member.balance);
           if (member.contact.contactId === this.userContact.contactId){
             balance += member.balance;
             break;
@@ -70,17 +85,30 @@ export class HomeComponent implements OnInit {
   confirmPayback(recommendationIndex: number): void {
 
     const currentRec = this.recommendations[recommendationIndex];
+    console.log(currentRec);
     const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
       width: '350px',
-      data: {group: currentRec.group.name, confirm: false, recipient: currentRec.recipient.contact, amount: currentRec.recipient.amount,
-        currency: currentRec.group.currency}
+      data: {recommendation: currentRec}
     });
 
     dialogRef.afterClosed().subscribe(result => {
       this.dialogData = result;
       if (this.dialogData !== undefined){
-        // TODO Send Data to matrix here
-        if (Utils.log) console.log(this.dialogData);
+
+        this.loadingConfirmPayback = true;
+        // TODO Missing recommendationId
+        promiseTimeout(TIMEOUT, this.matrixBasicDataService.confirmPayback(this.dialogData.recommendation.group.groupId,
+          recommendationIndex))
+          .then((data) => {
+            console.log(data);
+            if (!data.wasSuccessful()){
+              this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
+            }
+            this.loadingConfirmPayback = false;
+          }, (err) => {
+            this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
+            this.loadingConfirmPayback = false;
+          });
       }
     });
   }

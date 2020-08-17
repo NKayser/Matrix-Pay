@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Activity} from '../../DataModel/Group/Activity';
+import {ActivityType} from '../../DataModel/Group/ActivityType';
 
 @Component({
   selector: 'app-history',
@@ -10,6 +11,7 @@ import {Activity} from '../../DataModel/Group/Activity';
 export class HistoryComponent implements OnInit {
 
   activities: Activity[] = [];
+  activityTypes = ActivityType;
 
   constructor(private dataModelService: DataModelService) {
   }

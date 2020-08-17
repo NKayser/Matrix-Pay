@@ -30,7 +30,9 @@
     <!--contains Login button-->
     <div class = "row">
       <button mat-raised-button (click) = 'login()' class = "row" color="primary" [disabled]="passwordControl.invalid || matrixUrlControl.invalid">Login</button>
+      <mat-spinner *ngIf="loadingLogIn" [diameter]="30"></mat-spinner>
     </div>
+
 
 
   </mat-card>

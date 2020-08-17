@@ -6,9 +6,10 @@ import {Group} from '../../DataModel/Group/Group';
 import {TransactionType} from '../../DataModel/Group/TransactionType';
 import {Contact} from '../../DataModel/Group/Contact';
 import {DataModelService} from '../../DataModel/data-model.service';
-import {TransactionService} from '../../ServerCommunication/GroupCommunication/transaction.service';
 import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
-import {ErrorModalComponent} from '../error-modal/error-modal.component';
+import {currencyMap} from '../../DataModel/Utils/Currency';
+import {DialogProviderService} from '../dialog-provider.service';
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 
 @Component({
   selector: 'app-group-transaction',
@@ -27,7 +28,10 @@ export class GroupTransactionComponent implements OnChanges {
   public loadingCreateExpense = false;
   public loadingEditExpense = false;
 
-  constructor(public dialog: MatDialog, private dataModelService: DataModelService, private transactionService: TransactionService) {
+  public currencyMap = currencyMap;
+
+  constructor(public dialog: MatDialog, private dataModelService: DataModelService, private matrixBasicDataService: MatrixBasicDataService,
+              private dialogProviderService: DialogProviderService) {
   }
 
   /**
@@ -63,16 +67,16 @@ export class GroupTransactionComponent implements OnChanges {
         }
 
         this.loadingCreateExpense = true;
-        promiseTimeout(TIMEOUT, this.transactionService.createTransaction(this.group.groupId, this.data.description,
+        promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.group.groupId, this.data.description,
           this.data.payer.contactId, recipientIds, sendAmounts))
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){
-              this.openErrorModal('error create transaction 1: ' + data.getMessage());
+              this.dialogProviderService.openErrorModal('error create transaction 1: ' + data.getMessage(), this.dialog);
             }
             this.loadingCreateExpense = false;
           }, (err) => {
-            this.openErrorModal('error create Transaction 2: ' + err);
+            this.dialogProviderService.openErrorModal('error create Transaction 2: ' + err, this.dialog);
             this.loadingCreateExpense = false;
           });
       }
@@ -108,16 +112,16 @@ export class GroupTransactionComponent implements OnChanges {
           }
 
           this.loadingEditExpense = true;
-          promiseTimeout(TIMEOUT, this.transactionService.modifyTransaction(this.group.groupId, expense.transactionId,
+          promiseTimeout(TIMEOUT, this.matrixBasicDataService.modifyTransaction(this.group.groupId, expense.transactionId,
             this.data.description, this.data.payer.contactId, recipientIds, sendAmounts))
             .then((data) => {
               console.log(data);
               if (!data.wasSuccessful()){
-                this.openErrorModal('error edit transaction 1: ' + data.getMessage());
+                this.dialogProviderService.openErrorModal('error edit transaction 1: ' + data.getMessage(), this.dialog);
               }
               this.loadingEditExpense = false;
             }, (err) => {
-              this.openErrorModal('error edit Transaction 2: ' + err);
+              this.dialogProviderService.openErrorModal('error edit Transaction 2: ' + err, this.dialog);
               this.loadingEditExpense = false;
             });
 
@@ -174,14 +178,6 @@ export class GroupTransactionComponent implements OnChanges {
     }
 
     return 0;
-  }
-
-  // opens the error modal
-  private openErrorModal(message: string): void{
-    this.dialog.open(ErrorModalComponent, {
-      width: '300px',
-      data: {errorMessage: message}
-    });
   }
 
   fetchHistory(): void{

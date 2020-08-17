@@ -1,6 +1,6 @@
 import {ServerResponse} from '../ServerCommunication/Response/ServerResponse';
 
-export const TIMEOUT = 1000000000;
+export const TIMEOUT = 100000;
 
 // Rejects promise that is inputed, if it doesn't reject or resolve in the timeout timeframe
 export function promiseTimeout(ms: number, promise: Promise<ServerResponse>): Promise<ServerResponse>{

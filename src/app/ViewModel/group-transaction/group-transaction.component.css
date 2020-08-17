@@ -1,5 +1,41 @@
-.createButton{
+.createButtonDiv{
   position: fixed;
   right: 40px;
   bottom: 40px;
 }
+
+.transaction {
+  margin-bottom: 50px;
+}
+
+.first {
+  width: 300px;
+  float:left;
+  margin-right: 5px;
+}
+.second {
+  overflow: hidden;
+}
+
+.title{
+  font-size: 20px;
+  margin-right: 130px;
+}
+
+.description{
+  margin-right: 130px;
+  color: gray;
+}
+
+.description_left{
+  margin-right: 20px;
+}
+
+.payed_amount {
+  position: absolute;
+  right: 20px;
+  top: 30px;
+  font-size: 60px;
+}
+
+

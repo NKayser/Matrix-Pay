@@ -1,15 +1,11 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Contact} from '../../DataModel/Group/Contact';
-import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
+import {currencyMap} from '../../DataModel/Utils/Currency';
+import {Recommendation} from '../../DataModel/Group/Recommendation';
 
 
 export interface ConfirmPaybackDialogData {
-  group: string;
-  recipient: Contact;
-  amount: number;
-  currency: Currency;
-  confirm: boolean;
+  recommendation: Recommendation;
 }
 
 @Component({
@@ -37,7 +33,6 @@ export class ConfirmPaybackModalComponent {
    * Close the dialog and return the data
    */
   public onSave(): void {
-    this.data.confirm = true;
     this.dialogRef.close(this.data);
   }
 

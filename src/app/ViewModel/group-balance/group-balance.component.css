@@ -5,6 +5,20 @@
   margin-top: 10px;
 }
 
+.center {
+  /*display:grid is supper important to support the chart resize and correct behaviour of components below*/
+  display: grid;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 50px;
+}
+
+.item{
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
 /*Controls the person label on the approve Payback cards*/
 .approve_person {
   font-size: 120%;
@@ -35,5 +49,6 @@
 
 /*Controls the div, that contains all Payback cards*/
 .payback_div{
+  display: block;
   margin-top: 30px;
 }
