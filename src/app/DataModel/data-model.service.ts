@@ -9,6 +9,7 @@ import {MatrixEmergentDataService} from '../ServerCommunication/CommunicationInt
 import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
+import {Subject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,9 @@ import {Language} from './Utils/Language';
  */
 export class DataModelService {
   private status: Status;
+
+  private emitter = new Subject();
+  navItem$ = this.emitter.asObservable();
 
   /**
    * Cunstructor for DataModelService
@@ -29,6 +33,11 @@ export class DataModelService {
               private greedyOptimisation: GreedyOptimisationService,
               private matrixEmergentData: MatrixEmergentDataService) {
 
+  }
+
+  private notifyViewModelWhenReady(): void{
+    console.log('say hello to viewmodel from me');
+    this.emitter.next(true);
   }
 
   public getUser(): User{ // TODO: Delete Later
@@ -47,6 +56,7 @@ export class DataModelService {
     const contact = new Contact(userContactId, userName);
     const user = new User(contact, currency, language);
     this.status = new Status();
+    this.notifyViewModelWhenReady();
     return user;
   }
 

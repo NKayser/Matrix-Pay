@@ -22,6 +22,7 @@ export class BasicDataUpdateService {
     if (Utils.log) console.log('This is BasicDataUpdateService');
     this.observables = observables; // TODO imlement observableInterface
     this.createUser();
+    this.addGroup();
   }
 
   /**
