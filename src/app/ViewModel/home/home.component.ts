@@ -97,7 +97,8 @@ export class HomeComponent implements OnInit {
 
         this.loadingConfirmPayback = true;
         // TODO Missing recommendationId
-        promiseTimeout(TIMEOUT, this.matrixBasicDataService.confirmPayback(this.dialogData.recommendation.group.groupId, 0))
+        promiseTimeout(TIMEOUT, this.matrixBasicDataService.confirmPayback(this.dialogData.recommendation.group.groupId,
+          recommendationIndex))
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){

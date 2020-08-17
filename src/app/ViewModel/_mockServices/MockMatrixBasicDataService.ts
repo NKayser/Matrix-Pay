@@ -14,5 +14,30 @@ export class MockMatrixBasicDataService{
     return new SuccessfulResponse();
   }
 
+  public async userChangeLanguage(language: string): Promise<ServerResponse>{
+    return new SuccessfulResponse();
+  }
+
+  public async userChangeDefaultCurrency(currency: string): Promise<ServerResponse>{
+    return new SuccessfulResponse();
+  }
+
+  public async leaveGroup(groupId: string): Promise<ServerResponse>{
+    return new SuccessfulResponse();
+  }
+
+  public async groupCreate(name: string, currency: string): Promise<ServerResponse>{
+    return new SuccessfulResponse();
+  }
+
+  public async groupAddMember(groupId: string, userId: string): Promise<ServerResponse>{
+    return new SuccessfulResponse();
+  }
+
+  public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]):
+    Promise<ServerResponse>{
+    return new SuccessfulResponse();
+  }
+
 
 }

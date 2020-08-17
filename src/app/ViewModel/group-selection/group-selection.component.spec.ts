@@ -11,15 +11,15 @@ import { GroupSelectionComponent } from './group-selection.component';
 import {MatDialog} from '@angular/material/dialog';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {MockDataModelService} from '../_mockServices/MockDataModelService';
-import {GroupService} from '../../ServerCommunication/GroupCommunication/group.service';
-import {MockGroupService} from '../_mockServices/MockGroupService';
 import {MockDialog} from '../_mockServices/MockDialog';
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
 
 describe('GroupSelectionComponent', () => {
   let component: GroupSelectionComponent;
   let fixture: ComponentFixture<GroupSelectionComponent>;
   let dataModelService: DataModelService;
-  let groupService: GroupService;
+  let matrixBasicDataService: MatrixBasicDataService;
   let spy1: any;
 
   beforeEach(async(() => {
@@ -28,7 +28,7 @@ describe('GroupSelectionComponent', () => {
       providers: [
         { provide: MatDialog, useValue: MockDialog },
         { provide: DataModelService, useClass: MockDataModelService},
-        { provide: GroupService, useClass: MockGroupService }
+        { provide: MatrixBasicDataService, useClass: MockMatrixBasicDataService }
       ],
       imports: [
         NoopAnimationsModule,
@@ -42,7 +42,7 @@ describe('GroupSelectionComponent', () => {
     }).compileComponents();
 
     dataModelService = TestBed.inject(DataModelService);
-    groupService = TestBed.inject(GroupService);
+    matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
   }));
 
   beforeEach(() => {
@@ -65,21 +65,21 @@ describe('GroupSelectionComponent', () => {
 
   it('check leave group cancel', () => {
     component.ngOnInit();
-    spy1 = spyOn(groupService, 'leaveGroup');
+    spy1 = spyOn(matrixBasicDataService, 'leaveGroup');
     component.leaveGroup();
     expect(spy1).toHaveBeenCalledTimes(0);
   });
 
   it('check add member to group', () => {
     component.ngOnInit();
-    spy1 = spyOn(groupService, 'addMember');
+    spy1 = spyOn(matrixBasicDataService, 'groupAddMember');
     component.addMemberToGroup();
     expect(spy1).toHaveBeenCalled();
   });
 
   it('check create group', () => {
     component.ngOnInit();
-    spy1 = spyOn(groupService, 'createGroup');
+    spy1 = spyOn(matrixBasicDataService, 'groupCreate');
     component.addGroup();
     expect(spy1).toHaveBeenCalled();
   });

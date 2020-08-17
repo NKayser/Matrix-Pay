@@ -5,18 +5,18 @@ import {MatDialog} from '@angular/material/dialog';
 import {MockDialog} from '../_mockServices/MockDialog';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {MockDataModelService} from '../_mockServices/MockDataModelService';
-import {TransactionService} from '../../ServerCommunication/GroupCommunication/transaction.service';
-import {MockTransactionService} from '../_mockServices/MockTransactionService';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
 import {Transaction} from '../../DataModel/Group/Transaction';
 import {TransactionType} from '../../DataModel/Group/TransactionType';
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
 
 describe('GroupTransactionComponent', () => {
   let component: GroupTransactionComponent;
   let fixture: ComponentFixture<GroupTransactionComponent>;
   let dataModelService: DataModelService;
-  let transactionService: TransactionService;
+  let matrixBasicDataService: MatrixBasicDataService;
   // let spy1: any;
 
   beforeEach(async(() => {
@@ -25,13 +25,13 @@ describe('GroupTransactionComponent', () => {
       providers: [
         { provide: MatDialog, useValue: MockDialog },
         { provide: DataModelService, useClass: MockDataModelService },
-        { provide: TransactionService, useClass: MockTransactionService },
+        { provide: MatrixBasicDataService, useClass: MockMatrixBasicDataService },
       ]
     })
     .compileComponents();
 
     dataModelService = TestBed.inject(DataModelService);
-    transactionService = TestBed.inject(TransactionService);
+    matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
   }));
 
   beforeEach(() => {

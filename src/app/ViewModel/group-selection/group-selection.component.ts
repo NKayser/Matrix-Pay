@@ -20,6 +20,7 @@ import {ActivityType} from '../../DataModel/Group/ActivityType';
 import {GroupService} from '../../ServerCommunication/GroupCommunication/group.service';
 import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {DialogProviderService} from '../dialog-provider.service';
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 
 @Component({
   selector: 'app-group-selection',
@@ -50,7 +51,7 @@ export class GroupSelectionComponent implements OnInit{
     );
 
   constructor(private breakpointObserver: BreakpointObserver, public dialog: MatDialog, private dataModelService: DataModelService,
-              private groupService: GroupService, private dialogProviderService: DialogProviderService) {}
+              private matrixBasicDataService: MatrixBasicDataService, private dialogProviderService: DialogProviderService) {}
 
   // set default selected group
   ngOnInit(): void{
@@ -126,7 +127,7 @@ export class GroupSelectionComponent implements OnInit{
 
         if (this.leaveGroupData.leave === true){
           this.loadingLeaveGroup = true;
-          promiseTimeout(TIMEOUT, this.groupService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
+          promiseTimeout(TIMEOUT, this.matrixBasicDataService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){
               this.dialogProviderService.openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
@@ -159,8 +160,8 @@ export class GroupSelectionComponent implements OnInit{
         console.log(this.createGroupData.groupName);
 
         this.loadingAddGroup = true;
-        promiseTimeout(TIMEOUT, this.groupService.createGroup(this.createGroupData.groupName, this.createGroupData.currency.toString(),
-          this.createGroupData.groupName))
+        promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupCreate(this.createGroupData.groupName,
+          this.createGroupData.currency.toString()))
           .then((data) => {
           console.log(data);
           if (!data.wasSuccessful()){
@@ -191,7 +192,8 @@ export class GroupSelectionComponent implements OnInit{
         console.log(this.addUserToGroupData.user);
 
         this.loadingAddGroup = true;
-        promiseTimeout(TIMEOUT, this.groupService.addMember(this.addUserToGroupData.group.groupId, this.addUserToGroupData.user))
+        promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupAddMember(this.addUserToGroupData.group.groupId,
+          this.addUserToGroupData.user))
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){

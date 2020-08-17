@@ -1,4 +1,4 @@
-import {async, ComponentFixture, inject, TestBed} from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {SettingsComponent} from './settings.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -6,14 +6,14 @@ import {MockDataModelService} from '../_mockServices/MockDataModelService';
 import {Language} from '../../DataModel/Utils/Language';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Currency} from '../../DataModel/Utils/Currency';
-import {SettingsService} from '../../ServerCommunication/SettingsCommunication/settings.service';
-import {MockSettingsService} from '../_mockServices/MockSettingsService';
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
 
 describe('SettingsComponent', () => {
   let component: SettingsComponent;
   let fixture: ComponentFixture<SettingsComponent>;
   let dataModelService: DataModelService;
-  let settingsService: SettingsService;
+  let matrixBasicDataService: MatrixBasicDataService;
   let spy1: any;
   let spy2: any;
 
@@ -26,13 +26,13 @@ describe('SettingsComponent', () => {
           useValue: []
         },
         { provide: DataModelService, useClass: MockDataModelService },
-        { provide: SettingsService, useClass: MockSettingsService }
+        { provide: MatrixBasicDataService, useClass: MockMatrixBasicDataService }
       ]
     })
     .compileComponents();
 
     dataModelService = TestBed.inject(DataModelService);
-    settingsService = TestBed.inject(SettingsService);
+    matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
   }));
 
   beforeEach(() => {
@@ -55,8 +55,8 @@ describe('SettingsComponent', () => {
     component.selectedCurrency = Currency.USD;
     component.selectedLanguage = Language.ENGLISH;
     fixture.detectChanges();
-    spy1 = spyOn(settingsService, 'changeCurrency');
-    spy2 = spyOn(settingsService, 'changeLanguage');
+    spy1 = spyOn(matrixBasicDataService, 'userChangeLanguage');
+    spy2 = spyOn(matrixBasicDataService, 'userChangeDefaultCurrency');
     component.applySettings();
     expect(spy1).toHaveBeenCalled();
     expect(spy2).toHaveBeenCalled();

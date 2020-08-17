@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { HomeComponent } from './home.component';
+import {HomeComponent} from './home.component';
 import {MatDialog} from '@angular/material/dialog';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {MockDialog} from '../_mockServices/MockDialog';
@@ -8,6 +8,8 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {MockDataModelService} from '../_mockServices/MockDataModelService';
+import {Group} from '../../DataModel/Group/Group';
+import {Currency} from '../../DataModel/Utils/Currency';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -42,11 +44,11 @@ describe('HomeComponent', () => {
   });*/
 
   it('cancel recommendation', () => {
-    component.recommendations = [new Recommendation(null, null, null)];
+    component.recommendations = [new Recommendation(new Group('1', '1', Currency.USD), null, null)];
 
     spy1 = spyOn(matrixBasicDataService, 'confirmPayback');
     component.confirmPayback(0);
-    expect(spy1).toHaveBeenCalledTimes(0);
+    expect(spy1).toHaveBeenCalled();
 
   });
 });
