@@ -34,6 +34,7 @@ export class MatrixBasicDataService implements BasicDataInterface {
    * @param payerId
    * @param recipientIds
    * @param amounts
+   * @param isPayback
    */
   public createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
     return this.groupService.createTransaction(groupId, description, payerId, recipientIds, amounts, isPayback);

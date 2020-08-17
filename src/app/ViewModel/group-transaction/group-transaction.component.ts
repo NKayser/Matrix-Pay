@@ -68,7 +68,7 @@ export class GroupTransactionComponent implements OnChanges {
 
         this.loadingCreateExpense = true;
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.group.groupId, this.data.description,
-          this.data.payer.contactId, recipientIds, sendAmounts))
+          this.data.payer.contactId, recipientIds, sendAmounts, false))
           .then((data) => {
             console.log(data);
             if (!data.wasSuccessful()){

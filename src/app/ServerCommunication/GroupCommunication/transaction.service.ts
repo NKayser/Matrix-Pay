@@ -31,6 +31,7 @@ export class TransactionService {
    * @param recipientIds User Ids of the recipients in this transaction
    * @param amounts How much money each recipient received, in Cents. Same order as recipient array. Should all be
    * positive.
+   * @param isPayback
    */
   // TODO: known error: when (setting Recommendations or reading room account data) and then creating Transaction, this error occurs:
   // Error: This room is configured to use encryption, but your client does not support encryption.

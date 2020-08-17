@@ -176,6 +176,7 @@ export class GroupService {
    * @param payerId
    * @param recipientIds
    * @param amounts
+   * @param isPayback
    */
   public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
     return this.transactionService.createTransaction(groupId, description, payerId, recipientIds, amounts, isPayback);
