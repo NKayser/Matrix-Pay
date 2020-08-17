@@ -31,6 +31,14 @@ export class BasicDataUpdateService {
     if (Utils.log) console.log('This is BasicDataUpdateService');
     this.observables = observables; // TODO imlement observableInterface
     this.createUser();
+    this.addGroup();
+    this.addGroupActivity();
+    this.updateDefaultCurrency();
+    this.updateDefaultLanguage();
+    this.updateGroupMember();
+    this.updateModifiedGroupTransaction();
+    this.updateNewGroupTransactions();
+
   }
 
   /**
@@ -149,6 +157,8 @@ export class BasicDataUpdateService {
           if (group.getGroupmember(param.userId) === null) {
             const newMember = new Groupmember(new Contact(param.userId, param.name), group);
             group.addGroupmember(newMember);
+            const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, newMember.contact, param.date);
+            group.addActivity(activity);
           }
         }
         else {
@@ -156,7 +166,10 @@ export class BasicDataUpdateService {
           if (group.getGroupmember(param.groupId) != null) {
             if (Utils.log) console.log('BasicDataUpdateService removed member ' + param.name + '(' + param.userId + ')');
             const group = this.dataModel.getGroup(param.groupId);
+            const groupMember = group.getGroupmember(param.userId);
             group.removeGroupmember(param.userId);
+            const activity = new Activity(ActivityType.CONTACTLEFTGROUP, group, groupMember.contact, param.date);
+            group.addActivity(activity);
           }
         }
       }
@@ -175,6 +188,8 @@ export class BasicDataUpdateService {
         if (group.getGroupmember(groupMember.userId) === null) {
           const newMember = new Groupmember(new Contact(groupMember.userId, groupMember.name), group);
           group.addGroupmember(newMember);
+          const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, newMember.contact, groupMember.date);
+          group.addActivity(activity);
         }
       }
       else {
@@ -183,7 +198,10 @@ export class BasicDataUpdateService {
           if (Utils.log) console.log('BasicDataUpdateService removed member (got request from buffer): '
             + groupMember.name + '(' + groupMember.userId + ')');
           const group = this.dataModel.getGroup(groupMember.groupId);
+          const deletedMember = group.getGroupmember(groupMember.userId);
           group.removeGroupmember(groupMember.userId);
+          const activity = new Activity(ActivityType.CONTACTLEFTGROUP, group, deletedMember.contact, groupMember.date);
+          group.addActivity(activity);
         }
       }
     }
@@ -206,6 +224,8 @@ export class BasicDataUpdateService {
       const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
         param.name, param.creationDate, group, payer, recipients, sender);
       group.addTransaction(newTransaction);
+      const activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, sender.contact, param.creationDate);
+      group.addActivity(activity);
       return newTransaction;
   }
 
@@ -219,10 +239,13 @@ export class BasicDataUpdateService {
       const group = this.dataModel.getGroup(param.groupId);
       let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
       let recipients: AtomarChange[] = [];
+      let sender = group.getGroupmember(param.senderId);
       for (let i = 0; i < param.recipientIds.length; i++) {
         recipients.push(new AtomarChange(group.getGroupmember(param.recipientIds[i]).contact, param.recipientAmounts[i]));
       }
       group.editTransaction(param.transactionId, param.name, payer, recipients);
+      const activity = new Activity(ActivityType.NEWEXPENSE, group.getTransaction(param.transactionId), sender.contact, param.creationDate);
+      group.addActivity(activity);
       // TODO: Edit Balances after editing a transaction.
     });
   }
