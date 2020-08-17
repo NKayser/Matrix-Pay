@@ -23,7 +23,7 @@ import {ActivityType} from "../DataModel/Group/ActivityType";
 })
 export class BasicDataUpdateService {
   private observables: ObservableInterface;
-  private transactionBuffer: TransactionTypeInterface[][] = [[]];
+  private transactionBuffer: TransactionTypeInterface[][] = [];
   private activityBuffer: GroupActivityType[] = [];
   private membershipBuffer: GroupMemberType[] = [];
 
@@ -75,6 +75,7 @@ export class BasicDataUpdateService {
   }
 
   private checkBuffer(groupId: string): void {
+    console.log(this.transactionBuffer);
     this.activityBuffer.forEach( (item, index) => {
       if (item.groupId === groupId) {
         this.addGroupActivityFromBuffer(item);
@@ -82,6 +83,8 @@ export class BasicDataUpdateService {
       }
     });
     this.transactionBuffer.forEach( (item, index) => {
+      console.log('item: ');
+      console.log(item);
       if (item[0].groupId === groupId) {
         this.updateNewGroupTransactionsFromBuffer(item);
         this.activityBuffer.splice(index, 1);

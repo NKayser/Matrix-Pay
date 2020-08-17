@@ -67,14 +67,14 @@ export class ObservableService implements ObservableInterface {
   /*private oldRoomCreations: object;
   private oldRoomMembershipChanges: GroupMemberType[];
   private oldModifiedTransactions: TransactionType[];*/
-  private transactions: TransactionType[];
+  private transactions: TransactionType[] = [];
 
   private static async until(condition: () => boolean, interval: number, timeout?: number): Promise<boolean> {
     let time: number = 0;
     while (condition() == false) {
       if (timeout != undefined && time >= timeout) return Promise.reject();
       await new Promise(resolve => setTimeout(resolve, interval));
-      console.log('waiting for client to be logged in or prepared. ' + time);
+      if (Utils.log) console.log('waiting for client to be logged in or prepared. ' + time);
       time += interval;
     }
     return true;
@@ -82,18 +82,18 @@ export class ObservableService implements ObservableInterface {
 
   // for testing
   public scroll(): void {
-    console.log(this.window.canPaginate(EventTimeline.BACKWARDS));
+    if (Utils.log) console.log(this.window.canPaginate(EventTimeline.BACKWARDS));
     const tl = this.window.getTimelineIndex(EventTimeline.BACKWARDS);
     if (!tl) {
-      console.log('TimelineWindow: no timeline yet');
+      if (Utils.log) console.log('TimelineWindow: no timeline yet');
     }
     if (tl.index > tl.minIndex()) {
-      console.log('canPaginate');
+      if (Utils.log) console.log('canPaginate');
     }
-    console.log('neighboring timeline or pagination token available: ' +  Boolean(tl.timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS) ||
+    if (Utils.log) console.log('neighboring timeline or pagination token available: ' +  Boolean(tl.timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS) ||
       tl.timeline.getPaginationToken(EventTimeline.BACKWARDS)));
     this.window.paginate(EventTimeline.BACKWARDS, 10);
-    console.log('scrolled');
+    if (Utils.log) console.log('scrolled');
   }
 
   private async setUp(): Promise<void> {
@@ -129,7 +129,7 @@ export class ObservableService implements ObservableInterface {
       });
     });
     await syncPromise;
-    console.log(this.matrixClient.getSyncStateData());
+    if (Utils.log) console.log(this.matrixClient.getSyncStateData());
 
     // start the matrix listeners
     this.listenToMatrix();
@@ -186,7 +186,7 @@ export class ObservableService implements ObservableInterface {
     // but needed here for the observable (in DataModel for the group constructor)
     const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('currency', ' ');
     let currency: string;
-    console.log(currencyEvent);
+    if (Utils.log) console.log(currencyEvent);
     // See the sdk code of getStateEvents() for explanation
     if (currencyEvent === null) {
       // no such event type or no valid events with this event type and state key
@@ -201,22 +201,25 @@ export class ObservableService implements ObservableInterface {
       }
     } else {
       currency = currencyEvent.getContent().currency;
-      console.log(currencyEvent.getContent().currency);
+      if (Utils.log) console.log(currencyEvent.getContent().currency);
     }
-    console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames);
+    if (Utils.log) console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames);
     this.groupsObservable.next({
       groupId, groupName, currency, userIds,
       userNames, isLeave: false
     });
 
     // The things written into the local store of the client will eventually be detected by the listeners.
-    console.log('---window---');
+    if (Utils.log) console.log('---window---');
     const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
     timelineWindow.load();
-    console.log(timelineWindow.getEvents());
-    console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
-    this.paginateBackwardsUntilTheEnd(timelineWindow);
-    this.multipleNewTransactionsObservable.next(this.transactions);
+    if (Utils.log) console.log(timelineWindow.getEvents());
+    if (Utils.log) console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
+    await this.paginateBackwardsUntilTheEnd(timelineWindow);
+    console.log('Anzahl Transaktionen: ' + this.transactions.length);
+    if (this.transactions.length > 0) {
+      this.multipleNewTransactionsObservable.next(this.transactions);
+    }
 
     /*console.log('---new timelineSet---');
     // TODO: set the content of the filter
@@ -243,16 +246,13 @@ export class ObservableService implements ObservableInterface {
 
   }
 
-  private paginateBackwardsUntilTheEnd(window: TimelineWindow): void {
-    window.paginate(EventTimeline.BACKWARDS, 10)
-      .then(gotMoreEvents => {
-          if (gotMoreEvents) {
-            this.paginateBackwardsUntilTheEnd(window);
-          } else {
-            return;
-          }
-        }
-      );
+  private async paginateBackwardsUntilTheEnd(window: TimelineWindow): Promise<void> {
+    const gotMoreEvents: boolean = await window.paginate(EventTimeline.BACKWARDS, 10);
+    if (gotMoreEvents) {
+      await this.paginateBackwardsUntilTheEnd(window);
+    } else {
+      return;
+    }
   }
 
 
@@ -262,7 +262,7 @@ export class ObservableService implements ObservableInterface {
 
     if (Utils.log) { console.log('ObservableService is listening to Matrix'); }
 
-    console.log('ObservableService is listening to Matrix');
+    if (Utils.log) console.log('ObservableService is listening to Matrix');
 
     // Fires whenever new user-scoped account_data is added.
     this.matrixClient.on('accountData', (event, oldEvent) => {
@@ -331,7 +331,7 @@ export class ObservableService implements ObservableInterface {
           case ('payback'): {
             // If the event has been replaced, getContent() returns the content of the replacing event.
             if (!event.isRelation()) {
-              if (Utils.log) console.log('got an old payback. name: ' + event.getContent().name);
+              console.log('got an old payback. name: ' + event.getContent().name);
               this.transactions.push(this.getPaybackFromEvent(room, event));
             } else if (event.isRelation('m.replace')) {
               if (Utils.log) console.log('got an old editing of a payback. name: ' + event.getContent().name);
@@ -383,7 +383,7 @@ export class ObservableService implements ObservableInterface {
               // will be received through the replacing event.
               // However, using using getContent() won't hurt.
               if (Utils.log) { console.log('got payback. name: ' + event.getContent().name); }
-              this.newTransactionObservable.next(this.getPaybackFromEvent(room, event));
+              this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
             } else if (event.isRelation('m.replace')) {
               if (Utils.log) { console.log('got editing of payback. name: ' + event.getContent().name); }
               this.modifiedTransactionsObservable.next(this.getPaybackFromEvent(room, event));
@@ -392,7 +392,7 @@ export class ObservableService implements ObservableInterface {
           }
           case ('expense'): {
             if (Utils.log) { console.log('got expense. name: ' + event.getContent().name); }
-            this.newTransactionObservable.next(this.getExpenseFromEvent(room, event));
+            this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
             break;
           }
           case ('m.room.create'): {
@@ -413,9 +413,9 @@ export class ObservableService implements ObservableInterface {
         if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
           this.processNewRoom(this.matrixClient.getRoom(groupId));
           // TODO call next() on observable for activity
-          console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
+          if (Utils.log) console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
-          console.log('user left the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
+          if (Utils.log) console.log('user left the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
           this.groupsObservable.next({groupId, isLeave: true,
             currency: undefined, groupName: undefined, userNames: undefined, userIds: undefined});
         }
@@ -423,10 +423,10 @@ export class ObservableService implements ObservableInterface {
         let isLeave: boolean;
         if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
           isLeave = false;
-          console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
+          if (Utils.log) console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
           isLeave = true;
-          console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
+          if (Utils.log) console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
         }
         this.groupMembershipObservable.next(
           {groupId, isLeave, userId, date: event.getDate(),
@@ -501,7 +501,7 @@ export class ObservableService implements ObservableInterface {
   private canPaginateWithHelpfulLog(window: TimelineWindow, direction: string): boolean {
     const tl = window.getTimelineIndex(direction);
     if (!tl) {
-      console.log('TimelineWindow: no timeline yet');
+      if (Utils.log) console.log('TimelineWindow: no timeline yet');
       return false;
     }
     if (direction === EventTimeline.BACKWARDS) {
