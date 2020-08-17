@@ -190,22 +190,19 @@ export class ObservableService implements ObservableInterface {
       console.log(currencyEvent.getContent().currency);
     }
     console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames);
-    // As long as we do not filter for paygroups, set currency to 'EURO' for testing
     this.groupsObservable.next({
-      groupId, groupName, /*currency*/ currency: 'EURO', userIds,
+      groupId, groupName, currency, userIds,
       userNames, isLeave: false
     });
 
     // The things written into the local store of the client will eventually be detected by the listeners.
-    if (room.roomId == '!ckyzttSWpiMwtNphYR:dsn.tm.kit.edu') {
-      console.log('---window---');
-      const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
-      timelineWindow.load();
-      console.log(timelineWindow.getEvents());
-      console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
-      this.paginateBackwardsUntilTheEnd(timelineWindow);
-      this.multipleNewTransactionsObservable.next(this.transactions);
-    }
+    console.log('---window---');
+    const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
+    timelineWindow.load();
+    console.log(timelineWindow.getEvents());
+    console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
+    this.paginateBackwardsUntilTheEnd(timelineWindow);
+    this.multipleNewTransactionsObservable.next(this.transactions);
 
     /*console.log('---new timelineSet---');
     // TODO: set the content of the filter
