@@ -9,20 +9,36 @@ import {Groupmember} from "../DataModel/Group/Groupmember";
 import {Utils} from "../ServerCommunication/Response/Utils";
 import {Transaction} from "../DataModel/Group/Transaction";
 import {TransactionType} from "../DataModel/Group/TransactionType";
-import {TransactionType as TransactionTypeInterface} from "../ServerCommunication/CommunicationInterface/parameterTypes";
+import {
+  GroupActivityType,
+  GroupMemberType,
+  TransactionType as TransactionTypeInterface
+} from "../ServerCommunication/CommunicationInterface/parameterTypes";
 import {AtomarChange} from "../DataModel/Group/AtomarChange";
+import {Activity} from "../DataModel/Group/Activity";
+import {ActivityType} from "../DataModel/Group/ActivityType";
 
 @Injectable({
   providedIn: 'root'
 })
 export class BasicDataUpdateService {
   private observables: ObservableInterface;
+  private transactionBuffer: TransactionTypeInterface[][] = [];
+  private activityBuffer: GroupActivityType[] = [];
+  private membershipBuffer: GroupMemberType[] = [];
 
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     if (Utils.log) console.log('This is BasicDataUpdateService');
     this.observables = observables; // TODO imlement observableInterface
     this.createUser();
     this.addGroup();
+    this.addGroupActivity();
+    this.updateDefaultCurrency();
+    this.updateDefaultLanguage();
+    this.updateGroupMember();
+    this.updateModifiedGroupTransaction();
+    this.updateNewGroupTransactions();
+
   }
 
   /**
@@ -38,22 +54,79 @@ export class BasicDataUpdateService {
 
   /**
    * Creates a group and adds it to the groups in dataModel.groups. Adds all groupmembers to the group.
-   * TODO: create Activity (for both isLeave cases respectively).
    */
   private async addGroup(): Promise<void> {
     this.observables.getGroupsObservable().subscribe(param => {
       if (!param.isLeave) {
-        if (Utils.log) console.log('new group detected:' + param.groupId);
+        if (Utils.log) console.log('New group detected:' + param.groupId);
         this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
         const newGroup = this.dataModel.getGroup(param.groupId);
         for (let i = 0; i < param.userIds.length; i++) {
-          newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
+          if (newGroup.getGroupmember(param.groupId) === null) {
+            newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
+          }
         }
+        this.checkBuffer(param.groupId);
       }
       else {
-        if (Utils.log) console.log('group deleted:' + param.groupId);
+        if (Utils.log) console.log('Group deleted:' + param.groupId);
         this.dataModel.user.removeGroup(param.groupId)}
     });
+  }
+
+  private checkBuffer(groupId: string): void {
+    console.log(this.transactionBuffer);
+    this.activityBuffer.forEach( (item, index) => {
+      if (item.groupId === groupId) {
+        this.addGroupActivityFromBuffer(item);
+        this.activityBuffer.splice(index, 1);
+      }
+    });
+    this.transactionBuffer.forEach( (item, index) => {
+      console.log('item: ');
+      console.log(item);
+      if (item[0].groupId === groupId) {
+        this.updateNewGroupTransactionsFromBuffer(item);
+        this.activityBuffer.splice(index, 1);
+      }
+    });
+    this.membershipBuffer.forEach( (item, index) => {
+      if (item[0].groupId === groupId) {
+        this.updateGroupMemberFromBuffer(item);
+        this.activityBuffer.splice(index, 1);
+      }
+    });
+  }
+
+  /**
+   * Creates an activity for the creation of a group.
+   */
+  private async addGroupActivity(): Promise<void> {
+    this.observables.getGroupActivityObservable().subscribe(param => {
+      if (this.dataModel.getGroup(param.groupId) != null) {
+        if (Utils.log) console.log('Added group activity: ' + param.groupId);
+        const group = this.dataModel.getGroup(param.groupId);
+        const activity = new Activity(ActivityType.GROUPCREATION, group, group.getGroupmember(param.creatorId).contact, param.creationDate);
+        group.addActivity(activity);
+      }
+      else {
+        if (Utils.log) console.log('Group activity pushed to buffer: ' + param.groupId);
+        this.activityBuffer.push(param);
+      }
+    });
+  }
+
+  private async addGroupActivityFromBuffer(groupActivity: GroupActivityType): Promise<void> {
+    if (this.dataModel.getGroup(groupActivity.groupId) != null) {
+      if (Utils.log) console.log('Added group activity from buffer: ' + groupActivity.groupId);
+      const group = this.dataModel.getGroup(groupActivity.groupId);
+      const activity = new Activity(ActivityType.GROUPCREATION, group, group.getGroupmember(groupActivity.creatorId).contact, groupActivity.creationDate);
+      group.addActivity(activity);
+    }
+    else {
+      if (Utils.log) console.log('Group activity creation from buffer failed. Pushed back to buffer: ' + groupActivity.groupId);
+      this.activityBuffer.push(groupActivity);
+    }
   }
 
   /**
@@ -78,24 +151,73 @@ export class BasicDataUpdateService {
 
   /**
    * Adds a groupmember to a group if isLeave is false. Removes a groupmember from a group if isLeave is true.
-   * TODO: create an activity.
+   * TODO: create an activity. both times.
    */
   private async updateGroupMember(): Promise<void> {
     this.observables.getGroupMembershipObservable().subscribe( param => {
-      if (!param.isLeave) {
-        if (Utils.log) console.log('BasicDataUpdateService got member ' + param.name + '(' + param.userId + ')');
-        const group = this.dataModel.getGroup(param.groupId);
-        if (group.getGroupmember(param.userId) != null) {
-          const newMember = new Groupmember(new Contact(param.userId, param.name), group);
-          group.addGroupmember(newMember);
+      if (this.dataModel.getGroup(param.groupId) == null) {
+        if (!param.isLeave) {
+          if (Utils.log) console.log('BasicDataUpdateService got member: ' + param.name + ' (' + param.userId + ')');
+          const group = this.dataModel.getGroup(param.groupId);
+          const member = group.getGroupmember(param.userId);
+          if (member === null) {
+            const newMember = new Groupmember(new Contact(param.userId, param.name), group);
+            group.addGroupmember(newMember);
+          }
+          const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
+          group.addActivity(activity);
+
+        }
+        else {
+          const group = this.dataModel.getGroup(param.groupId);
+          if (group.getGroupmember(param.groupId) != null) {
+            if (Utils.log) console.log('BasicDataUpdateService removed member ' + param.name + '(' + param.userId + ')');
+            const group = this.dataModel.getGroup(param.groupId);
+            const groupMember = group.getGroupmember(param.userId);
+            group.removeGroupmember(param.userId);
+            const activity = new Activity(ActivityType.CONTACTLEFTGROUP, group, groupMember.contact, param.date);
+            group.addActivity(activity);
+          }
         }
       }
       else {
-        if (Utils.log) console.log('BasicDataUpdateService removed member ' + param.name + '(' + param.userId + ')');
-        const group = this.dataModel.getGroup(param.groupId);
-        group.removeGroupmember(param.userId);
+        this.membershipBuffer.push(param);
+        if (Utils.log) console.log('new member pushed to buffer: ' + param.name + ' (' + param.userId + ')');
       }
     });
+  }
+
+  private updateGroupMemberFromBuffer(groupMember: GroupMemberType): void {
+    if (this.dataModel.getGroup(groupMember.groupId) == null) {
+      if (!groupMember.isLeave) {
+        if (Utils.log) console.log('BasicDataUpdateService got member from buffer: ' + groupMember.name + ' (' + groupMember.userId + ')');
+        const group = this.dataModel.getGroup(groupMember.groupId);
+        const member = group.getGroupmember(groupMember.userId);
+        if (member === null) {
+          const newMember = new Groupmember(new Contact(groupMember.userId, groupMember.name), group);
+          group.addGroupmember(newMember);
+        }
+        const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, groupMember.date);
+        group.addActivity(activity);
+      }
+      else {
+        const group = this.dataModel.getGroup(groupMember.groupId);
+        if (group.getGroupmember(groupMember.groupId) != null) {
+          if (Utils.log) console.log('BasicDataUpdateService removed member (got request from buffer): '
+            + groupMember.name + '(' + groupMember.userId + ')');
+          const group = this.dataModel.getGroup(groupMember.groupId);
+          const deletedMember = group.getGroupmember(groupMember.userId);
+          group.removeGroupmember(groupMember.userId);
+          const activity = new Activity(ActivityType.CONTACTLEFTGROUP, group, deletedMember.contact, groupMember.date);
+          group.addActivity(activity);
+        }
+      }
+    }
+    else {
+      this.membershipBuffer.push(groupMember);
+      if (Utils.log) console.log('Membership creation/deletion from buffer failed. Pushed back to buffer: '
+        + groupMember.name + ' (' + groupMember.userId + ')');
+    }
   }
 
   private updateSingleTransaction(param: TransactionTypeInterface): Transaction {
@@ -110,6 +232,8 @@ export class BasicDataUpdateService {
       const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
         param.name, param.creationDate, group, payer, recipients, sender);
       group.addTransaction(newTransaction);
+      const activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, sender.contact, param.creationDate);
+      group.addActivity(activity);
       return newTransaction;
   }
 
@@ -123,10 +247,13 @@ export class BasicDataUpdateService {
       const group = this.dataModel.getGroup(param.groupId);
       let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
       let recipients: AtomarChange[] = [];
+      let sender = group.getGroupmember(param.senderId);
       for (let i = 0; i < param.recipientIds.length; i++) {
         recipients.push(new AtomarChange(group.getGroupmember(param.recipientIds[i]).contact, param.recipientAmounts[i]));
       }
       group.editTransaction(param.transactionId, param.name, payer, recipients);
+      const activity = new Activity(ActivityType.NEWEXPENSE, group.getTransaction(param.transactionId), sender.contact, param.creationDate);
+      group.addActivity(activity);
       // TODO: Edit Balances after editing a transaction.
     });
   }
@@ -137,15 +264,38 @@ export class BasicDataUpdateService {
    */
   private async updateNewGroupTransactions(): Promise<void> {
     this.observables.getMultipleNewTransactionsObservable().subscribe(param => {
-      if (Utils.log) console.log('BasicDataUpdateService added transactions');
+      if (this.dataModel.getGroup(param[0].groupId) != null) {
+        if (Utils.log) console.log('BasicDataUpdateService added transactions for group: ' + param[0].groupId);
+        const multipleTransactions: Transaction[] = [];
+        for (const transactionType of param) {
+          let currentTransaction = this.updateSingleTransaction(transactionType);
+          multipleTransactions.push(currentTransaction);
+        }
+        let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
+          param[param.length - 1].groupId);
+      }
+      else {
+        if (Utils.log) console.log('transactions for group pushed to buffer: ' +  param[0].groupId);
+        this.transactionBuffer.push(param);
+      }
+    });
+  }
+
+  private updateNewGroupTransactionsFromBuffer(transactions: TransactionTypeInterface[]) {
+    if (this.dataModel.getGroup(transactions[0].groupId) != null) {
+      if (Utils.log) console.log('BasicDataUpdateService added transactions from buffer for group: ' + transactions[0].groupId);
       const multipleTransactions: Transaction[] = [];
-      for (const transactionType of param) {
-        let currentTransaction = this.updateSingleTransaction(transactionType);
+      for (const transaction of transactions) {
+        let currentTransaction = this.updateSingleTransaction(transaction);
         multipleTransactions.push(currentTransaction);
       }
-      let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
-        param[param.length - 1].groupId);
-    });
+      let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
+        transactions[transactions.length - 1].groupId);
+    }
+    else {
+      if (Utils.log) console.log('Transactions creation from buffer failed. Pushed back to buffer: ' +  transactions[0].groupId);
+      this.transactionBuffer.push(transactions);
+    }
   }
 
   private currencyStringToEnum(currencyString: string): Currency {

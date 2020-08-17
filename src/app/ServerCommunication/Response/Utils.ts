@@ -5,7 +5,7 @@ import {UnsuccessfulResponse} from "./UnsuccessfulResponse";
 import {ServerResponse} from "./ServerResponse";
 
 export class Utils {
-  public static readonly log: boolean = false;
+  public static readonly log: boolean = true;
 
   public static async makeStandardRequest<T>(request: () => Promise<T>,
       errorMapping: (errCode: string) => number): Promise<ServerResponse> {
