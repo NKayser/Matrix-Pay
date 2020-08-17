@@ -84,8 +84,10 @@ export class BasicDataUpdateService {
       if (!param.isLeave) {
         if (Utils.log) console.log('BasicDataUpdateService got member ' + param.name + '(' + param.userId + ')');
         const group = this.dataModel.getGroup(param.groupId);
-        const newMember = new Groupmember(new Contact(param.userId, param.name), group);
-        group.addGroupmember(newMember);
+        if (group.getGroupmember(param.userId) != null) {
+          const newMember = new Groupmember(new Contact(param.userId, param.name), group);
+          group.addGroupmember(newMember);
+        }
       }
       else {
         if (Utils.log) console.log('BasicDataUpdateService removed member ' + param.name + '(' + param.userId + ')');
