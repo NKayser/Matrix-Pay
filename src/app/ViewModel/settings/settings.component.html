@@ -2,22 +2,22 @@
 <div class="absolute">
 
   <!--language dropdown and label-->
-  <div>
+  <!--<div>
     <mat-label class="settings_label">Language</mat-label>
 
     <mat-form-field appearance="fill">
-      <mat-select [(ngModel)]="selectedLanguage">
+      <mat-select [(value)]="selectedLanguage">
         <mat-option *ngFor="let language of languageMap, index as i" [value]="i">{{language}}</mat-option>
       </mat-select>
     </mat-form-field>
-  </div>
+  </div>-->
 
   <!--currency dropdown and label-->
   <div>
     <mat-label class="settings_label">Currency</mat-label>
 
     <mat-form-field appearance="fill">
-      <mat-select [(ngModel)]="selectedCurrency">
+      <mat-select [(value)]="selectedCurrency">
         <mat-option *ngFor="let currency of currencyMap, index as j" [value]="j">{{currency}}</mat-option>
       </mat-select>
     </mat-form-field>

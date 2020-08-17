@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter} from '@angular/core';
+import {Component, Output, EventEmitter, OnInit, OnDestroy} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
@@ -6,9 +6,12 @@ import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
 import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 import {MatrixEmergentDataService} from '../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {Subscription} from 'rxjs';
 
 // @ts-ignore
 import {MatrixEvent} from 'matrix-js-sdk';
+
 
 
 @Component({
@@ -16,7 +19,7 @@ import {MatrixEvent} from 'matrix-js-sdk';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy{
   private clientService: ClientInterface;
 
   // emitter to tell the App Component to display the Menu when logged in
@@ -26,14 +29,27 @@ export class LoginComponent {
   public hidePassword = true;
   public loadingLogIn = false;
 
+  private subscription: Subscription;
+
   // gets the input values of the user and checks if they obey all requirements
   public matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
   public passwordControl = new FormControl('', [Validators.required]);
 
   constructor(clientService: MatrixClientService,
               private emergentDataService: MatrixEmergentDataService,
-              private basicDataService: MatrixBasicDataService) {
+              private basicDataService: MatrixBasicDataService, private dataModelService: DataModelService) {
     this.clientService = clientService;
+  }
+
+  ngOnInit(): void {
+    this.subscription = this.dataModelService.navItem$.subscribe(item => {if (item){this.loggedIn.emit(true);
+                                                                                    this.loadingLogIn = false; } });
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription !== undefined){
+      this.subscription.unsubscribe();
+    }
   }
 
 
@@ -60,11 +76,6 @@ export class LoginComponent {
         } else {
           console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
         }
-
-        this.loadingLogIn = false;
-        // Tell AppComponent, that user is logged in
-        // TODO make sure that this only gets emitted when the dataModel was created
-        this.loggedIn.emit(true);
       }
   }
 

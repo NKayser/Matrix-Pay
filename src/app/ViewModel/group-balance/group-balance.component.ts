@@ -8,6 +8,8 @@ import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 import {DialogProviderService} from '../dialog-provider.service';
 import {gridListResize} from '../gridListResizer';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {Contact} from '../../DataModel/Group/Contact';
 
 @Component({
   selector: 'app-group-balance',
@@ -26,6 +28,7 @@ export class GroupBalanceComponent implements OnChanges {
 
   public recommendations: Recommendation[] = [];
   public balanceData = [];
+  public userContact: Contact;
 
   // used to resize the gridList
   public breakpoint: number;
@@ -47,7 +50,7 @@ export class GroupBalanceComponent implements OnChanges {
   }
 
   constructor(public dialog: MatDialog, public matrixBasicDataService: MatrixBasicDataService,
-              private dialogProviderService: DialogProviderService) {
+              private dialogProviderService: DialogProviderService, private dataModelService: DataModelService) {
   }
 
   /**
@@ -55,6 +58,8 @@ export class GroupBalanceComponent implements OnChanges {
    * this is necessary to detect the changes of the group form the group-selection-component
    */
   ngOnChanges(): void {
+
+    this.userContact = this.dataModelService.getUser().contact;
     // Initializes the graph with the balances of the members
     this.balanceData = [];
     const groupMembers = this.group.groupmembers;

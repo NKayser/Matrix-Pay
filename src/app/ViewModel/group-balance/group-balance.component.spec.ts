@@ -8,11 +8,15 @@ import {Group} from '../../DataModel/Group/Group';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {MockDataModelService} from '../_mockServices/MockDataModelService';
+import {Test} from 'tslint';
 
 describe('GroupBalanceComponent', () => {
   let component: GroupBalanceComponent;
   let fixture: ComponentFixture<GroupBalanceComponent>;
   let matrixBasicDataService: MatrixBasicDataService;
+  let dataModelService: DataModelService;
   let spy1: any;
 
   beforeEach(async(() => {
@@ -20,12 +24,14 @@ describe('GroupBalanceComponent', () => {
       declarations: [ GroupBalanceComponent ],
       providers: [
         { provide: MatDialog, useValue: MockDialog },
-        { provide: MatrixBasicDataService, useClass: MockMatrixBasicDataService}
+        { provide: MatrixBasicDataService, useClass: MockMatrixBasicDataService},
+        { provide: DataModelService, useClass: MockDataModelService}
       ]
     })
     .compileComponents();
 
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
+    dataModelService = TestBed.inject(DataModelService);
   }));
 
   beforeEach(() => {

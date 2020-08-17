@@ -10,6 +10,10 @@ import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {currencyMap} from '../../DataModel/Utils/Currency';
 import {DialogProviderService} from '../dialog-provider.service';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
+
+// @ts-ignore
+import {MatrixEvent} from 'matrix-js-sdk';
 
 @Component({
   selector: 'app-group-transaction',
@@ -47,12 +51,21 @@ export class GroupTransactionComponent implements OnChanges {
    * and send the data to matrix via the transactionService
    */
   public createExpense(): void {
+
+    /*const transactionResponse: ServerResponse = await this.matrixBasicDataService.createTransaction('!klmrbYgMcDFypBxwIF:dsn.tm.kit.edu', 'Description', '@uelkt:dsn.tm.kit.edu', ['@uelkt:dsn.tm.kit.edu'], [100], false);
+
+    if (transactionResponse.wasSuccessful()) {
+      console.log('transaction successful with val ' + transactionResponse.getValue());
+    } else {
+      console.log('transaction failed :/    :( because ' + transactionResponse.getError());
+    }*/
+
     const dialogRef = this.dialog.open(PaymentModalComponent, {
       width: '350px',
       data: this.generateCreateExpenseData(),
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       this.data = result;
       if (this.data !== undefined){
 
@@ -65,6 +78,10 @@ export class GroupTransactionComponent implements OnChanges {
           }
 
         }
+
+        console.log(this.data);
+        console.log(this.group.groupId);
+
 
         this.loadingCreateExpense = true;
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.group.groupId, this.data.description,
