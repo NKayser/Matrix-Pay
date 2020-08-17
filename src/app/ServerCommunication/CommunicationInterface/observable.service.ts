@@ -348,9 +348,10 @@ export class ObservableService implements ObservableInterface {
               isLeave = true;
             }
             // this.oldRoomMembershipChanges.push({groupId: room.roomId, userId: event.getStateKey(),
-            //  date: event.getDate(), isLeave, name: undefined /* should not be passed here */});
+            //  date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
+            // alternativ für den Namen (auch bei dem Room.membership-listener): room.getMember(event.getStateKey()).user.displayName)
             this.groupMembershipObservable.next({groupId: room.roomId, userId: event.getStateKey(),
-              date: event.getDate(), isLeave, name: undefined /* should not be passed here */});
+              date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
             break;
           }
         }
@@ -405,7 +406,9 @@ export class ObservableService implements ObservableInterface {
           isLeave = true;
           console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
         }
-        this.groupMembershipObservable.next({groupId, isLeave, userId, date: event.getDate(), name: undefined})
+        this.groupMembershipObservable.next(
+          {groupId, isLeave, userId, date: event.getDate(),
+            name: this.matrixClient.getUser(event.getStateKey()).displayName});
       }
     });
 
