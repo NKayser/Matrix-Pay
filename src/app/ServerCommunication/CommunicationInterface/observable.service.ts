@@ -347,7 +347,8 @@ export class ObservableService implements ObservableInterface {
           }
           case ('m.room.create'): {
             if (Utils.log) console.log('got an old room creation. room: ' + room.name + ' creator: ' + event.getContent().creator + ' date: ' + event.getDate());
-            // TODO: push in array (this.oldRoomCreations.push({...});)
+            this.groupActivityObservable.next({groupId: room.roomId, creatorId: event.getContent().creator
+              , creationDate: event.getDate()});
             break;
           }
           case ('m.room.member'): {
@@ -392,6 +393,13 @@ export class ObservableService implements ObservableInterface {
           case ('expense'): {
             if (Utils.log) { console.log('got expense. name: ' + event.getContent().name); }
             this.newTransactionObservable.next(this.getExpenseFromEvent(room, event));
+            break;
+          }
+          case ('m.room.create'): {
+            if (Utils.log) console.log('got a room creation. room: ' + room.name
+              + ' creator: ' + event.getContent().creator + ' date: ' + event.getDate());
+            this.groupActivityObservable.next({groupId: room.roomId, creatorId: event.getContent().creator, creationDate: event.getDate()});
+            break;
           }
         }
       }
