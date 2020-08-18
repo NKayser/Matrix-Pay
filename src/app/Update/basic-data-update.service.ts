@@ -62,7 +62,7 @@ export class BasicDataUpdateService {
         this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
         const newGroup = this.dataModel.getGroup(param.groupId);
         for (let i = 0; i < param.userIds.length; i++) {
-          if (newGroup.getGroupmember(param.groupId) === null) {
+          if (newGroup.getGroupmember(param.userIds[i]) === null) {
             newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
           }
         }
