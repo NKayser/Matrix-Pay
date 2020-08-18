@@ -22,7 +22,7 @@ export class MockDataModelService {
       this._user = new User(c1, Currency.EUR, Language.GERMAN);
       this._groups = [new Group('1', '1', Currency.USD), new Group('2', '2', Currency.EUR)];
 
-      const c2 = new Contact('c2', 'Bob');
+      /*const c2 = new Contact('c2', 'Bob');
       const c3 = new Contact('c3', 'Eve');
       const testGroup = this._groups[0];
       const m2 = new Groupmember(c2, testGroup);

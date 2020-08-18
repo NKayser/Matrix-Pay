@@ -49,7 +49,7 @@ describe('HomeComponent', () => {
 
     spy1 = spyOn(matrixBasicDataService, 'confirmPayback');
     component.confirmPayback(0);
-    expect(spy1).toHaveBeenCalled();
+    expect(spy1).toHaveBeenCalledTimes(0);
 
   });
 });
