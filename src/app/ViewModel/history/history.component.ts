@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {Activity} from '../../DataModel/Group/Activity';
 import {ActivityType} from '../../DataModel/Group/ActivityType';
 import {Group} from '../../DataModel/Group/Group';
@@ -8,7 +8,7 @@ import {Group} from '../../DataModel/Group/Group';
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.css']
 })
-export class HistoryComponent implements OnInit {
+export class HistoryComponent implements OnChanges {
 
   activities: Activity[] = [];
   activityTypes = ActivityType;
@@ -21,7 +21,7 @@ export class HistoryComponent implements OnInit {
   /**
    * get reference to activities of groups merge and sort them
    */
-  ngOnInit(): void {
+  ngOnChanges(): void {
 
     this.activities = this.group.activities;
 
