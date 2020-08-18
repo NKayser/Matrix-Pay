@@ -101,7 +101,7 @@ export class User {
   public createGroup(groupId: string, name: string, currency: Currency): Group {
     const group: Group = new Group(groupId, name, currency);
     this._groups.push(group);
-    group.addGroupmember(new Groupmember(this._contact, group));
+    //group.addGroupmember(new Groupmember(this._contact, group));
     return group;
   }
 
