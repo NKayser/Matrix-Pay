@@ -10,6 +10,7 @@ export enum Currency {
  * Maps currencies to their symbols to ensure correct display.
  */
 export const currencyMap = ['€', '$'];
+export const matrixCurrencyMap = ['EUR', 'USD'];
 
 /**
  * Maps currencies to symbol positions relative to the amount to ensure correct display.

@@ -8,6 +8,7 @@ import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {ClientError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
+import {matrixCurrencyMap} from '../../DataModel/Utils/Currency';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,7 @@ export class MatrixClientService implements ClientInterface {
   // TODO: decide where to save these constants
   private static readonly CURRENCY_KEY: string = 'com.matrixpay.currency';
   private static readonly LANGUAGE_KEY: string = 'com.matrixpay.language';
-  private static readonly DEFAULT_CURRENCY: string = 'Euro';
+  private static readonly DEFAULT_CURRENCY: string = matrixCurrencyMap[0];
   private static readonly DEFAULT_LANGUAGE: string = 'English';
 
   constructor() {}

@@ -10,6 +10,7 @@ import {DataModelService} from '../../DataModel/data-model.service';
 import {MockDataModelService} from '../_mockServices/MockDataModelService';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
+import {SuccessfulResponse} from '../../ServerCommunication/Response/SuccessfulResponse';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
