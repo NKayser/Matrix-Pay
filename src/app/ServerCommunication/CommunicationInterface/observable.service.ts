@@ -108,7 +108,7 @@ export class ObservableService implements ObservableInterface {
     // test: does not give the displayName, but the userId
     const name = this.matrixClient.getUser(userId).displayName;
     // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
-    const currencyEventContent = await this.matrixClient.getAccountDataFromServer('currency') // content of the matrix event
+    const currencyEventContent = await this.matrixClient.getAccountDataFromServer('com.matrixpay.currency') // content of the matrix event
       .catch(() => {if (Utils.log) { console.log('rejected promise while getting account data from server'); } });
     if (Utils.log) { console.log(currencyEventContent); }
     /* When setting language is implemented in login component:
@@ -270,12 +270,12 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('accountData', (event, oldEvent) => {
       // if (Utils.log) console.log('got account data change' + event.getType());
       switch (event.getType()) {
-        case ('currency'): {
+        case ('com.matrixpay.currency'): {
           if (Utils.log) { console.log('got currency change to ' + event.getContent().currency); }
           this.settingsCurrencyObservable.next({currency: event.getContent().currency});
           break;
         }
-        case ('language'): {
+        case ('com.matrixpay.language'): {
           if (Utils.log) { console.log('got language change to ' + event.getContent().language); }
           this.settingsLanguageObservable.next({language: event.getContent().language});
           break;
@@ -288,7 +288,7 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('Room.accountData', (event, room, oldEvent) => {
       // if (Utils.log) console.log('got account data change' + event.getType());
       switch (event.getType()) {
-        case ('balances'): {
+        case ('com.matrixpay.balances'): {
           const groupId = room.roomId;
           const content = event.getContent();
           const balances = content.balances;
@@ -298,7 +298,7 @@ export class ObservableService implements ObservableInterface {
           // TODO: call next() on observable
           break;
         }
-        case ('recommendation'): {
+        case ('com.matrixpay.recommendation'): {
           const groupId = room.roomId;
           const content = event.getContent();
           const recipients = content.recipients;
@@ -330,7 +330,7 @@ export class ObservableService implements ObservableInterface {
       if (!data.liveEvent) {
         // Process the events retrieved by backpagination
         switch (event.getType()) {
-          case ('payback'): {
+          case ('com.matrixpay.payback'): {
             // If the event has been replaced, getContent() returns the content of the replacing event.
             if (!event.isRelation()) {
               console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
@@ -342,7 +342,7 @@ export class ObservableService implements ObservableInterface {
             }
             break;
           }
-          case ('expense'): {
+          case ('com.matrixpay.expense'): {
             if (Utils.log) console.log('got an old expense. name: ' + event.getContent().name);
             this.transactions.push(this.getExpenseFromEvent(room, event));
             break;
@@ -377,7 +377,7 @@ export class ObservableService implements ObservableInterface {
       if (data.liveEvent) {
         // Process the events retrieved by /sync
         switch (event.getType()) {
-          case ('payback'): {
+          case ('com.matrixpay.payback'): {
             if (!event.isRelation()) {
               // We could consider using getOriginalContent() instead of getContent(), because if this event has been replaced
               // (replacing event in the same /sync batch),
@@ -392,7 +392,7 @@ export class ObservableService implements ObservableInterface {
             }
             break;
           }
-          case ('expense'): {
+          case ('com.matrixpay.expense'): {
             if (Utils.log) { console.log('got expense. name: ' + event.getContent().name); }
             this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
             break;
@@ -439,7 +439,7 @@ export class ObservableService implements ObservableInterface {
     // probably not needed
     // Fires whenever the event dictionary in room state is updated.
     this.matrixClient.on('RoomState.events', (event, state, prevEvent) => {
-      if (event.getType() === 'currency') {
+      if (event.getType() === 'com.matrixpay.currency') {
         const newCurrency = event.getContent().currency;
         if (Utils.log) { console.log('got change of room currency. room: ' + state.roomId + ' new currency: ' + newCurrency); }
         // TODO: call next() on observable
