@@ -10,6 +10,7 @@ import {DataModelService} from '../../DataModel/data-model.service';
 import {MockDataModelService} from '../_mockServices/MockDataModelService';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
+import {SuccessfulResponse} from '../../ServerCommunication/Response/SuccessfulResponse';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -48,7 +49,7 @@ describe('HomeComponent', () => {
 
     spy1 = spyOn(matrixBasicDataService, 'confirmPayback');
     component.confirmPayback(0);
-    expect(spy1).toHaveBeenCalled();
+    expect(spy1).toHaveBeenCalledTimes(0);
 
   });
 });

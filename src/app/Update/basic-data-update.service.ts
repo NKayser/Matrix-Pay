@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ObservableInterface} from '../ServerCommunication/CommunicationInterface/observableInterface';
 import {ObservableService} from '../ServerCommunication/CommunicationInterface/observable.service';
 import {DataModelService} from '../DataModel/data-model.service';
-import {Currency} from '../DataModel/Utils/Currency';
+import {Currency, currencyMap, matrixCurrencyMap} from '../DataModel/Utils/Currency';
 import {Contact} from '../DataModel/Group/Contact';
 import {Language} from '../DataModel/Utils/Language';
 import {Groupmember} from "../DataModel/Group/Groupmember";
@@ -303,11 +303,11 @@ export class BasicDataUpdateService {
   private currencyStringToEnum(currencyString: string): Currency {
     let currencyEnum: Currency = Currency.EUR;
     switch (currencyString) {
-      case ('EURO'): {
+      case (matrixCurrencyMap[0]): {
         currencyEnum = Currency.EUR;
         break;
       }
-      case ('USD'): {
+      case (matrixCurrencyMap[1]): {
         currencyEnum = Currency.USD;
         break;
       }
