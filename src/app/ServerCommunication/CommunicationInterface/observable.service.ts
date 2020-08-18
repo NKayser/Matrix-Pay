@@ -209,16 +209,18 @@ export class ObservableService implements ObservableInterface {
       userNames, isLeave: false
     });
 
-    // The things written into the local store of the client will eventually be detected by the listeners.
-    if (Utils.log) console.log('---window---');
-    const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
-    timelineWindow.load();
-    if (Utils.log) console.log(timelineWindow.getEvents());
-    if (Utils.log) console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
-    await this.paginateBackwardsUntilTheEnd(timelineWindow);
-    console.log('Anzahl Transaktionen: ' + this.transactions.length);
-    if (this.transactions.length > 0) {
-      this.multipleNewTransactionsObservable.next(this.transactions);
+    if (room.roomId === '!BGBWYmlePjKITRjxXS:dsn.tm.kit.edu') {
+      // The things written into the local store of the client will eventually be detected by the listeners.
+      if (Utils.log) console.log('---window---');
+      const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
+      timelineWindow.load();
+      if (Utils.log) console.log(timelineWindow.getEvents());
+      if (Utils.log) console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
+      await this.paginateBackwardsUntilTheEnd(timelineWindow);
+      console.log('Anzahl Transaktionen: ' + this.transactions.length);
+      if (this.transactions.length > 0) {
+        this.multipleNewTransactionsObservable.next(this.transactions);
+      }
     }
 
     /*console.log('---new timelineSet---');
@@ -331,7 +333,7 @@ export class ObservableService implements ObservableInterface {
           case ('payback'): {
             // If the event has been replaced, getContent() returns the content of the replacing event.
             if (!event.isRelation()) {
-              console.log('got an old payback. name: ' + event.getContent().name);
+              console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
               this.transactions.push(this.getPaybackFromEvent(room, event));
             } else if (event.isRelation('m.replace')) {
               if (Utils.log) console.log('got an old editing of a payback. name: ' + event.getContent().name);
@@ -449,28 +451,29 @@ export class ObservableService implements ObservableInterface {
     const content = event.getContent();
     return {transactionType: ObservableService.TRANSACTION_TYPE_EXPENSE,
       transactionId: event.getId(),
-      name: event.content.name,
+      name: content.name,
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payerId,
       payerAmount: content.amounts,
       recipientIds: content.recipientIds,
       recipientAmounts: content.amounts,
-      senderId: event.getSender};
+      senderId: event.getSender()};
   }
 
   private getPaybackFromEvent(room, event): TransactionType {
+    console.log('this is getPaybackFromEvent');
     const content = event.getContent();
     return {transactionType: ObservableService.TRANSACTION_TYPE_PAYBACK,
       transactionId: event.getId(),
-      name: event.content.name,
+      name: content.name,
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payerId,
       payerAmount: undefined, // should be calculated in BasicDataUpdateService
       recipientIds: content.recipientIds,
       recipientAmounts: content.amounts,
-      senderId: event.getSender};
+      senderId: event.getSender()};
   }
 
   // similar to Room.prototype.getOrCreateFilteredTimelineSet
