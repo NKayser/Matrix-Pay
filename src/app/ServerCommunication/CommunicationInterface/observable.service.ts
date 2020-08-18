@@ -114,8 +114,10 @@ export class ObservableService implements ObservableInterface {
     /* When setting language is implemented in login component:
        const languageEventContent = await matrixClient.getAccountDataFromServer('language');
        if (Utils.log) console.log(languageEventContent);*/
-    this.userObservable.next({contactId: userId, name,
-      currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
+    if (currencyEventContent !== null) {
+      this.userObservable.next({contactId: userId, name,
+        currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
+    }
 
 
     // wait until initial sync is done
