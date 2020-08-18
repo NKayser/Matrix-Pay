@@ -409,8 +409,11 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('RoomMember.membership', (event, member, oldMembership) => {
       const userId = member.userId;
       const groupId = member.roomId;
+      console.log('membership changed: ' + member.membership + ' ' + oldMembership);
       if (userId === this.matrixClient.getUserId()) {
-        if ((oldMembership === 'invite' || oldMembership === 'leave') && member.membership === 'join') {
+        if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
+          // aus irgendeinem grund ist der raum hier null
+
           this.processNewRoom(this.matrixClient.getRoom(groupId));
           // TODO call next() on observable for activity
           if (Utils.log) console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());

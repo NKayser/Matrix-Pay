@@ -155,14 +155,16 @@ export class BasicDataUpdateService {
    */
   private async updateGroupMember(): Promise<void> {
     this.observables.getGroupMembershipObservable().subscribe( param => {
-      if (this.dataModel.getGroup(param.groupId) == null) {
+      console.log(this.dataModel.getGroups());
+      console.log(param.groupId);
+      if (this.dataModel.getGroup(param.groupId) !== null) {
         if (!param.isLeave) {
           if (Utils.log) console.log('BasicDataUpdateService got member: ' + param.name + ' (' + param.userId + ')');
           const group = this.dataModel.getGroup(param.groupId);
-          const member = group.getGroupmember(param.userId);
+          let member = group.getGroupmember(param.userId);
           if (member === null) {
-            const newMember = new Groupmember(new Contact(param.userId, param.name), group);
-            group.addGroupmember(newMember);
+            member = new Groupmember(new Contact(param.userId, param.name), group);
+            group.addGroupmember(member);
           }
           const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
           group.addActivity(activity);
@@ -188,14 +190,14 @@ export class BasicDataUpdateService {
   }
 
   private updateGroupMemberFromBuffer(groupMember: GroupMemberType): void {
-    if (this.dataModel.getGroup(groupMember.groupId) == null) {
+    if (this.dataModel.getGroup(groupMember.groupId) !== null) {
       if (!groupMember.isLeave) {
         if (Utils.log) console.log('BasicDataUpdateService got member from buffer: ' + groupMember.name + ' (' + groupMember.userId + ')');
         const group = this.dataModel.getGroup(groupMember.groupId);
-        const member = group.getGroupmember(groupMember.userId);
+        let member = group.getGroupmember(groupMember.userId);
         if (member === null) {
-          const newMember = new Groupmember(new Contact(groupMember.userId, groupMember.name), group);
-          group.addGroupmember(newMember);
+          member = new Groupmember(new Contact(groupMember.userId, groupMember.name), group);
+          group.addGroupmember(member);
         }
         const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, groupMember.date);
         group.addActivity(activity);
