@@ -17,8 +17,8 @@ export class SettingsService {
   private matrixClientService: ClientInterface;
   private observableService: ObservableService;
 
-  private static readonly CURRENCY_CONTENT_KEY: string = 'currency';
-  private static readonly LANGUAGE_CONTENT_KEY: string = 'language';
+  private static readonly CURRENCY_CONTENT_KEY: string = 'com.matrixpay.currency';
+  private static readonly LANGUAGE_CONTENT_KEY: string = 'com.matrixpay.language';
 
   constructor(matrixClientService: MatrixClientService, observableService: ObservableService) {
     this.matrixClientService = matrixClientService;

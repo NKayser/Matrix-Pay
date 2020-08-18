@@ -13,8 +13,8 @@ import {MatrixClientService} from "./matrix-client.service";
 export class MatrixEmergentDataService implements EmergentDataInterface {
   private clientService: ClientInterface;
 
-  private static BALANCES_EVENT_TYPE: string = 'balances';
-  private static RECOMMENDATIONS_EVENT_TYPE: string = 'recommendations';
+  private static BALANCES_EVENT_TYPE: string = 'com.matrixpay.balances';
+  private static RECOMMENDATIONS_EVENT_TYPE: string = 'com.matrixpay.recommendations';
 
   constructor(clientService: MatrixClientService) {
     this.clientService = clientService;

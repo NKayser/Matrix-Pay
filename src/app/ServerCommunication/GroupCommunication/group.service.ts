@@ -23,7 +23,7 @@ export class GroupService {
   private static readonly ERRCODE_INUSE: string = 'M_ROOM_IN_USE';
   private static readonly ERRCODE_UNRECOGNIZED: string = 'M_UNRECOGNIZED';
   private static readonly ERRCODE_INVALID_PARAM: string = 'M_INVALID_PARAM';
-  private static readonly CURRENCY_KEY: string = 'currency';
+  private static readonly CURRENCY_KEY: string = 'com.matrixpay.currency';
   private static readonly RECOMMENDATIONS_KEY: string = 'recommendations';
   private static readonly ACCOUNT_DATA_KEY: string = 'accountData';
   private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways
