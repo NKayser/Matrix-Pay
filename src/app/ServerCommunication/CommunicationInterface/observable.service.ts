@@ -211,7 +211,7 @@ export class ObservableService implements ObservableInterface {
       userNames, isLeave: false
     });
 
-    if (room.roomId === '!BGBWYmlePjKITRjxXS:dsn.tm.kit.edu') {
+    //if (room.roomId === '!BGBWYmlePjKITRjxXS:dsn.tm.kit.edu') {
       // The things written into the local store of the client will eventually be detected by the listeners.
       if (Utils.log) console.log('---window---');
       const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
@@ -223,7 +223,7 @@ export class ObservableService implements ObservableInterface {
       if (this.transactions.length > 0) {
         this.multipleNewTransactionsObservable.next(this.transactions);
       }
-    }
+    //}
 
     /*console.log('---new timelineSet---');
     // TODO: set the content of the filter
@@ -454,14 +454,15 @@ export class ObservableService implements ObservableInterface {
 
   private getExpenseFromEvent(room, event): TransactionType {
     const content = event.getContent();
+    console.log(content);
     return {transactionType: ObservableService.TRANSACTION_TYPE_EXPENSE,
       transactionId: event.getId(),
       name: content.name,
       creationDate: event.getDate(),
       groupId: room.roomId,
-      payerId: content.payerId,
-      payerAmount: content.amounts,
-      recipientIds: content.recipientIds,
+      payerId: content.payer,
+      payerAmount: content.amounts[0], // TODO payer amount is currently wrong
+      recipientIds: content.recipients,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
   }
