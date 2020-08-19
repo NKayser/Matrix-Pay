@@ -100,7 +100,7 @@ export class ObservableService implements ObservableInterface {
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
     this.matrixClient = this.clientService.getClient();
-    
+
     // start the matrix listeners
     await this.listenToMatrix();
     await this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
@@ -294,17 +294,15 @@ export class ObservableService implements ObservableInterface {
       }
     });
 
-    /*
     // now done in 'Room.membership'-Listener so that a date can be retrieved with event.getDate()
     // Fires whenever invited to a room or joining a room
-        this.matrixClient.on('Room', room => {
+    this.matrixClient.on('Room', room => {
       const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
       if (!(members[this.matrixClient.getUserId()].membership === 'join')) {
         return;
       }
       this.processNewRoom(room);
     });
-    */
 
     // Fires whenever the timeline in a room is updated
     this.matrixClient.on('Room.timeline',
@@ -399,7 +397,7 @@ export class ObservableService implements ObservableInterface {
         if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
           // aus irgendeinem grund ist der raum hier null
 
-          this.processNewRoom(this.matrixClient.getRoom(groupId));
+          // this.processNewRoom(this.matrixClient.getRoom(groupId));
           // TODO call next() on observable for activity
           if (Utils.log) console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
