@@ -56,7 +56,7 @@ export class MatrixClientService implements ClientInterface {
     }
     this.serverAddress = config['m.homeserver']['base_url'];
 
-    const opts = { 
+    const opts = {
       localStorage: window.localStorage,
       indexedDB: window.indexedDB
     };
@@ -111,9 +111,10 @@ export class MatrixClientService implements ClientInterface {
     // this.matrixEmergentDataService.setClient(this.matrixClient);
 
     const resp = await response;
-    if(resp instanceof SuccessfulResponse) {
+    if (resp instanceof SuccessfulResponse) {
       this.loggedInEmitter.emit();
     }
+
     return resp;
 
     // TODO: Initialization of Data
