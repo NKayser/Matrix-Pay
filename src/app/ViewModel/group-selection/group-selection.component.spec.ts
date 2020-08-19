@@ -14,6 +14,9 @@ import {MockDataModelService} from '../_mockServices/MockDataModelService';
 import {MockDialog} from '../_mockServices/MockDialog';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
+import {GroupTransactionComponent} from '../group-transaction/group-transaction.component';
+import {HistoryComponent} from '../history/history.component';
+import {GroupBalanceComponent} from '../group-balance/group-balance.component';
 
 describe('GroupSelectionComponent', () => {
   let component: GroupSelectionComponent;
@@ -24,7 +27,7 @@ describe('GroupSelectionComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [GroupSelectionComponent],
+      declarations: [GroupSelectionComponent, GroupTransactionComponent, HistoryComponent, GroupBalanceComponent],
       providers: [
         { provide: MatDialog, useValue: MockDialog },
         { provide: DataModelService, useClass: MockDataModelService},
