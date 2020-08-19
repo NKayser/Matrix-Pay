@@ -14,7 +14,10 @@ export class MatrixClassProviderService {
     return AutoDiscovery.findClientConfig(domain);
   }
 
-  public createClient(serverAddress: string): Promise<MatrixClient> {
-    return createClient(serverAddress);
+  public createClient(serverAddress: string, store: any): Promise<MatrixClient> {
+    return createClient({
+      store: store,
+      baseUrl: serverAddress
+    });
   }
 }
