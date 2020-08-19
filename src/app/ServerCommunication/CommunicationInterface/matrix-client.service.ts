@@ -9,6 +9,7 @@ import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {ClientError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
 import {matrixCurrencyMap} from '../../DataModel/Utils/Currency';
+import {MatrixClassProviderService} from "../ServerUtils/matrix-class-provider.service";
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,7 @@ export class MatrixClientService implements ClientInterface {
   private static readonly DEFAULT_CURRENCY: string = matrixCurrencyMap[0];
   private static readonly DEFAULT_LANGUAGE: string = 'English';
 
-  constructor() {}
+  constructor(private matrixClassProviderService: MatrixClassProviderService) {}
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (MatrixClientService.loggedIn) {
@@ -44,7 +45,7 @@ export class MatrixClientService implements ClientInterface {
     const domain = seperatedAccount[1];
 
     // Discover base url and save it
-    const config: DiscoveredClientConfig = await AutoDiscovery.findClientConfig(domain);
+    const config: DiscoveredClientConfig = await this.matrixClassProviderService.findClientConfig(domain);
     const configState: string = config['m.homeserver']['state'];
     if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
       return new UnsuccessfulResponse(ClientError.Autodiscovery,
@@ -53,7 +54,7 @@ export class MatrixClientService implements ClientInterface {
     this.serverAddress = config['m.homeserver']['base_url'];
 
     // Create a Client
-    this.matrixClient = await createClient(this.serverAddress);
+    this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
 
     let response: ServerResponse;
 
@@ -122,48 +123,11 @@ export class MatrixClientService implements ClientInterface {
     return this.matrixClient;
   }
 
-  private static isLoggedIn(): boolean {
+  public static isLoggedIn(): boolean {
     return MatrixClientService.loggedIn;
   }
 
-  public async getLoggedInClient(): Promise<MatrixClient> {
-    if (MatrixClientService.loggedIn) return this.getClient();
-    await MatrixClientService.until(MatrixClientService.isLoggedIn, 1000,
-      MatrixClientService.TIMEOUT).catch(() => {return new UnsuccessfulResponse(3600000).promise();});
-    return this.getClient();
-  }
-
-  private static isPrepared(): boolean {
+  public static isPrepared(): boolean {
     return MatrixClientService.prepared;
-  }
-
-  public async getPreparedClient(): Promise<MatrixClient> {
-    const client: MatrixClient = await this.getClient();
-    if (MatrixClientService.prepared) return client;
-    await MatrixClientService.until(MatrixClientService.isPrepared, 1000,
-      MatrixClientService.TIMEOUT).catch(() => {return new UnsuccessfulResponse(ClientError.Timeout).promise();});
-    return this.getClient();
-  }
-
-  private static async until(condition: () => boolean, interval: number, timeout?: number): Promise<boolean> {
-    let time: number = 0;
-    while (condition() == false) {
-      if (timeout != undefined && time >= timeout) return Promise.reject();
-      await new Promise(resolve => setTimeout(resolve, interval));
-      console.log("waiting for client to be logged in or prepared. " + time);
-      time += interval;
-    }
-    return true;
-
-
-    /*
-        function sleep(ms) {
-          return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        await sleep( 23000);
-        console.log("Timer over");
-    */
-
   }
 }
