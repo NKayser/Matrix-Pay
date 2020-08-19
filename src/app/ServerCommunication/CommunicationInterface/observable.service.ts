@@ -40,15 +40,16 @@ export class ObservableService implements ObservableInterface {
     this.multipleNewTransactionsObservable = new Subject();
     this.settingsLanguageObservable = new Subject();
     this.groupActivityObservable = new Subject();
-
-    this.setUp();
+    this.clientService.on("loggedIn", async () => {
+      await this.setUp();
+    });
   }
   // TODO: remove magic numbers
 
   private static TRANSACTION_TYPE_PAYBACK = 'PAYBACK';
   private static TRANSACTION_TYPE_EXPENSE = 'EXPENSE';
   private matrixClient: MatrixClient;
-  private clientService: ClientInterface;
+  private clientService: MatrixClientService;
   private userObservable: Subject<UserType>;
   private groupsObservable: Subject<GroupsType>;
   private balancesObservable: Subject<BalancesType>;
@@ -98,7 +99,7 @@ export class ObservableService implements ObservableInterface {
 
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
-    this.matrixClient = await this.clientService.getLoggedInClient();
+    this.matrixClient = this.clientService.getClient();
 
     // start the client, initial sync
     this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
