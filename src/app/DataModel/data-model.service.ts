@@ -134,8 +134,8 @@ export class DataModelService {
     const group = this.getGroup(groupId);
 
     const problem = this.balanceCalculator.calculateBalances(group.groupmembers, transactions);
-    const response = await this.matrixEmergentData.setBalances(groupId, problem.getBalances(), problem.getUsers(), lastTransactionId);
-    this.status.newResponse(response);
+    /*OLD COMMUNICATION METHOD const response = await this.matrixEmergentData.setBalances(groupId, problem.getBalances(), problem.getUsers(), lastTransactionId);
+      this.status.newResponse(response);
     if (!response.wasSuccessful()) {
       // Do some Error stuff
     } else {
@@ -146,6 +146,6 @@ export class DataModelService {
       if (!response2.wasSuccessful()) {
         // Do some Error stuff
       }
-    }
+    }*/
   }
 }

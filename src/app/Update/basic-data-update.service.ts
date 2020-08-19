@@ -279,11 +279,11 @@ export class BasicDataUpdateService {
           }
         }
         if (multipleTransactions.length != 0) {
-          /*let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
-          param[param.length - 1].groupId);*/
-
+          console.log('Input for balances' + param[0].groupId, multipleTransactions, param[param.length - 1].groupId);
           console.log('Balances should be calculated here (updateNewGroupTransactions): '
             + this.dataModel.getGroup(param[0].groupId).name);
+          let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
+          param[param.length - 1].groupId);
         }
       }
       else {
@@ -304,10 +304,11 @@ export class BasicDataUpdateService {
         }
       }
       if (multipleTransactions.length != 0) {
-        /*let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
-          transactions[transactions.length - 1].groupId);*/
+        console.log('Input for balances' + transactions[0].groupId, multipleTransactions, transactions[transactions.length - 1].groupId);
         console.log('Balances should be calculated here (updateNewGroupTransactionsFromBuffer): '
           + this.dataModel.getGroup(transactions[0].groupId).name);
+        /*let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
+          transactions[transactions.length - 1].groupId);*/
       }
     }
     else {
