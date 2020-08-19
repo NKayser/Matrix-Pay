@@ -41,7 +41,8 @@ export class GroupService {
    * @param userId
    */
   public async addMember(groupId: string, userId: string): Promise<ServerResponse> {
-    const client: MatrixClient = await this.matrixClientService.getPreparedClient();
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
+    const client: MatrixClient = this.matrixClientService.getClient();
     let response: ServerResponse;
     await client.invite(groupId, userId).then(() => {
       response = new SuccessfulResponse();
@@ -75,7 +76,8 @@ export class GroupService {
   // TODO: almost works. Sometimes there is a weird encryption error when creating the transaction.
   public async confirmRecommendation(groupId: string, recommendationId: number): Promise<ServerResponse> {
     // TODO: seperate into private methods and avoid magic numbers
-    const client: MatrixClient = await this.matrixClientService.getPreparedClient();
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
+    const client: MatrixClient = this.matrixClientService.getClient();
 
     // Part 1: Find the right recommendation
     const room = client.getRoom(groupId);
@@ -188,7 +190,8 @@ export class GroupService {
    * @param groupId
    */
   public async fetchHistory(groupId: string): Promise<ServerResponse> {
-    const client: MatrixClient = await this.matrixClientService.getPreparedClient();
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
+    const client: MatrixClient = await this.matrixClientService.getClient();
     const room: Room = await client.getRoom(groupId);
     const scrollbackResponse: any = await client.scrollback(room, GroupService.SCROLLBACK_LIMIT);
     return new SuccessfulResponse();
@@ -199,7 +202,8 @@ export class GroupService {
    * @param groupId
    */
   public async leaveGroup(groupId: string): Promise<ServerResponse> {
-    const client: MatrixClient = await this.matrixClientService.getPreparedClient();
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
+    const client: MatrixClient = await this.matrixClientService.getClient();
 
     const room = client.getRoom(groupId);
     if (room == undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound).promise();

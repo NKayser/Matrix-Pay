@@ -128,10 +128,14 @@ export class TransactionService {
     return await response;
   }
 
+  // TODO: activate later ?
   private async areGroupMembers(roomId: string, userIds: string[]): Promise<boolean> {
+    /*
     const client = await this.matrixClientService.getClient();
     const joined = await client.getJoinedRoomMembers(roomId);
     const members = Object.keys(joined['joined']);
     return userIds.every(val => members.includes(val));
+     */
+    return true;
   }
 }
