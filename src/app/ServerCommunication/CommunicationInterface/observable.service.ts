@@ -103,6 +103,7 @@ export class ObservableService implements ObservableInterface {
     
     // start the matrix listeners
     await this.listenToMatrix();
+    await this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
 
     const userId = this.matrixClient.getUserId();
     console.log("+++ user id: " + userId +  ", name: " + this.matrixClient.getUser(userId).displayName);
@@ -112,7 +113,6 @@ export class ObservableService implements ObservableInterface {
         currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
     }
     // start the client, initial sync
-    this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
 
     // Getting data about the use
 
