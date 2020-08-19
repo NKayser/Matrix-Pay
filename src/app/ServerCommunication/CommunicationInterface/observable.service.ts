@@ -40,7 +40,7 @@ export class ObservableService implements ObservableInterface {
     this.multipleNewTransactionsObservable = new Subject();
     this.settingsLanguageObservable = new Subject();
     this.groupActivityObservable = new Subject();
-    this.clientService.on("loggedIn", async () => {
+    this.clientService.getLoggedInEmitter().subscribe(async () => {
       await this.setUp();
     });
   }
@@ -100,42 +100,22 @@ export class ObservableService implements ObservableInterface {
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
     this.matrixClient = this.clientService.getClient();
-
+    
     // start the matrix listeners
     await this.listenToMatrix();
 
-    // start the client, initial sync
-    await this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
-
-    // Getting data about the user
     const userId = this.matrixClient.getUserId();
-    // test: does not give the displayName, but the userId
-    const name = this.matrixClient.getUser(userId).displayName;
-    // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
+    console.log("+++ user id: " + userId +  ", name: " + this.matrixClient.getUser(userId).displayName);
     const currencyEventContent = await this.matrixClient.getAccountDataFromServer('com.matrixpay.currency') // content of the matrix event
-      .catch(() => {if (Utils.log) { console.log('rejected promise while getting account data from server'); } });
-    if (Utils.log) { console.log(currencyEventContent); }
-    /* When setting language is implemented in login component:
-       const languageEventContent = await matrixClient.getAccountDataFromServer('language');
-       if (Utils.log) console.log(languageEventContent);*/
     if (currencyEventContent !== null) {
-      this.userObservable.next({contactId: userId, name,
+      this.userObservable.next({contactId: userId, name: this.matrixClient.getUser(userId).displayName,
         currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
     }
+    // start the client, initial sync
+    this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
 
+    // Getting data about the use
 
-    // wait until initial sync is done
-    const syncPromise = new Promise((resolve, reject) => {
-      this.matrixClient.on('sync', (state, payload) => {
-        if (state === 'SYNCING') {
-          resolve();
-        } else if (state === 'ERROR'){
-          console.log('error while syncing');
-        }
-      });
-    });
-    await syncPromise;
-    if (Utils.log) console.log(this.matrixClient.getSyncStateData());
 
     // Get data about the rooms (and transfer the information to BasicDataUpdateService,
     // so that future events can be stored in an existing group)
@@ -169,8 +149,7 @@ export class ObservableService implements ObservableInterface {
     console.log(rooms);
     // forin does not work (does not get correct references of individual rooms), no idea why
     for (let i = 0; i < rooms.length; i++) {
-      console.log('in getRooms()');
-      await this.processNewRoom(rooms[i]);
+      this.processNewRoom(rooms[i]);
     }
   }
 
@@ -315,15 +294,17 @@ export class ObservableService implements ObservableInterface {
       }
     });
 
+    /*
     // now done in 'Room.membership'-Listener so that a date can be retrieved with event.getDate()
     // Fires whenever invited to a room or joining a room
-    this.matrixClient.on('Room', async (room) => {
+        this.matrixClient.on('Room', room => {
       const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
       if (!(members[this.matrixClient.getUserId()].membership === 'join')) {
         return;
       }
-      await this.processNewRoom(room);
+      this.processNewRoom(room);
     });
+    */
 
     // Fires whenever the timeline in a room is updated
     this.matrixClient.on('Room.timeline',
@@ -410,15 +391,15 @@ export class ObservableService implements ObservableInterface {
     });
 
     // Fires whenever any room member's membership state changes.
-    this.matrixClient.on('RoomMember.membership', async (event, member, oldMembership) => {
+    this.matrixClient.on('RoomMember.membership', (event, member, oldMembership) => {
       const userId = member.userId;
       const groupId = member.roomId;
       console.log('membership changed: ' + member.membership + ' ' + oldMembership);
       if (userId === this.matrixClient.getUserId()) {
         if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
           // aus irgendeinem grund ist der raum hier null
-          // console.log('users membership state changed');
-          // await this.processNewRoom(await this.matrixClient.getRoom(groupId));
+
+          this.processNewRoom(this.matrixClient.getRoom(groupId));
           // TODO call next() on observable for activity
           if (Utils.log) console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
