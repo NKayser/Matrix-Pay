@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 // @ts-ignore
-import {MatrixClient} from 'matrix-js-sdk';
+import {MatrixClient, IndexedDBStore} from 'matrix-js-sdk';
 
 import { ServerResponse } from '../Response/ServerResponse';
 import { ClientInterface } from './ClientInterface';
@@ -56,8 +56,15 @@ export class MatrixClientService implements ClientInterface {
     }
     this.serverAddress = config['m.homeserver']['base_url'];
 
+    const opts = { 
+      localStorage: window.localStorage,
+      indexedDB: window.indexedDB
+    };
+    const store = new IndexedDBStore(opts);
+    await store.startup();
+
     // Create a Client
-    this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
+    this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, store);
 
     let response: ServerResponse;
 
@@ -89,7 +96,7 @@ export class MatrixClientService implements ClientInterface {
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
-      this.prepared = await (state === 'PREPARED' || state === 'SYNCING');
+      this.prepared = await (state === 'PREPARED' || state === 'SYNCING')
       console.log("prepared: " + this.prepared);
     });
 
@@ -99,7 +106,9 @@ export class MatrixClientService implements ClientInterface {
     // this.matrixEmergentDataService.setClient(this.matrixClient);
 
     const resp = await response;
-    this.loggedInEmitter.emit();
+    if(resp instanceof SuccessfulResponse) {
+      this.loggedInEmitter.emit();
+    }
     return resp;
 
     // TODO: Initialization of Data
