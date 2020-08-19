@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 // @ts-ignore
 import {MatrixClient} from 'matrix-js-sdk';
 
@@ -14,7 +14,7 @@ import {MatrixClassProviderService} from "../ServerUtils/matrix-class-provider.s
 @Injectable({
   providedIn: 'root'
 })
-export class MatrixClientService implements ClientInterface {
+export class MatrixClientService extends EventEmitter implements ClientInterface {
   private matrixClient: MatrixClient;
   private serverAddress: string;
   private accessToken: string;
@@ -30,7 +30,9 @@ export class MatrixClientService implements ClientInterface {
   private static readonly DEFAULT_CURRENCY: string = matrixCurrencyMap[0];
   private static readonly DEFAULT_LANGUAGE: string = 'English';
 
-  constructor(private matrixClassProviderService: MatrixClassProviderService) {}
+  constructor(private matrixClassProviderService: MatrixClassProviderService) {
+    super();
+  }
 
   public async login(account: string, password: string): Promise<ServerResponse> {
     if (this.loggedIn) {
@@ -86,8 +88,8 @@ export class MatrixClientService implements ClientInterface {
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.once('sync', async (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
-      MatrixClientService.prepared = await (state === 'PREPARED' || state === 'SYNCING');
-      console.log("prepared: " + MatrixClientService.prepared);
+      this.prepared = await (state === 'PREPARED' || state === 'SYNCING');
+      console.log("prepared: " + this.prepared);
     });
 
     // move to the end of the method?
@@ -95,7 +97,9 @@ export class MatrixClientService implements ClientInterface {
     // this.observableService.setUp();
     // this.matrixEmergentDataService.setClient(this.matrixClient);
 
-    return await response;
+    const resp = await response;
+    this.emit("loggedIn");
+    return resp;
 
     // TODO: Initialization of Data
   }
