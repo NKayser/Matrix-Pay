@@ -461,10 +461,18 @@ export class ObservableService implements ObservableInterface {
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payer,
-      payerAmount: content.amounts[0], // TODO payer amount is currently wrong
+      payerAmount: this.SumUpRecipientAmounts(content.amounts), // TODO payer amount is currently wrong
       recipientIds: content.recipients,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
+  }
+
+  private SumUpRecipientAmounts(recipientAmounts: number[]): number {
+    let sum : number = 0;
+    for (let i = 0; i < recipientAmounts.length; i++) {
+      sum += recipientAmounts[i];
+    }
+    return sum;
   }
 
   private getPaybackFromEvent(room, event): TransactionType {
