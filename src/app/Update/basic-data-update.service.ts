@@ -190,7 +190,8 @@ export class BasicDataUpdateService {
   }
 
   private updateGroupMemberFromBuffer(groupMember: GroupMemberType): void {
-    if (this.dataModel.getGroup(groupMember.groupId) !== null) {
+    if (this.dataModel.getGroup(groupMember
+      .groupId) !== null) {
       if (!groupMember.isLeave) {
         if (Utils.log) console.log('BasicDataUpdateService got member from buffer: ' + groupMember.name + ' (' + groupMember.userId + ')');
         const group = this.dataModel.getGroup(groupMember.groupId);
@@ -277,8 +278,8 @@ export class BasicDataUpdateService {
             multipleTransactions.push(currentTransaction);
           }
         }
-        let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
-          param[param.length - 1].groupId);
+        /*let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
+          param[param.length - 1].groupId);*/
       }
       else {
         if (Utils.log) console.log('transactions for group pushed to buffer: ' +  param[0].groupId);
@@ -297,8 +298,8 @@ export class BasicDataUpdateService {
           multipleTransactions.push(currentTransaction);
         }
       }
-      let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
-        transactions[transactions.length - 1].groupId);
+      /*let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
+        transactions[transactions.length - 1].groupId);*/
     }
     else {
       if (Utils.log) console.log('Transactions creation from buffer failed. Pushed back to buffer: ' +  transactions[0].groupId);
