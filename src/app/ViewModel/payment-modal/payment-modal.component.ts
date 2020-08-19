@@ -38,7 +38,7 @@ export class PaymentModalComponent implements OnInit{
   ngOnInit(): void {
     this.formControlAmount = new Array<FormControl>(this.data.amount.length);
     for (let i = 0; i < this.data.amount.length; i++){
-      this.formControlAmount[i] = new FormControl(this.data.amount[i], [Validators.required]);
+      this.formControlAmount[i] = new FormControl(this.data.amount[i] / 100, [Validators.required, Validators.pattern('[0-9]*[.]?[0-9]?[0-9]?')]);
     }
 
     this.formControlDescription = new FormControl(this.data.description, [Validators.required]);
@@ -57,7 +57,7 @@ export class PaymentModalComponent implements OnInit{
       }
     }
 
-    if (this.formControlDescription.invalid){
+    if (this.formControlDescription.invalid || this.data.payer == null){
       tempValid = true;
     }
 
@@ -92,7 +92,7 @@ export class PaymentModalComponent implements OnInit{
     const newAmount = new Array<number>(0);
     for (let i = 0; i < this.data.amount.length; i++){
         newRecipients.push(this.data.recipients[i]);
-        newAmount.push(this.formControlAmount[i].value);
+        newAmount.push(this.formControlAmount[i].value * 100);
     }
 
     return {modalTitle: '', description: newDescription, payer: newPayer, recipients: newRecipients, amount: newAmount,

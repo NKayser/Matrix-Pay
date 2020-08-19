@@ -190,7 +190,8 @@ export class BasicDataUpdateService {
   }
 
   private updateGroupMemberFromBuffer(groupMember: GroupMemberType): void {
-    if (this.dataModel.getGroup(groupMember.groupId) !== null) {
+    if (this.dataModel.getGroup(groupMember
+      .groupId) !== null) {
       if (!groupMember.isLeave) {
         if (Utils.log) console.log('BasicDataUpdateService got member from buffer: ' + groupMember.name + ' (' + groupMember.userId + ')');
         const group = this.dataModel.getGroup(groupMember.groupId);

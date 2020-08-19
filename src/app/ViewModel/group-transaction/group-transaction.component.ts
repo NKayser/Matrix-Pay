@@ -52,14 +52,6 @@ export class GroupTransactionComponent implements OnChanges {
    */
   public createExpense(): void {
 
-    /*const transactionResponse: ServerResponse = await this.matrixBasicDataService.createTransaction('!klmrbYgMcDFypBxwIF:dsn.tm.kit.edu', 'Description', '@uelkt:dsn.tm.kit.edu', ['@uelkt:dsn.tm.kit.edu'], [100], false);
-
-    if (transactionResponse.wasSuccessful()) {
-      console.log('transaction successful with val ' + transactionResponse.getValue());
-    } else {
-      console.log('transaction failed :/    :( because ' + transactionResponse.getError());
-    }*/
-
     const dialogRef = this.dialog.open(PaymentModalComponent, {
       width: '350px',
       data: this.generateCreateExpenseData(),
@@ -173,7 +165,7 @@ export class GroupTransactionComponent implements OnChanges {
     const modalTitle = 'Create Transaction';
     const recipients = Array<Contact>(0);
     const description = '';
-    const payer = this.dataModelService.getUser().contact;
+    const payer = this.group.groupmembers[0].contact;
     const amount = Array<number>(0);
     const isAdded = Array<boolean>(0);
     for (const recipient of this.group.groupmembers){

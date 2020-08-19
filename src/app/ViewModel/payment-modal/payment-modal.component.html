@@ -11,7 +11,7 @@
   <!--Payer form-->
   <mat-form-field>
     <mat-label>Payer</mat-label>
-    <mat-select [(ngModel)]="data.payer">
+    <mat-select [(value)]="data.payer">
       <mat-option *ngFor="let recipient of data.recipients" [value]="recipient">{{recipient.name}}</mat-option>
     </mat-select>
   </mat-form-field>
