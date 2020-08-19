@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { EventEmitter } from 'events';
+import { Injectable, EventEmitter } from '@angular/core';
 // @ts-ignore
 import {MatrixClient} from 'matrix-js-sdk';
 
@@ -15,12 +14,13 @@ import {MatrixClassProviderService} from "../ServerUtils/matrix-class-provider.s
 @Injectable({
   providedIn: 'root'
 })
-export class MatrixClientService extends EventEmitter implements ClientInterface {
+export class MatrixClientService implements ClientInterface {
   private matrixClient: MatrixClient;
   private serverAddress: string;
   private accessToken: string;
   private loggedIn: boolean = false;
   private prepared: boolean = false;
+  private loggedInEmitter: EventEmitter<void>;
 
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
@@ -32,7 +32,7 @@ export class MatrixClientService extends EventEmitter implements ClientInterface
   private static readonly DEFAULT_LANGUAGE: string = 'English';
 
   constructor(private matrixClassProviderService: MatrixClassProviderService) {
-    super();
+    this.loggedInEmitter = new EventEmitter();
   }
 
   public async login(account: string, password: string): Promise<ServerResponse> {
@@ -99,10 +99,14 @@ export class MatrixClientService extends EventEmitter implements ClientInterface
     // this.matrixEmergentDataService.setClient(this.matrixClient);
 
     const resp = await response;
-    this.emit("loggedIn");
+    this.loggedInEmitter.emit();
     return resp;
 
     // TODO: Initialization of Data
+  }
+
+  public getLoggedInEmitter(): EventEmitter<void> {
+    return this.loggedInEmitter;
   }
 
   public async logout(): Promise<ServerResponse> {

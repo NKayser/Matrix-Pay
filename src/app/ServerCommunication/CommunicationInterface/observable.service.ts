@@ -40,7 +40,7 @@ export class ObservableService implements ObservableInterface {
     this.multipleNewTransactionsObservable = new Subject();
     this.settingsLanguageObservable = new Subject();
     this.groupActivityObservable = new Subject();
-    this.clientService.on("loggedIn", async () => {
+    this.clientService.getLoggedInEmitter().subscribe(async () => {
       await this.setUp();
     });
   }
@@ -100,42 +100,22 @@ export class ObservableService implements ObservableInterface {
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
     this.matrixClient = this.clientService.getClient();
+    
+    // start the matrix listeners
+    await this.listenToMatrix();
 
+    const userId = this.matrixClient.getUserId();
+    console.log("+++ user id: " + userId +  ", name: " + this.matrixClient.getUser(userId).displayName);
+    const currencyEventContent = await this.matrixClient.getAccountDataFromServer('com.matrixpay.currency') // content of the matrix event
+    if (currencyEventContent !== null) {
+      this.userObservable.next({contactId: userId, name: this.matrixClient.getUser(userId).displayName,
+        currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
+    }
     // start the client, initial sync
     this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
 
-    // Getting data about the user
-    const userId = this.matrixClient.getUserId();
-    // test: does not give the displayName, but the userId
-    const name = this.matrixClient.getUser(userId).displayName;
-    // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
-    const currencyEventContent = await this.matrixClient.getAccountDataFromServer('com.matrixpay.currency') // content of the matrix event
-      .catch(() => {if (Utils.log) { console.log('rejected promise while getting account data from server'); } });
-    if (Utils.log) { console.log(currencyEventContent); }
-    /* When setting language is implemented in login component:
-       const languageEventContent = await matrixClient.getAccountDataFromServer('language');
-       if (Utils.log) console.log(languageEventContent);*/
-    if (currencyEventContent !== null) {
-      this.userObservable.next({contactId: userId, name,
-        currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
-    }
+    // Getting data about the use
 
-
-    // wait until initial sync is done
-    const syncPromise = new Promise((resolve, reject) => {
-      this.matrixClient.on('sync', (state, payload) => {
-        if (state === 'SYNCING') {
-          resolve();
-        } else if (state === 'ERROR'){
-          console.log('error while syncing');
-        }
-      });
-    });
-    await syncPromise;
-    if (Utils.log) console.log(this.matrixClient.getSyncStateData());
-
-    // start the matrix listeners
-    this.listenToMatrix();
 
     // Get data about the rooms (and transfer the information to BasicDataUpdateService,
     // so that future events can be stored in an existing group)
