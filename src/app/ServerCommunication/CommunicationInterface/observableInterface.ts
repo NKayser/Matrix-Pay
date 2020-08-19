@@ -22,7 +22,7 @@ export interface ObservableInterface {
 
   getNewTransactionObservable(): Observable<TransactionType>;
 
-  getMultipleNewTransactionsObservable(): Observable<TransactionType[]>
+  getMultipleNewTransactionsObservable(): Observable<TransactionType[]>;
 
   getModifiedTransactionObservable(): Observable<TransactionType>;
 

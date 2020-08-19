@@ -279,7 +279,7 @@ export class BasicDataUpdateService {
           }
         }
         /*let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
-          param[param.length - 1].groupId);*/
+          param[param.length - 1].groupId);*/ // TODO: undo commentation
       }
       else {
         if (Utils.log) console.log('transactions for group pushed to buffer: ' +  param[0].groupId);
@@ -299,7 +299,7 @@ export class BasicDataUpdateService {
         }
       }
       /*let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
-        transactions[transactions.length - 1].groupId);*/
+        transactions[transactions.length - 1].groupId);*/ // TODO: undo commentation
     }
     else {
       if (Utils.log) console.log('Transactions creation from buffer failed. Pushed back to buffer: ' +  transactions[0].groupId);
