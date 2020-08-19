@@ -223,8 +223,10 @@ export class BasicDataUpdateService {
   }
 
   private updateSingleTransaction(param: TransactionTypeInterface): Transaction {
-    console.log('BasicDataUpdateService got new transaction ' + param.transactionId);
+
+      console.log('BasicDataUpdateService got new transaction ' + param.transactionId);
       const group = this.dataModel.getGroup(param.groupId);
+      console.log(param);
       let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
       let recipients: AtomarChange[] = [];
       for (let i = 0; i < param.recipientIds.length; i++) {
@@ -270,11 +272,13 @@ export class BasicDataUpdateService {
         if (Utils.log) console.log('BasicDataUpdateService added transactions for group: ' + param[0].groupId);
         const multipleTransactions: Transaction[] = [];
         for (const transactionType of param) {
-          let currentTransaction = this.updateSingleTransaction(transactionType);
-          multipleTransactions.push(currentTransaction);
+          if (this.dataModel.getGroup(transactionType.groupId).getTransaction(transactionType.transactionId) === null) {
+            let currentTransaction = this.updateSingleTransaction(transactionType);
+            multipleTransactions.push(currentTransaction);
+          }
         }
-        let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
-          param[param.length - 1].groupId);
+        /*let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
+          param[param.length - 1].groupId);*/ // TODO: undo commentation
       }
       else {
         if (Utils.log) console.log('transactions for group pushed to buffer: ' +  param[0].groupId);
@@ -288,11 +292,13 @@ export class BasicDataUpdateService {
       if (Utils.log) console.log('BasicDataUpdateService added transactions from buffer for group: ' + transactions[0].groupId);
       const multipleTransactions: Transaction[] = [];
       for (const transaction of transactions) {
-        let currentTransaction = this.updateSingleTransaction(transaction);
-        multipleTransactions.push(currentTransaction);
+        if (this.dataModel.getGroup(transaction.groupId).getTransaction(transaction.transactionId) === null) {
+          let currentTransaction = this.updateSingleTransaction(transaction);
+          multipleTransactions.push(currentTransaction);
+        }
       }
-      let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
-        transactions[transactions.length - 1].groupId);
+      /*let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
+        transactions[transactions.length - 1].groupId);*/ // TODO: undo commentation
     }
     else {
       if (Utils.log) console.log('Transactions creation from buffer failed. Pushed back to buffer: ' +  transactions[0].groupId);
