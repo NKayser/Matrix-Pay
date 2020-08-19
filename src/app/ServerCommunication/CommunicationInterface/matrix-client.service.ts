@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 // @ts-ignore
-import {createClient, MatrixClient, AutoDiscovery, MatrixError} from 'matrix-js-sdk';
+import {MatrixClient} from 'matrix-js-sdk';
 
 import { ServerResponse } from '../Response/ServerResponse';
 import { ClientInterface } from './ClientInterface';
@@ -18,8 +18,8 @@ export class MatrixClientService implements ClientInterface {
   private matrixClient: MatrixClient;
   private serverAddress: string;
   private accessToken: string;
-  private static loggedIn: boolean = false;
-  private static prepared: boolean = false;
+  private loggedIn: boolean = false;
+  private prepared: boolean = false;
 
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
@@ -33,7 +33,7 @@ export class MatrixClientService implements ClientInterface {
   constructor(private matrixClassProviderService: MatrixClassProviderService) {}
 
   public async login(account: string, password: string): Promise<ServerResponse> {
-    if (MatrixClientService.loggedIn) {
+    if (this.loggedIn) {
       return new UnsuccessfulResponse(ClientError.AlreadyLoggedIn).promise();
     }
 
@@ -61,11 +61,11 @@ export class MatrixClientService implements ClientInterface {
     // Login and get Access Token
     this.accessToken = await this.matrixClient.loginWithPassword(account, password).then(
       () => {
-        MatrixClientService.loggedIn = true;
+        this.loggedIn = true;
         response = new SuccessfulResponse
       },
       (reason: string) => {
-        MatrixClientService.loggedIn = false;
+        this.loggedIn = false;
         response = new UnsuccessfulResponse(ClientError.InvalidPassword, reason)
       });
 
@@ -101,10 +101,10 @@ export class MatrixClientService implements ClientInterface {
   }
 
   public async logout(): Promise<ServerResponse> {
-    if (MatrixClientService.loggedIn) {
+    if (this.loggedIn) {
       await this.matrixClient.logout();
-      MatrixClientService.loggedIn = false;
-      MatrixClientService.prepared = false;
+      this.loggedIn = false;
+      this.prepared = false;
       //this.observableService.tearDown();
       //this.matrixEmergentDataService.setClient(undefined);
     }
@@ -114,7 +114,7 @@ export class MatrixClientService implements ClientInterface {
   }
 
   public async getClient(): Promise<MatrixClient> {
-    if (MatrixClientService.loggedIn == false) {
+    if (this.loggedIn == false) {
       throw new Error('can only get Client if logged in');
     } else if (this.matrixClient == undefined) {
       throw new Error('unknown error')
@@ -123,11 +123,11 @@ export class MatrixClientService implements ClientInterface {
     return this.matrixClient;
   }
 
-  public static isLoggedIn(): boolean {
-    return MatrixClientService.loggedIn;
+  public isLoggedIn(): boolean {
+    return this.loggedIn;
   }
 
-  public static isPrepared(): boolean {
-    return MatrixClientService.prepared;
+  public isPrepared(): boolean {
+    return this.prepared;
   }
 }
