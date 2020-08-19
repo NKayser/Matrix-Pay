@@ -80,6 +80,34 @@ describe('GroupBalanceComponent', () => {
     component.confirmPayback(0);
     expect(matrixBasicDataService.createTransaction).not.toHaveBeenCalled();
   });
+
+  it('cancel balance color', () => {
+    const c1 = new Contact('c1', 'Alice');
+    const c2 = new Contact('c2', 'Bob');
+    const c3 = new Contact('c3', 'Eve');
+    const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+    dataModelService.getUser.and.returnValue(stubValueUser);
+    const g1 = new Group('1', '1', Currency.USD);
+    g1.setRecommendations([new Recommendation(g1, null, null)]);
+    const mg1 = new Groupmember(c1, g1);
+    mg1.balance = 5;
+    g1.addGroupmember(mg1);
+    const mg2 = new Groupmember(c2, g1);
+    mg2.balance = -5;
+    g1.addGroupmember(mg2);
+    const mg3 = new Groupmember(c3, g1);
+    mg3.balance = 0;
+    g1.addGroupmember(mg3);
+
+    component.group = g1;
+    component.ngOnChanges();
+
+    expect(component.getCustomColor(c1.name)).toBe('green');
+    expect(component.getCustomColor(c2.name)).toBe('red');
+    expect(component.getCustomColor(c3.name)).toBe('green');
+
+
+  });
 });
 
 describe('GroupBalanceComponent', () => {
