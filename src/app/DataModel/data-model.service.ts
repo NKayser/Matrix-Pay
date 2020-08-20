@@ -19,6 +19,11 @@ import {Subject} from 'rxjs';
  */
 export class DataModelService {
   private status: Status;
+  private _userExists = false;
+
+  get userExists(): boolean {
+    return this._userExists;
+  }
 
   private emitter = new Subject();
   navItem$ = this.emitter.asObservable();
@@ -56,6 +61,7 @@ export class DataModelService {
     const contact = new Contact(userContactId, userName);
     const user = new User(contact, currency, language);
     this.status = new Status();
+    this._userExists = true;
     this.notifyViewModelWhenReady();
     return user;
   }
