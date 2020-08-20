@@ -326,21 +326,21 @@ export class BasicDataUpdateService {
 
   private updateSingleTransaction(param: TransactionTypeInterface): Transaction {
 
-      console.log('BasicDataUpdateService got new transaction ' + param.name + ' (' + param.transactionId + ')');
-      const group = this.dataModel.getGroup(param.groupId);
-      console.log(param);
-      let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
-      let recipients: AtomarChange[] = [];
-      for (let i = 0; i < param.recipientIds.length; i++) {
-        recipients.push(new AtomarChange(group.getGroupmember(param.recipientIds[i]).contact, param.recipientAmounts[i]));
-      }
-      let sender = group.getGroupmember(param.senderId);
-      const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
-        param.name, param.creationDate, group, payer, recipients, sender);
-      group.addTransaction(newTransaction);
-      const activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, sender.contact, param.creationDate);
-      group.addActivity(activity);
-      return newTransaction;
+    console.log('BasicDataUpdateService got new transaction ' + param.name + ' (' + param.transactionId + ')');
+    const group = this.dataModel.getGroup(param.groupId);
+    console.log(param);
+    let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
+    let recipients: AtomarChange[] = [];
+    for (let i = 0; i < param.recipientIds.length; i++) {
+      recipients.push(new AtomarChange(group.getGroupmember(param.recipientIds[i]).contact, param.recipientAmounts[i]));
+    }
+    let sender = group.getGroupmember(param.senderId);
+    const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
+      param.name, param.creationDate, group, payer, recipients, sender);
+    group.addTransaction(newTransaction);
+    const activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, sender.contact, param.creationDate);
+    group.addActivity(activity);
+    return newTransaction;
   }
 
   /**
