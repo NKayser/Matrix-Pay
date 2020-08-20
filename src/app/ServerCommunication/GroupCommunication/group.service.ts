@@ -9,7 +9,6 @@ import {ServerResponse} from '../Response/ServerResponse';
 import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {GroupError} from '../Response/ErrorTypes';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
-import {MatrixEmergentDataService} from '../CommunicationInterface/matrix-emergent-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,8 +28,7 @@ export class GroupService {
   private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways
 
   constructor(transactionService: TransactionService,
-              matrixClientService: MatrixClientService,
-              private matrixEmergentDataService: MatrixEmergentDataService) {
+              matrixClientService: MatrixClientService) {
     this.transactionService = transactionService;
     this.matrixClientService = matrixClientService;
   }
