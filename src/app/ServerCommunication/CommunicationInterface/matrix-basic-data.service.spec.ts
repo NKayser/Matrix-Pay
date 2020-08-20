@@ -12,7 +12,7 @@ describe('MatrixBasicDataService', () => {
   let service: MatrixBasicDataService;
 
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['setAccountData', 'invite']);
+    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
     ['isPrepared', 'getClient']);
   const settingsService = new SettingsService(clientServiceSpy);
@@ -198,6 +198,38 @@ describe('MatrixBasicDataService', () => {
       },
       (err) => {
         expect(err.message).toContain('unknown error');
+        done();
+      }
+    );
+  });
+
+  it('should confirm recommendation with valid input', async (done: DoneFn) => {
+    // Mock
+    const accountDataEvent = jasmine.createSpyObj('accountDataEvent', ['getOriginalContent']);
+    accountDataEvent.getOriginalContent.and.returnValue(
+      {
+        recipients: ['@id1:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'],
+        payers: ['@id2:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        amounts: [100, 200],
+        last_transaction: 'lastId'
+      });
+    mockedClient.getRoom.and.returnValue({
+        roomId: 'room_id_A',
+        memberIds: ['@id1:dsn.tm.kit.edu', '@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        accountData: {
+          recommendations: accountDataEvent
+        }
+      }
+    );
+    mockedClient.getUserId.and.returnValue('@id3:dsn.tm.kit.edu');
+    mockedClient.sendEvent.and.returnValue(Promise.resolve({event_id: 'new_transaction_id'}));
+
+    await service.confirmPayback('groupId', 1).then(
+      () => {
+        done();
+      },
+      () => {
+        fail('should return successful response');
         done();
       }
     );
