@@ -204,6 +204,7 @@ export class ObservableService implements ObservableInterface {
         this.multipleNewTransactionsObservable.next(this.transactions[room.roomId]);
         console.log('Anzahl Transaktionen: ' + this.transactions[room.roomId].length);
       }
+
     //}
 
     /*console.log('---new timelineSet---');
@@ -305,89 +306,90 @@ export class ObservableService implements ObservableInterface {
     // Fires whenever the timeline in a room is updated
     this.matrixClient.on('Room.timeline',
       (event, room, toStartOfTimeline, removed, data) => {
-      // if (Utils.log) console.log('got a timeline change. event type: '  + event.getType());
-      if (!data.liveEvent) {
-        // Process the events retrieved by backpagination
-        switch (event.getType()) {
-          case ('com.matrixpay.payback'): {
-            console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
-            if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
-            this.transactions[room.roomId].push(this.getPaybackFromEvent(room, event));
-            break;
-          }
-          case ('com.matrixpay.expense'): {
-            if(!event.isRelation()) {
-              // If the event has been replaced, getContent() returns the content of the replacing event.
-              if (Utils.log) console.log('got an old expense. name: ' + event.getContent().name);
+        // if (Utils.log) console.log('got a timeline change. event type: '  + event.getType());
+        if (!data.liveEvent) {
+          // Process the events retrieved by backpagination
+          switch (event.getType()) {
+            case ('com.matrixpay.payback'): {
+              console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
               if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
-              this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
-            } else if (event.isRelation('m.replace')) {
-              if (Utils.log) console.log('got an old editing of an expense. name: ' + event.getContent().name);
-              // this.oldModifiedTransactions[room.roomId].push(transaction);
-              this.modifiedTransactionsObservable.next(this.getExpenseFromEvent(room, event));
+              this.transactions[room.roomId].push(this.getPaybackFromEvent(room, event));
+              break;
             }
-            break;
-          }
-          case ('m.room.create'): {
-            if (Utils.log) console.log('got an old room creation. room: ' + room.name + ' creator: ' + event.getContent().creator + ' date: ' + event.getDate());
-            this.groupActivityObservable.next({groupId: room.roomId, creatorId: event.getContent().creator
-              , creationDate: event.getDate()});
-            break;
-          }
-          case ('m.room.member'): {
-            // use getPrevContent() if necessary
-            let isLeave: boolean;
-            if (event.getContent().membership === 'join') {
-              if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' joined the room ' + room.name);
-              isLeave = false;
-            }
-            if (event.getContent().membership === 'leave') {
-              if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' left the room ' + room.name);
-              isLeave = true;
-            }
-            // this.oldRoomMembershipChanges.push({groupId: room.roomId, userId: event.getStateKey(),
-            //  date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
-            // alternativ für den Namen (auch bei dem Room.membership-listener): room.getMember(event.getStateKey()).user.displayName)
-            this.groupMembershipObservable.next({groupId: room.roomId, userId: event.getStateKey(),
-              date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
-            break;
-          }
-        }
-      }
-      // only data.liveEvent instead of !toStartOfTimeline && data.liveEvent ? yes
-      if (data.liveEvent) {
-        // Process the events retrieved by /sync
-        switch (event.getType()) {
-          case ('com.matrixpay.payback'): {
-            this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
-            break;
-          }
-          case ('com.matrixpay.expense'): {
-            if (!event.isRelation()) {
-              // We could consider using getOriginalContent() instead of getContent(), because if this event has been replaced
-              // (replacing event in the same /sync batch),
-              // getContent() returns the content of the replacing event (?), but the information about the replacement
-              // will be received through the replacing event.
-              // However, using using getContent() won't hurt.
-              if (Utils.log) {
-                console.log('got expense. name: ' + event.getContent().name);
+            case ('com.matrixpay.expense'): {
+              if(!event.isRelation()) {
+                // If the event has been replaced, getContent() returns the content of the replacing event.
+                if (Utils.log) console.log('got an old expense. name: ' + event.getContent().name);
+                if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
+                this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
+              } else if (event.isRelation('m.replace')) {
+                if (Utils.log) console.log('got an old editing of an expense. name: ' + event.getContent().name);
+                // this.oldModifiedTransactions[room.roomId].push(transaction);
+                this.modifiedTransactionsObservable.next(this.getExpenseFromEvent(room, event));
               }
-              this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
-            } else if (event.isRelation('m.replace')) {
-              if (Utils.log) { console.log('got editing of payback. name: ' + event.getContent().name); }
-              this.modifiedTransactionsObservable.next(this.getPaybackFromEvent(room, event));
+              break;
             }
-            break;
-          }
-          case ('m.room.create'): {
-            if (Utils.log) console.log('got a room creation. room: ' + room.name
-              + ' creator: ' + event.getContent().creator + ' date: ' + event.getDate());
-            this.groupActivityObservable.next({groupId: room.roomId, creatorId: event.getContent().creator, creationDate: event.getDate()});
-            break;
+            case ('m.room.create'): {
+              if (Utils.log) console.log('got an old room creation. room: ' + room.name + ' creator: ' + event.getContent().creator + ' date: ' + event.getDate());
+              this.groupActivityObservable.next({groupId: room.roomId, creatorId: event.getContent().creator
+                , creationDate: event.getDate()});
+              break;
+            }
+            case ('m.room.member'): {
+              // use getPrevContent() if necessary
+              let isLeave: boolean;
+              if (event.getContent().membership === 'join') {
+                if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' joined the room ' + room.name);
+                isLeave = false;
+              }
+              if (event.getContent().membership === 'leave') {
+                if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' left the room ' + room.name);
+                isLeave = true;
+              }
+              // this.oldRoomMembershipChanges.push({groupId: room.roomId, userId: event.getStateKey(),
+              //  date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
+              // alternativ für den Namen (auch bei dem Room.membership-listener): room.getMember(event.getStateKey()).user.displayName)
+              this.groupMembershipObservable.next({groupId: room.roomId, userId: event.getStateKey(),
+                date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
+              break;
+            }
           }
         }
-      }
-    });
+        // only data.liveEvent instead of !toStartOfTimeline && data.liveEvent ? yes
+        if (data.liveEvent) {
+          // Process the events retrieved by /sync
+          switch (event.getType()) {
+            case ('com.matrixpay.payback'): {
+              this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
+              break;
+            }
+            case ('com.matrixpay.expense'): {
+              if (!event.isRelation()) {
+                // We could consider using getOriginalContent() instead of getContent(), because if this event has been replaced
+                // (replacing event in the same /sync batch),
+                // getContent() returns the content of the replacing event (?), but the information about the replacement
+                // will be received through the replacing event.
+                // However, using using getContent() won't hurt.
+                if (Utils.log) {
+                  console.log('got expense. name: ' + event.getContent().name);
+                }
+                this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
+              } else if (event.isRelation('m.replace')) {
+                if (Utils.log) { console.log('got editing of payback. name: ' + event.getContent().name); }
+                this.modifiedTransactionsObservable.next(this.getPaybackFromEvent(room, event));
+              }
+              break;
+            }
+            case ('m.room.create'): {
+              if (Utils.log) console.log('got a room creation. room: ' + room.name
+                + ' creator: ' + event.getContent().creator + ' date: ' + event.getDate());
+              this.groupActivityObservable.next({groupId: room.roomId, creatorId: event.getContent().creator, creationDate: event.getDate()});
+              break;
+            }
+          }
+        }
+      });
+
 
     // Fires whenever any room member's membership state changes.
     this.matrixClient.on('RoomMember.membership', (event, member, oldMembership) => {
@@ -441,10 +443,18 @@ export class ObservableService implements ObservableInterface {
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payer,
-      payerAmount: content.amounts[0], // TODO payer amount is currently wrong
+      payerAmount: this.SumUpRecipientAmounts(content.amounts), // TODO payer amount is currently wrong
       recipientIds: content.recipients,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
+  }
+
+  private SumUpRecipientAmounts(recipientAmounts: number[]): number {
+    let sum : number = 0;
+    for (let i = 0; i < recipientAmounts.length; i++) {
+      sum += recipientAmounts[i];
+    }
+    return sum;
   }
 
   private getPaybackFromEvent(room, event): TransactionType {

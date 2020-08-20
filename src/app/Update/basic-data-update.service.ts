@@ -11,9 +11,9 @@ import {Transaction} from "../DataModel/Group/Transaction";
 import {TransactionType} from "../DataModel/Group/TransactionType";
 import {
   GroupActivityType,
-  GroupMemberType,
+  GroupMemberType, GroupsType,
   TransactionType as TransactionTypeInterface
-} from "../ServerCommunication/CommunicationInterface/parameterTypes";
+} from '../ServerCommunication/CommunicationInterface/parameterTypes';
 import {AtomarChange} from "../DataModel/Group/AtomarChange";
 import {Activity} from "../DataModel/Group/Activity";
 import {ActivityType} from "../DataModel/Group/ActivityType";
@@ -26,6 +26,7 @@ export class BasicDataUpdateService {
   private transactionBuffer: TransactionTypeInterface[][] = [];
   private activityBuffer: GroupActivityType[] = [];
   private membershipBuffer: GroupMemberType[] = [];
+  private groupBuffer: GroupsType[] = [];
 
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     if (Utils.log) console.log('This is BasicDataUpdateService');
@@ -38,7 +39,6 @@ export class BasicDataUpdateService {
     this.updateGroupMember();
     this.updateModifiedGroupTransaction();
     this.updateNewGroupTransactions();
-
   }
 
   /**
@@ -48,7 +48,8 @@ export class BasicDataUpdateService {
     this.observables.getUserObservable().subscribe(param => {
       if (Utils.log) console.log('call user constructor');
       this.dataModel.initializeUserThisSession(param.contactId, param.name, this.currencyStringToEnum(param.currency),
-        this.languageStringToEnum(param.language))
+        this.languageStringToEnum(param.language));
+      this.emptyGroupBuffer();
     });
   }
 
@@ -57,8 +58,34 @@ export class BasicDataUpdateService {
    */
   private async addGroup(): Promise<void> {
     this.observables.getGroupsObservable().subscribe(param => {
+      if (this.dataModel.userExists) {
+        console.log ('LOG007.4 user wasnt null');
+        if (!param.isLeave) {
+          if (Utils.log) {console.log('New group detected:' + param.groupId);}
+          this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
+          const newGroup = this.dataModel.getGroup(param.groupId);
+          for (let i = 0; i < param.userIds.length; i++) {
+            if (newGroup.getGroupmember(param.userIds[i]) === null) {
+              newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
+            }
+          }
+          this.checkBuffer(param.groupId);
+        }
+        else {
+          if (Utils.log) console.log('Group deleted:' + param.groupId);
+          this.dataModel.user.removeGroup(param.groupId)}
+      }
+      else {
+        console.log('LOG007 user was not ready yet, group pushed to buffer');
+        this.groupBuffer.push(param);
+      }
+    });
+  }
+
+  private async addGroupFromBuffer(param: GroupsType): Promise<void> {
+    if (typeof this.dataModel.userExists) {
       if (!param.isLeave) {
-        if (Utils.log) console.log('New group detected:' + param.groupId);
+        if (Utils.log) {console.log('LOG0072 New group detected from buffer:' + param.groupId); }
         this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
         const newGroup = this.dataModel.getGroup(param.groupId);
         for (let i = 0; i < param.userIds.length; i++) {
@@ -71,7 +98,18 @@ export class BasicDataUpdateService {
       else {
         if (Utils.log) console.log('Group deleted:' + param.groupId);
         this.dataModel.user.removeGroup(param.groupId)}
-    });
+    }
+    else {
+      console.log('LOG0073 user was still not ready, group pushed back to buffer ');
+      this.groupBuffer.push(param);
+    }
+  }
+
+  private emptyGroupBuffer(): void {
+    console.log('LOG0071 emptying groupBuffer');
+    for (const group of this.groupBuffer){
+      this.addGroupFromBuffer(group);
+    }
   }
 
   private checkBuffer(groupId: string): void {
@@ -225,7 +263,7 @@ export class BasicDataUpdateService {
 
   private updateSingleTransaction(param: TransactionTypeInterface): Transaction {
 
-      console.log('BasicDataUpdateService got new transaction ' + param.transactionId);
+      console.log('BasicDataUpdateService got new transaction ' + param.name + ' (' + param.transactionId + ')');
       const group = this.dataModel.getGroup(param.groupId);
       console.log(param);
       let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
@@ -248,7 +286,7 @@ export class BasicDataUpdateService {
    */
   private async updateModifiedGroupTransaction(): Promise<void> {
     this.observables.getModifiedTransactionObservable().subscribe(param => {
-      if (Utils.log) console.log('BasicDataUpdateService modified transaction: ' + param.transactionId);
+      if (Utils.log) console.log('BasicDataUpdateService modified transaction: ' + param.name + ' (' + param.transactionId + ')');
       const group = this.dataModel.getGroup(param.groupId);
       let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
       let recipients: AtomarChange[] = [];

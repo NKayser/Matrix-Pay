@@ -3,53 +3,124 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {HomeComponent} from './home.component';
 import {MatDialog} from '@angular/material/dialog';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
-import {MockDialog} from '../_mockServices/MockDialog';
+import {MockDialog, MockDialogCancel} from '../_mockServices/MockDialog';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
-import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
 import {DataModelService} from '../../DataModel/data-model.service';
-import {MockDataModelService} from '../_mockServices/MockDataModelService';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
-import {SuccessfulResponse} from '../../ServerCommunication/Response/SuccessfulResponse';
+import {User} from '../../DataModel/User/User';
+import {Language} from '../../DataModel/Utils/Language';
+import {Contact} from '../../DataModel/Group/Contact';
+import {Groupmember} from '../../DataModel/Group/Groupmember';
+import {AtomarChange} from '../../DataModel/Group/AtomarChange';
 
-describe('HomeComponent', () => {
+describe('HomeComponentCancel', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let spy1: any;
-  let matrixBasicDataService: MatrixBasicDataService;
-  let dataModelService: DataModelService;
+
+  let dataModelService: jasmine.SpyObj<DataModelService>;
+  let matrixBasicDataService: jasmine.SpyObj<MatrixBasicDataService>;
 
   beforeEach(async(() => {
+
+    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups']);
+    const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['createTransaction']);
+
     TestBed.configureTestingModule({
       declarations: [ HomeComponent ],
       providers: [
-        { provide: MatDialog, useValue: MockDialog },
-        { provide: MatrixBasicDataService, useClass: MockMatrixBasicDataService},
-        { provide: DataModelService, useClass: MockDataModelService}
+        { provide: MatDialog, useValue: MockDialogCancel },
+        { provide: MatrixBasicDataService, useValue: spyMatrix},
+        { provide: DataModelService, useValue: spyData}
       ]
     })
     .compileComponents();
 
-    matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
-    dataModelService = TestBed.inject(DataModelService);
-  }));
+    dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
+    matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
-    // fixture.detectChanges();
-  });
-
-  /*it('should create', () => {
-    expect(component).toBeTruthy();
-  });*/
+  }));
 
   it('cancel recommendation', () => {
-    component.recommendations = [new Recommendation(new Group('1', '1', Currency.USD), null, null)];
-
-    spy1 = spyOn(matrixBasicDataService, 'confirmPayback');
+    component.recommendations = [new Recommendation(new Group('1', '1', Currency.USD),
+      new AtomarChange(new Contact('c1', 'name_c1'), 5),
+      new AtomarChange(new Contact('c2', 'name_c2'), -5))];
     component.confirmPayback(0);
-    expect(spy1).toHaveBeenCalledTimes(0);
-
+    expect(matrixBasicDataService.createTransaction).not.toHaveBeenCalled();
   });
+
+  it('calculate total Balances', () => {
+    const c1 = new Contact('c1', 'Alice');
+    const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+    dataModelService.getUser.and.returnValue(stubValueUser);
+
+    const g1 = new Group('g1', 'name_g1', Currency.USD);
+    const g2 = new Group('g2', 'name_g2', Currency.USD);
+    const g3 = new Group('g3', 'name_g3', Currency.EUR);
+    const g4 = new Group('g4', 'name_g4', Currency.EUR);
+
+    const mg1 = new Groupmember(c1, g1);
+    mg1.balance = 5;
+    g1.addGroupmember(mg1);
+    const mg2 = new Groupmember(c1, g2);
+    mg2.balance = 10;
+    g2.addGroupmember(mg2);
+    const mg3 = new Groupmember(c1, g3);
+    mg3.balance = 7;
+    g3.addGroupmember(mg3);
+    const mg4 = new Groupmember(c1, g4);
+    mg4.balance = 6;
+    g4.addGroupmember(mg4);
+
+    const stubValueGroups = [g1, g2, g3, g4];
+
+    dataModelService.getGroups.and.returnValue(stubValueGroups);
+
+    fixture.detectChanges();
+
+    expect(component.getTotalBalance(Currency.USD)).toBe(15);
+    expect(component.getTotalBalance(Currency.EUR)).toBe(13);
+  });
+
+});
+
+describe('HomeComponentConfirm', () => {
+  let component: HomeComponent;
+  let fixture: ComponentFixture<HomeComponent>;
+
+  let dataModelService: jasmine.SpyObj<DataModelService>;
+  let matrixBasicDataService: jasmine.SpyObj<MatrixBasicDataService>;
+
+  beforeEach(async(() => {
+
+    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups']);
+    const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['createTransaction']);
+
+    TestBed.configureTestingModule({
+      declarations: [ HomeComponent ],
+      providers: [
+        { provide: MatDialog, useValue: MockDialog },
+        { provide: MatrixBasicDataService, useValue: spyMatrix},
+        { provide: DataModelService, useValue: spyData}
+      ]
+    })
+      .compileComponents();
+
+    dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
+    matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
+
+    fixture = TestBed.createComponent(HomeComponent);
+    component = fixture.componentInstance;
+  }));
+
+  it('confirm recommendation', () => {
+    component.recommendations = [new Recommendation(new Group('1', '1', Currency.USD),
+      new AtomarChange(new Contact('c1', 'name_c1'), 5),
+      new AtomarChange(new Contact('c2', 'name_c2'), -5))];
+    component.confirmPayback(0);
+    expect(matrixBasicDataService.createTransaction).toHaveBeenCalled();
+  });
+
 });

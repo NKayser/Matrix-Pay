@@ -4,7 +4,6 @@ import {Group} from '../../DataModel/Group/Group';
 
 export interface LeaveGroupDialogData {
   group: Group;
-  leave: boolean;
 }
 
 @Component({
@@ -33,7 +32,7 @@ export class LeaveGroupModalComponent implements OnInit {
    * Close the dialog and return the data
    */
   public onSave(): void {
-    this.dialogRef.close({leave: true, group: this.data.group});
+    this.dialogRef.close(this.data);
   }
 
 }

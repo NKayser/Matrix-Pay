@@ -5,7 +5,6 @@ import {Transaction} from '../../DataModel/Group/Transaction';
 import {Group} from '../../DataModel/Group/Group';
 import {TransactionType} from '../../DataModel/Group/TransactionType';
 import {Contact} from '../../DataModel/Group/Contact';
-import {DataModelService} from '../../DataModel/data-model.service';
 import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {currencyMap} from '../../DataModel/Utils/Currency';
 import {DialogProviderService} from '../dialog-provider.service';
@@ -34,7 +33,7 @@ export class GroupTransactionComponent implements OnChanges {
 
   public currencyMap = currencyMap;
 
-  constructor(public dialog: MatDialog, private dataModelService: DataModelService, private matrixBasicDataService: MatrixBasicDataService,
+  constructor(public dialog: MatDialog, private matrixBasicDataService: MatrixBasicDataService,
               private dialogProviderService: DialogProviderService) {
   }
 

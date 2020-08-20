@@ -20,7 +20,6 @@ import {MatrixEvent} from 'matrix-js-sdk';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit, OnDestroy{
-  private clientService: ClientInterface;
 
   // emitter to tell the App Component to display the Menu when logged in
   @Output() loggedIn = new EventEmitter<boolean>();
@@ -35,10 +34,9 @@ export class LoginComponent implements OnInit, OnDestroy{
   public matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
   public passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService,
+  constructor(private clientService: MatrixClientService,
               private emergentDataService: MatrixEmergentDataService,
               private basicDataService: MatrixBasicDataService, private dataModelService: DataModelService) {
-    this.clientService = clientService;
   }
 
   ngOnInit(): void {
