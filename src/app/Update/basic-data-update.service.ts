@@ -129,7 +129,7 @@ export class BasicDataUpdateService {
       }
     });
     this.membershipBuffer.forEach( (item, index) => {
-      if (item[0].groupId === groupId) {
+      if (item.groupId === groupId) {
         this.updateGroupMemberFromBuffer(item);
         this.activityBuffer.splice(index, 1);
       }
