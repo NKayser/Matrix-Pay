@@ -44,6 +44,8 @@ describe('Group', () => {
     expect(g1.groupmembers).toEqual([gm2, gm3, gm1]);
 
     expect(g1.getGroupmember('c1')).toBe(gm1);
+
+    expect(g1.getGroupmember('c3')).toBe(null);
   });
 
   it('check activities', () => {
