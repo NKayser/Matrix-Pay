@@ -7,11 +7,7 @@ import {Currency} from '../../DataModel/Utils/Currency';
 import {Group} from '../../DataModel/Group/Group';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
-import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
 import {DataModelService} from '../../DataModel/data-model.service';
-import {MockDataModelService} from '../_mockServices/MockDataModelService';
-import {Test} from 'tslint';
-import {HomeComponent} from '../home/home.component';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
 import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
@@ -108,6 +104,19 @@ describe('GroupBalanceComponent', () => {
 
 
   });
+
+  it('onresize check', () => {
+    component.onResize({target: {innerWidth: 800}});
+    expect(component.breakpoint).toEqual(2);
+    component.onResize({target: {innerWidth: 100}});
+    expect(component.breakpoint).toEqual(1);
+    component.onResize({target: {innerWidth: 1920}});
+    expect(component.breakpoint).toEqual(3);
+    component.onResize({target: {innerWidth: 540}});
+    expect(component.breakpoint).toEqual(1);
+  });
+
+
 });
 
 describe('GroupBalanceComponent', () => {

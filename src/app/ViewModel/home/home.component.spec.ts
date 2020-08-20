@@ -50,6 +50,35 @@ describe('HomeComponentCancel', () => {
     component.confirmPayback(0);
     expect(matrixBasicDataService.createTransaction).not.toHaveBeenCalled();
   });
+  it('init recommendation', () => {
+    const c1 = new Contact('c1', 'Alice');
+    const c2 = new Contact('c2', 'Bob');
+    const g1 = new Group('g1', 'name_g1', Currency.EUR);
+    const gm1 = new Groupmember(c1, g1);
+    const gm2 = new Groupmember(c2, g1);
+    g1.addGroupmember(gm1);
+    g1.addGroupmember(gm2);
+    const r1 = new Recommendation(g1, new AtomarChange(c1, 100), new AtomarChange(c2, -100));
+    g1.setRecommendations([r1]);
+    dataModelService.getUser.and.returnValue(new User(c1, Currency.EUR, Language.ENGLISH));
+    dataModelService.getGroups.and.returnValue([g1]);
+
+    fixture.detectChanges();
+
+    expect(component.recommendations).toEqual([r1]);
+  });
+
+
+  it('onresize check', () => {
+    component.onResize({target: {innerWidth: 800}});
+    expect(component.breakpoint).toEqual(2);
+    component.onResize({target: {innerWidth: 100}});
+    expect(component.breakpoint).toEqual(1);
+    component.onResize({target: {innerWidth: 1920}});
+    expect(component.breakpoint).toEqual(4);
+    component.onResize({target: {innerWidth: 540}});
+    expect(component.breakpoint).toEqual(1);
+  });
 
   it('calculate total Balances', () => {
     const c1 = new Contact('c1', 'Alice');
