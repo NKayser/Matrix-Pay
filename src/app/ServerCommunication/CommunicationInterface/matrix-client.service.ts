@@ -36,14 +36,12 @@ export class MatrixClientService implements ClientInterface {
   }
 
   public async login(account: string, password: string): Promise<ServerResponse> {
-    if (this.loggedIn) {
-      return new UnsuccessfulResponse(ClientError.AlreadyLoggedIn).promise();
-    }
+    if (this.loggedIn) throw new Error('already logged in');
 
     // Discover Homeserver Address and throw Errors if not successful
     const seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
     if (seperatedAccount.length != 2 || seperatedAccount[1] == '' || seperatedAccount[1] == undefined) {
-      return new UnsuccessfulResponse(ClientError.UserIdFormat).promise();
+      throw new Error('wrong user id format');
     }
     const domain = seperatedAccount[1];
 
@@ -56,7 +54,7 @@ export class MatrixClientService implements ClientInterface {
     }
     this.serverAddress = config['m.homeserver']['base_url'];
 
-    const opts = { 
+    const opts = {
       localStorage: window.localStorage,
       indexedDB: window.indexedDB
     };
@@ -72,12 +70,15 @@ export class MatrixClientService implements ClientInterface {
     this.accessToken = await this.matrixClient.loginWithPassword(account, password).then(
       () => {
         this.loggedIn = true;
-        response = new SuccessfulResponse
+        response = new SuccessfulResponse();
       },
       (reason: string) => {
         this.loggedIn = false;
-        response = new UnsuccessfulResponse(ClientError.InvalidPassword, reason)
+        console.log(reason);
+        response = new UnsuccessfulResponse(ClientError.InvalidPassword, reason);
       });
+
+    if (await response instanceof UnsuccessfulResponse) return response;
 
     // Start the Client (now in ObservableService)
     // this.matrixClient.startClient({initialSyncLimit: 8});
@@ -97,7 +98,7 @@ export class MatrixClientService implements ClientInterface {
     const listener = async (state, prevState, res) => {
       this.prepared = (state === "PREPARED" || state === "SYNCING");
       console.log("Matrix Client prepared: " + this.prepared);
-      if(this.prepared) {
+      if (this.prepared) {
         this.matrixClient.removeListener("sync", listener);
       }
     }
@@ -111,9 +112,10 @@ export class MatrixClientService implements ClientInterface {
     // this.matrixEmergentDataService.setClient(this.matrixClient);
 
     const resp = await response;
-    if(resp instanceof SuccessfulResponse) {
+    if (resp instanceof SuccessfulResponse) {
       this.loggedInEmitter.emit();
     }
+
     return resp;
 
     // TODO: Initialization of Data
