@@ -9,6 +9,8 @@ import {ServerResponse} from '../Response/ServerResponse';
 import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {GroupError} from '../Response/ErrorTypes';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
+import {MatrixEmergentDataService} from '../CommunicationInterface/matrix-emergent-data.service';
+import {EmergentDataInterface} from "../CommunicationInterface/EmergentDataInterface";
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +18,7 @@ import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 export class GroupService {
   private transactionService: TransactionService;
   private matrixClientService: ClientInterface;
+  private matrixEmergentDataService: EmergentDataInterface;
 
   private static readonly ROOM_VISIBILITY: string = 'private';
   private static readonly ERRCODE_UNKNOWN: string = 'M_UNKNOWN';
@@ -28,9 +31,11 @@ export class GroupService {
   private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways
 
   constructor(transactionService: TransactionService,
-              matrixClientService: MatrixClientService) {
+              matrixClientService: MatrixClientService,
+              matrixEmergentDataService: MatrixEmergentDataService) {
     this.transactionService = transactionService;
     this.matrixClientService = matrixClientService;
+    this.matrixEmergentDataService = matrixEmergentDataService;
   }
 
   /**
@@ -46,21 +51,24 @@ export class GroupService {
       response = new SuccessfulResponse();
     },
       (err) => {
-      let errCode: number = GroupError.Unknown;
-      const errMessage: string = err['data']['error'];
+      //let errCode: number = GroupError.Unknown;
+      //const errMessage: string = err['data']['error'];
 
       switch (err['data']['errcode']) {
         case GroupService.ERRCODE_UNKNOWN:
         case GroupService.ERRCODE_UNRECOGNIZED:
-          errCode = GroupError.RoomNotFound;
+          //errCode = GroupError.RoomNotFound;
+          throw new Error('GroupId invalid');
           break;
         case GroupService.ERRCODE_INVALID_PARAM:
-          errCode = GroupError.InvalidUsers;
+          //errCode = GroupError.InvalidUsers;
+          throw new Error('UserId invalid');
           break;
         default:
+          throw new Error('unknown error');
           break;
       }
-      response = new UnsuccessfulResponse(errCode, errMessage);
+      //response = new UnsuccessfulResponse(errCode, errMessage);
     });
 
     return await response;

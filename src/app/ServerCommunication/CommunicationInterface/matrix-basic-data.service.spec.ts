@@ -6,21 +6,24 @@ import {GroupService} from "../GroupCommunication/group.service";
 import {TransactionService} from "../GroupCommunication/transaction.service";
 import {ServerResponse} from "../Response/ServerResponse";
 import {SettingsError} from "../Response/ErrorTypes";
+import {MatrixEmergentDataService} from "./matrix-emergent-data.service";
 
 describe('MatrixBasicDataService', () => {
   let service: MatrixBasicDataService;
 
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['setAccountData']);
+    ['setAccountData', 'invite']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
-    ['getClient']);
+    ['isPrepared', 'getClient']);
   const settingsService = new SettingsService(clientServiceSpy);
   const transactionService = new TransactionService(clientServiceSpy);
-  const groupService = new GroupService(transactionService, clientServiceSpy);
+  const emergentDataService = new MatrixEmergentDataService(clientServiceSpy);
+  const groupService = new GroupService(transactionService, clientServiceSpy, emergentDataService);
 
   beforeEach(() => {
     service = new MatrixBasicDataService(groupService, settingsService);
     clientServiceSpy.getClient.and.returnValue(mockedClient);
+    clientServiceSpy.isPrepared.and.returnValue(true);
   });
 
   it('should be created', () => {
@@ -97,5 +100,106 @@ describe('MatrixBasicDataService', () => {
         done();
       },
       (err) => fail('should not throw error'));
+  });
+
+  it('should throw Error if Client not prepared', async (done: DoneFn) => {
+    clientServiceSpy.getClient.and.returnValue(null);
+    clientServiceSpy.isPrepared.and.returnValue(false);
+
+    service.userChangeDefaultCurrency('currency').then(() => fail('should have thrown error'),
+      (err) => expect(err.message).toBe('Client is not prepared'));
+
+    service.userChangeLanguage('language').then(() => fail('should have thrown error'),
+      (err) => expect(err.message).toBe('Client is not prepared'));
+
+    service.confirmPayback(null, null).then(() => fail('should have thrown error'),
+      (err) => expect(err.message).toBe('Client is not prepared'));
+
+    service.groupAddMember(null, null).then(() => fail('should have thrown error'),
+      (err) => expect(err.message).toBe('Client is not prepared'));
+
+    service.fetchHistory(null).then(() => fail('should have thrown error'),
+      (err) => expect(err.message).toBe('Client is not prepared'));
+
+    service.leaveGroup(null).then(() => fail('should have thrown error'),
+      (err) => expect(err.message).toBe('Client is not prepared'));
+
+    done();
+  });
+
+  it('should addMember with valid input', async (done: DoneFn) => {
+    mockedClient.invite.and.returnValue(Promise.resolve());
+
+    service.groupAddMember('groupIdA', '@uxxxx:dsn.tm.kit.edu').then(
+      (response: ServerResponse) => {
+        expect(response).toBeDefined();
+        expect(response.wasSuccessful()).toBe(true);
+        done();
+      },
+      () => {
+        fail('should be successful');
+        done();
+      }
+    );
+  });
+
+  it('should not addMember with unrecognized groupId input', async (done: DoneFn) => {
+    mockedClient.invite.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'M_UNRECOGNIZED'}}));
+
+    await service.groupAddMember('nonExistingGroup', '@uxxxx:dsn.tm.kit.edu').then(
+      () => {
+        fail('should throw error');
+        done();
+      },
+      (err) => {
+        expect(err.message).toContain('GroupId invalid');
+        done();
+      }
+    );
+  });
+
+  it('should not addMember with unknown groupId input', async (done: DoneFn) => {
+    mockedClient.invite.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'M_UNKNOWN'}}));
+
+    await service.groupAddMember('nonExistingGroup', '@uxxxx:dsn.tm.kit.edu').then(
+      () => {
+        fail('should throw error');
+        done();
+      },
+      (err) => {
+        expect(err.message).toContain('GroupId invalid');
+        done();
+      }
+    );
+  });
+
+  it('should not addMember with invalid userId input', async (done: DoneFn) => {
+    mockedClient.invite.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'M_INVALID_PARAM'}}));
+
+    await service.groupAddMember('group', 'invalid').then(
+      () => {
+        fail('should throw error');
+        done();
+      },
+      (err) => {
+        expect(err.message).toContain('UserId invalid');
+        done();
+      }
+    );
+  });
+
+  it('should not addMember with invalid input', async (done: DoneFn) => {
+    mockedClient.invite.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'SOME_CODE'}}));
+
+    await service.groupAddMember('group', 'invalid').then(
+      () => {
+        fail('should throw error');
+        done();
+      },
+      (err) => {
+        expect(err.message).toContain('unknown error');
+        done();
+      }
+    );
   });
 });

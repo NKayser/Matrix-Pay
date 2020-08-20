@@ -27,6 +27,7 @@ export class SettingsService {
    * @param currency The new string value of the default currency setting of that User.
    */
   public async changeCurrency(currency: string): Promise<ServerResponse> {
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
     const client: MatrixClient = await this.matrixClientService.getClient();
 
     // Set Value
@@ -57,6 +58,7 @@ export class SettingsService {
    * @param language The new string value of the default language setting of that User.
    */
   public async changeLanguage(language: string): Promise<ServerResponse> {
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
     const client: MatrixClient = await this.matrixClientService.getClient();
 
     // Set Value
