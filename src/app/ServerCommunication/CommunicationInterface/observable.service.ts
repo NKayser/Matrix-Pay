@@ -68,7 +68,7 @@ export class ObservableService implements ObservableInterface {
   /*private oldRoomCreations: object;
   private oldRoomMembershipChanges: GroupMemberType[];
   private oldModifiedTransactions: TransactionType[];*/
-  private transactions: TransactionType[] = [];
+  private transactions = {};
 
   private static async until(condition: () => boolean, interval: number, timeout?: number): Promise<boolean> {
     let time: number = 0;
@@ -175,7 +175,6 @@ export class ObservableService implements ObservableInterface {
       // no such event type or no valid events with this event type and state key
       console.log('no currency set');
     } else if (Array.isArray(currencyEvent)) {
-      // extra check because currencyEvent === [] did not work
       if (currencyEvent.length === 0) {
         console.log('no currency set');
       } else {
@@ -200,9 +199,10 @@ export class ObservableService implements ObservableInterface {
       if (Utils.log) console.log(timelineWindow.getEvents());
       if (Utils.log) console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
       await this.paginateBackwardsUntilTheEnd(timelineWindow);
-      console.log('Anzahl Transaktionen: ' + this.transactions.length);
-      if (this.transactions.length > 0) {
-        this.multipleNewTransactionsObservable.next(this.transactions);
+      console.log('found old transactions in room ' + room.roomId + ': ' + this.transactions.hasOwnProperty(room.roomId));
+      if (this.transactions.hasOwnProperty(room.roomId)) {
+        this.multipleNewTransactionsObservable.next(this.transactions[room.roomId]);
+        console.log('Anzahl Transaktionen: ' + this.transactions[room.roomId].length);
       }
     //}
 
@@ -313,19 +313,21 @@ export class ObservableService implements ObservableInterface {
         switch (event.getType()) {
           case ('com.matrixpay.payback'): {
             // If the event has been replaced, getContent() returns the content of the replacing event.
-            if (!event.isRelation()) {
-              console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
-              this.transactions.push(this.getPaybackFromEvent(room, event));
-            } else if (event.isRelation('m.replace')) {
-              if (Utils.log) console.log('got an old editing of a payback. name: ' + event.getContent().name);
-              // this.oldModifiedTransactions.push(transaction);
-              this.modifiedTransactionsObservable.next(this.getPaybackFromEvent(room, event));
-            }
+            console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
+            if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
+            this.transactions[room.roomId].push(this.getPaybackFromEvent(room, event));
             break;
           }
           case ('com.matrixpay.expense'): {
-            if (Utils.log) console.log('got an old expense. name: ' + event.getContent().name);
-            this.transactions.push(this.getExpenseFromEvent(room, event));
+            if(!event.isRelation()) {
+              if (Utils.log) console.log('got an old expense. name: ' + event.getContent().name);
+              if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
+              this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
+            } else if (event.isRelation('m.replace')) {
+              if (Utils.log) console.log('got an old editing of an expense. name: ' + event.getContent().name);
+              // this.oldModifiedTransactions[room.roomId].push(transaction);
+              this.modifiedTransactionsObservable.next(this.getExpenseFromEvent(room, event));
+            }
             break;
           }
           case ('m.room.create'): {
@@ -359,23 +361,24 @@ export class ObservableService implements ObservableInterface {
         // Process the events retrieved by /sync
         switch (event.getType()) {
           case ('com.matrixpay.payback'): {
+            this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
+            break;
+          }
+          case ('com.matrixpay.expense'): {
             if (!event.isRelation()) {
               // We could consider using getOriginalContent() instead of getContent(), because if this event has been replaced
               // (replacing event in the same /sync batch),
               // getContent() returns the content of the replacing event (?), but the information about the replacement
               // will be received through the replacing event.
               // However, using using getContent() won't hurt.
-              if (Utils.log) { console.log('got payback. name: ' + event.getContent().name); }
-              this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
+              if (Utils.log) {
+                console.log('got expense. name: ' + event.getContent().name);
+              }
+              this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
             } else if (event.isRelation('m.replace')) {
               if (Utils.log) { console.log('got editing of payback. name: ' + event.getContent().name); }
               this.modifiedTransactionsObservable.next(this.getPaybackFromEvent(room, event));
             }
-            break;
-          }
-          case ('com.matrixpay.expense'): {
-            if (Utils.log) { console.log('got expense. name: ' + event.getContent().name); }
-            this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
             break;
           }
           case ('m.room.create'): {
