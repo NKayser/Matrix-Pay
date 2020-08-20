@@ -316,13 +316,8 @@ export class BasicDataUpdateService {
             multipleTransactions.push(currentTransaction);
           }
         }
-        if (multipleTransactions.length != 0) {
-          console.log('Input for balances' + param[0].groupId, multipleTransactions, param[param.length - 1].groupId);
-          console.log('Balances should be calculated here (updateNewGroupTransactions): '
-            + this.dataModel.getGroup(param[0].groupId).name);
-          let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
-          param[param.length - 1].groupId);
-        }
+        /*let promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
+          param[param.length - 1].groupId);*/ // TODO: undo commentation
       }
       else {
         if (Utils.log) console.log('transactions for group pushed to buffer: ' +  param[0].groupId);
@@ -341,13 +336,8 @@ export class BasicDataUpdateService {
           multipleTransactions.push(currentTransaction);
         }
       }
-      if (multipleTransactions.length != 0) {
-        console.log('Input for balances' + transactions[0].groupId, multipleTransactions, transactions[transactions.length - 1].groupId);
-        console.log('Balances should be calculated here (updateNewGroupTransactionsFromBuffer): '
-          + this.dataModel.getGroup(transactions[0].groupId).name);
-        /*let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
-          transactions[transactions.length - 1].groupId);*/
-      }
+      /*let promise = this.dataModel.calculateBalances(transactions[0].groupId, multipleTransactions,
+        transactions[transactions.length - 1].groupId);*/ // TODO: undo commentation
     }
     else {
       if (Utils.log) console.log('Transactions creation from buffer failed. Pushed back to buffer: ' +  transactions[0].groupId);

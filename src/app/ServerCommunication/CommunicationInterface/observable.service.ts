@@ -40,15 +40,16 @@ export class ObservableService implements ObservableInterface {
     this.multipleNewTransactionsObservable = new Subject();
     this.settingsLanguageObservable = new Subject();
     this.groupActivityObservable = new Subject();
-
-    this.setUp();
+    this.clientService.getLoggedInEmitter().subscribe(async () => {
+      await this.setUp();
+    });
   }
   // TODO: remove magic numbers
 
   private static TRANSACTION_TYPE_PAYBACK = 'PAYBACK';
   private static TRANSACTION_TYPE_EXPENSE = 'EXPENSE';
   private matrixClient: MatrixClient;
-  private clientService: ClientInterface;
+  private clientService: MatrixClientService;
   private userObservable: Subject<UserType>;
   private groupsObservable: Subject<GroupsType>;
   private balancesObservable: Subject<BalancesType>;
@@ -98,43 +99,23 @@ export class ObservableService implements ObservableInterface {
 
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
-    this.matrixClient = await this.clientService.getLoggedInClient();
-
-    // start the client, initial sync
-    this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
-
-    // Getting data about the user
-    const userId = this.matrixClient.getUserId();
-    // test: does not give the displayName, but the userId
-    const name = this.matrixClient.getUser(userId).displayName;
-    // use getAccountDataFromServer instead of getAccountData in case the initial sync is not complete
-    const currencyEventContent = await this.matrixClient.getAccountDataFromServer('com.matrixpay.currency') // content of the matrix event
-      .catch(() => {if (Utils.log) { console.log('rejected promise while getting account data from server'); } });
-    if (Utils.log) { console.log(currencyEventContent); }
-    /* When setting language is implemented in login component:
-       const languageEventContent = await matrixClient.getAccountDataFromServer('language');
-       if (Utils.log) console.log(languageEventContent);*/
-    if (currencyEventContent !== null) {
-      this.userObservable.next({contactId: userId, name,
-        currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
-    }
-
-
-    // wait until initial sync is done
-    const syncPromise = new Promise((resolve, reject) => {
-      this.matrixClient.on('sync', (state, payload) => {
-        if (state === 'SYNCING') {
-          resolve();
-        } else if (state === 'ERROR'){
-          console.log('error while syncing');
-        }
-      });
-    });
-    await syncPromise;
-    if (Utils.log) console.log(this.matrixClient.getSyncStateData());
+    this.matrixClient = this.clientService.getClient();
 
     // start the matrix listeners
-    this.listenToMatrix();
+    await this.listenToMatrix();
+    await this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
+
+    const userId = this.matrixClient.getUserId();
+    console.log("+++ user id: " + userId +  ", name: " + this.matrixClient.getUser(userId).displayName);
+    const currencyEventContent = await this.matrixClient.getAccountDataFromServer('com.matrixpay.currency') // content of the matrix event
+    if (currencyEventContent !== null) {
+      this.userObservable.next({contactId: userId, name: this.matrixClient.getUser(userId).displayName,
+        currency: currencyEventContent.currency, /*language: languageEventContent.language*/ language: 'ENGLISH'});
+    }
+    // start the client, initial sync
+
+    // Getting data about the use
+
 
     // Get data about the rooms (and transfer the information to BasicDataUpdateService,
     // so that future events can be stored in an existing group)
@@ -168,7 +149,7 @@ export class ObservableService implements ObservableInterface {
     console.log(rooms);
     // forin does not work (does not get correct references of individual rooms), no idea why
     for (let i = 0; i < rooms.length; i++) {
-      this.processNewRoom(rooms[i]);
+      await this.processNewRoom(rooms[i]);
     }
   }
 
@@ -194,7 +175,6 @@ export class ObservableService implements ObservableInterface {
       // no such event type or no valid events with this event type and state key
       console.log('no currency set');
     } else if (Array.isArray(currencyEvent)) {
-      // extra check because currencyEvent === [] did not work
       if (currencyEvent.length === 0) {
         console.log('no currency set');
       } else {
@@ -268,8 +248,6 @@ export class ObservableService implements ObservableInterface {
 
     if (Utils.log) { console.log('ObservableService is listening to Matrix'); }
 
-    if (Utils.log) console.log('ObservableService is listening to Matrix');
-
     // Fires whenever new user-scoped account_data is added.
     this.matrixClient.on('accountData', (event, oldEvent) => {
       // if (Utils.log) console.log('got account data change' + event.getType());
@@ -315,17 +293,15 @@ export class ObservableService implements ObservableInterface {
       }
     });
 
-    /*
     // now done in 'Room.membership'-Listener so that a date can be retrieved with event.getDate()
     // Fires whenever invited to a room or joining a room
-        this.matrixClient.on('Room', room => {
+    this.matrixClient.on('Room', room => {
       const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
       if (!(members[this.matrixClient.getUserId()].membership === 'join')) {
         return;
       }
       this.processNewRoom(room);
     });
-    */
 
     // Fires whenever the timeline in a room is updated
     this.matrixClient.on('Room.timeline',
@@ -424,9 +400,9 @@ export class ObservableService implements ObservableInterface {
         if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
           // aus irgendeinem grund ist der raum hier null
 
-          this.processNewRoom(this.matrixClient.getRoom(groupId));
+          // this.processNewRoom(this.matrixClient.getRoom(groupId));
           // TODO call next() on observable for activity
-          if (Utils.log) console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
+          // if (Utils.log) console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
           if (Utils.log) console.log('user left the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
           this.groupsObservable.next({groupId, isLeave: true,
