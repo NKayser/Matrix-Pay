@@ -149,7 +149,7 @@ export class ObservableService implements ObservableInterface {
     console.log(rooms);
     // forin does not work (does not get correct references of individual rooms), no idea why
     for (let i = 0; i < rooms.length; i++) {
-      this.processNewRoom(rooms[i]);
+      await this.processNewRoom(rooms[i]);
     }
   }
 
@@ -247,8 +247,6 @@ export class ObservableService implements ObservableInterface {
 
     if (Utils.log) { console.log('ObservableService is listening to Matrix'); }
 
-    if (Utils.log) console.log('ObservableService is listening to Matrix');
-
     // Fires whenever new user-scoped account_data is added.
     this.matrixClient.on('accountData', (event, oldEvent) => {
       // if (Utils.log) console.log('got account data change' + event.getType());
@@ -312,7 +310,6 @@ export class ObservableService implements ObservableInterface {
         // Process the events retrieved by backpagination
         switch (event.getType()) {
           case ('com.matrixpay.payback'): {
-            // If the event has been replaced, getContent() returns the content of the replacing event.
             console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
             if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
             this.transactions[room.roomId].push(this.getPaybackFromEvent(room, event));
@@ -320,6 +317,7 @@ export class ObservableService implements ObservableInterface {
           }
           case ('com.matrixpay.expense'): {
             if(!event.isRelation()) {
+              // If the event has been replaced, getContent() returns the content of the replacing event.
               if (Utils.log) console.log('got an old expense. name: ' + event.getContent().name);
               if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
               this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
@@ -402,7 +400,7 @@ export class ObservableService implements ObservableInterface {
 
           // this.processNewRoom(this.matrixClient.getRoom(groupId));
           // TODO call next() on observable for activity
-          if (Utils.log) console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
+          // if (Utils.log) console.log('user joined the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
           if (Utils.log) console.log('user left the room ' + this.matrixClient.getRoom(groupId).name + ' date: ' + event.getDate());
           this.groupsObservable.next({groupId, isLeave: true,
