@@ -70,33 +70,6 @@ export class ObservableService implements ObservableInterface {
   private oldModifiedTransactions: TransactionType[];*/
   private transactions = {};
 
-  private static async until(condition: () => boolean, interval: number, timeout?: number): Promise<boolean> {
-    let time: number = 0;
-    while (condition() == false) {
-      if (timeout != undefined && time >= timeout) return Promise.reject();
-      await new Promise(resolve => setTimeout(resolve, interval));
-      if (Utils.log) console.log('waiting for client to be logged in or prepared. ' + time);
-      time += interval;
-    }
-    return true;
-  }
-
-  // for testing
-  public scroll(): void {
-    if (Utils.log) console.log(this.window.canPaginate(EventTimeline.BACKWARDS));
-    const tl = this.window.getTimelineIndex(EventTimeline.BACKWARDS);
-    if (!tl) {
-      if (Utils.log) console.log('TimelineWindow: no timeline yet');
-    }
-    if (tl.index > tl.minIndex()) {
-      if (Utils.log) console.log('canPaginate');
-    }
-    if (Utils.log) console.log('neighboring timeline or pagination token available: ' +  Boolean(tl.timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS) ||
-      tl.timeline.getPaginationToken(EventTimeline.BACKWARDS)));
-    this.window.paginate(EventTimeline.BACKWARDS, 10);
-    if (Utils.log) console.log('scrolled');
-  }
-
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
     this.matrixClient = this.clientService.getClient();
