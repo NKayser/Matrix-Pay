@@ -5,24 +5,21 @@ import {MatrixClient, MatrixEvent} from 'matrix-js-sdk';
 import {ClientInterface} from '../CommunicationInterface/ClientInterface';
 import {MatrixClientService} from '../CommunicationInterface/matrix-client.service';
 import {ServerResponse} from '../Response/ServerResponse';
-import {ObservableService} from '../CommunicationInterface/observable.service';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
-import {SettingsError} from "../Response/ErrorTypes";
+import {SettingsError} from '../Response/ErrorTypes';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SettingsService {
   private matrixClientService: ClientInterface;
-  private observableService: ObservableService;
 
   private static readonly CURRENCY_CONTENT_KEY: string = 'com.matrixpay.currency';
   private static readonly LANGUAGE_CONTENT_KEY: string = 'com.matrixpay.language';
 
-  constructor(matrixClientService: MatrixClientService, observableService: ObservableService) {
+  constructor(matrixClientService: MatrixClientService) {
     this.matrixClientService = matrixClientService;
-    this.observableService = observableService;
   }
 
   /**
@@ -34,7 +31,8 @@ export class SettingsService {
 
     // Set Value
     let response: ServerResponse;
-    await client.setAccountData(SettingsService.CURRENCY_CONTENT_KEY, {currency}).then(
+    await client.setAccountData(SettingsService.CURRENCY_CONTENT_KEY,
+      {[SettingsService.CURRENCY_CONTENT_KEY]: currency}).then(
       () => response = new SuccessfulResponse(),
       (err: string) => response = new UnsuccessfulResponse(SettingsError.Setter, err));
 
@@ -63,7 +61,8 @@ export class SettingsService {
 
     // Set Value
     let response: ServerResponse;
-    await client.setAccountData(SettingsService.LANGUAGE_CONTENT_KEY, {language}).then(
+    await client.setAccountData(SettingsService.LANGUAGE_CONTENT_KEY,
+      {[SettingsService.LANGUAGE_CONTENT_KEY]: language}).then(
       () => response = new SuccessfulResponse(),
       (err: string) => response = new UnsuccessfulResponse(SettingsError.Setter, err));
 

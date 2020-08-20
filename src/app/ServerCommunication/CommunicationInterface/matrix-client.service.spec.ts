@@ -29,7 +29,7 @@ describe('MatrixClientServiceService', () => {
     //service = TestBed.inject(MatrixClientService);
     service = new MatrixClientService(classProviderSpy);
     classProviderSpy.createClient.and.returnValue(mockedClient);
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    //jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
   });
 
   it('should be created', () => {
