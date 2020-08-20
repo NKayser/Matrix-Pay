@@ -23,63 +23,69 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatGridListModule} from '@angular/material/grid-list';
+import {LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
+import {Group} from '../../DataModel/Group/Group';
+import {Currency} from '../../DataModel/Utils/Currency';
 
 describe('CreateGroupModalComponent', () => {
   let component: CreateGroupModalComponent;
   let fixture: ComponentFixture<CreateGroupModalComponent>;
 
+  let matDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
+
   beforeEach(async(() => {
+
+    const spyDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
     TestBed.configureTestingModule({
       declarations: [ CreateGroupModalComponent ],
       providers: [
-        {
-          provide: MatDialogRef,
-          useValue: []
-        },
-        {
-          provide: MAT_DIALOG_DATA,
-          useValue: []
-        }
-      ],
-      imports: [
-        NoopAnimationsModule,
-        LayoutModule,
-        BrowserModule,
-        BrowserAnimationsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatIconModule,
-        MatCardModule,
-        FormsModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatRadioModule,
-        ReactiveFormsModule,
-        LayoutModule,
-        MatToolbarModule,
-        MatSidenavModule,
-        MatListModule,
-        MatTabsModule,
-        MatDialogModule,
-        AppRoutingModule,
-        NgxChartsModule,
-        MatSlideToggleModule,
-        MatCheckboxModule,
-        MatProgressSpinnerModule,
-        MatGridListModule,
+        { provide: MatDialogRef, useValue: spyDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: [] },
       ]
-
     })
     .compileComponents();
-  }));
 
-  beforeEach(() => {
+    matDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
     fixture = TestBed.createComponent(CreateGroupModalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+  }));
+
+  it('cancel', () => {
+    component.onCancel();
+    expect(matDialogRef.close).toHaveBeenCalled();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('check error messages', () => {
+    expect(component.getInvalidGroupNameErrorMessage()).toEqual('Not a valid group name');
+  });
+
+  it('confirm', () => {
+
+    const data = {
+      groupName: 'name_g1',
+      currency: Currency.USD
+    };
+
+    component.data = data;
+    component.ngOnInit();
+
+    component.onSave();
+    expect(matDialogRef.close).toHaveBeenCalledWith(data);
+
+  });
+
+  it('confirm invalid group', () => {
+
+    const data = {
+      groupName: '',
+      currency: Currency.USD
+    };
+
+    component.data = data;
+    component.ngOnInit();
+
+    component.onSave();
+    expect(matDialogRef.close).not.toHaveBeenCalled();
+
   });
 });

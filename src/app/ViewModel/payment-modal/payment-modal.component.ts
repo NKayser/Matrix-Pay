@@ -48,7 +48,7 @@ export class PaymentModalComponent implements OnInit{
   /**
    * Check if all inputs of all forms a valid
    */
-  public checkForm(): boolean {
+  private checkForm(): boolean {
 
     let tempValid = false;
     for (let i = 0; i < this.data.amount.length; i++){
@@ -92,10 +92,10 @@ export class PaymentModalComponent implements OnInit{
     const newAmount = new Array<number>(0);
     for (let i = 0; i < this.data.amount.length; i++){
         newRecipients.push(this.data.recipients[i]);
-        newAmount.push(this.formControlAmount[i].value * 100);
+        newAmount.push(Math.round(this.formControlAmount[i].value * 100));
     }
 
-    return {modalTitle: '', description: newDescription, payer: newPayer, recipients: newRecipients, amount: newAmount,
+    return {modalTitle: this.data.modalTitle, description: newDescription, payer: newPayer, recipients: newRecipients, amount: newAmount,
       isAdded: this.data.isAdded};
 
   }
@@ -111,7 +111,7 @@ export class PaymentModalComponent implements OnInit{
    * Return an error message if the description is invalid
    */
   public getInvalidDescriptionErrorMessage(): string{
-    return 'Not a valid number';
+    return 'Not a description';
   }
 
   /**

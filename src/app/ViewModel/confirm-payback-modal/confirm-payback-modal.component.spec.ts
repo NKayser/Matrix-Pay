@@ -1,84 +1,55 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ConfirmPaybackModalComponent } from './confirm-payback-modal.component';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {BrowserAnimationsModule, NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {LayoutModule} from '@angular/cdk/layout';
-import {BrowserModule} from '@angular/platform-browser';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatIconModule} from '@angular/material/icon';
-import {MatCardModule} from '@angular/material/card';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {MatSelectModule} from '@angular/material/select';
-import {MatRadioModule} from '@angular/material/radio';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatSidenavModule} from '@angular/material/sidenav';
-import {MatListModule} from '@angular/material/list';
-import {MatTabsModule} from '@angular/material/tabs';
-import {AppRoutingModule} from '../app-routing/app-routing.module';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatGridListModule} from '@angular/material/grid-list';
+import {ConfirmPaybackModalComponent} from './confirm-payback-modal.component';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Currency} from '../../DataModel/Utils/Currency';
+import {Recommendation} from '../../DataModel/Group/Recommendation';
+import {Contact} from '../../DataModel/Group/Contact';
+import {Group} from '../../DataModel/Group/Group';
+import {AtomarChange} from '../../DataModel/Group/AtomarChange';
 
 describe('ConfirmPaybackModalComponent', () => {
   let component: ConfirmPaybackModalComponent;
   let fixture: ComponentFixture<ConfirmPaybackModalComponent>;
 
+  let matDialogRef: jasmine.SpyObj<MatDialogRef<ConfirmPaybackModalComponent>>;
+
   beforeEach(async(() => {
+    const spyDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+
     TestBed.configureTestingModule({
       declarations: [ ConfirmPaybackModalComponent ],
       providers: [
-        {
-          provide: MatDialogRef,
-          useValue: []
-        },
-        {
-          provide: MAT_DIALOG_DATA,
-          useValue: []
-        }
-      ],
-      imports: [
-        NoopAnimationsModule,
-        LayoutModule,
-        BrowserModule,
-        BrowserAnimationsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatIconModule,
-        MatCardModule,
-        FormsModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatRadioModule,
-        ReactiveFormsModule,
-        LayoutModule,
-        MatToolbarModule,
-        MatSidenavModule,
-        MatListModule,
-        MatTabsModule,
-        MatDialogModule,
-        AppRoutingModule,
-        NgxChartsModule,
-        MatSlideToggleModule,
-        MatCheckboxModule,
-        MatProgressSpinnerModule,
-        MatGridListModule,
+        { provide: MatDialogRef, useValue: spyDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: [] },
       ]
     })
     .compileComponents();
-  }));
 
-  beforeEach(() => {
+    matDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<ConfirmPaybackModalComponent>>;
     fixture = TestBed.createComponent(ConfirmPaybackModalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+  }));
+
+  it('cancel', () => {
+    component.onCancel();
+    expect(matDialogRef.close).toHaveBeenCalled();
   });
 
-  /*it('should create', () => {
-    expect(component).toBeTruthy();
-  });*/
+  it('confirm', () => {
+
+    const c1 = new Contact('c1', 'Alice');
+    const c2 = new Contact('c2', 'Bob');
+    const g1 = new Group('g1', 'name_g1', Currency.EUR);
+
+    const data = {
+      recommendation: new Recommendation(g1, new AtomarChange(c1, 5), new AtomarChange(c2, -5))
+    };
+
+    component.data = data;
+
+    component.onSave();
+    expect(matDialogRef.close).toHaveBeenCalledWith(data);
+
+  });
 });

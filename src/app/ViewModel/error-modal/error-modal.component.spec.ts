@@ -23,62 +23,33 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatGridListModule} from '@angular/material/grid-list';
+import {LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
 
 describe('ErrorModalComponent', () => {
   let component: ErrorModalComponent;
   let fixture: ComponentFixture<ErrorModalComponent>;
+  let matDialogRef: jasmine.SpyObj<MatDialogRef<ErrorModalComponent>>;
 
   beforeEach(async(() => {
+
+    const spyDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+
     TestBed.configureTestingModule({
       declarations: [ ErrorModalComponent ],
       providers: [
-        {
-          provide: MatDialogRef,
-          useValue: []
-        },
-        {
-          provide: MAT_DIALOG_DATA,
-          useValue: []
-        }
-      ],
-      imports: [
-        NoopAnimationsModule,
-        LayoutModule,
-        BrowserModule,
-        BrowserAnimationsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatIconModule,
-        MatCardModule,
-        FormsModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatRadioModule,
-        ReactiveFormsModule,
-        LayoutModule,
-        MatToolbarModule,
-        MatSidenavModule,
-        MatListModule,
-        MatTabsModule,
-        MatDialogModule,
-        AppRoutingModule,
-        NgxChartsModule,
-        MatSlideToggleModule,
-        MatCheckboxModule,
-        MatProgressSpinnerModule,
-        MatGridListModule,
+        { provide: MatDialogRef, useValue: spyDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: [] },
       ]
     })
     .compileComponents();
-  }));
 
-  beforeEach(() => {
+    matDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<ErrorModalComponent>>;
     fixture = TestBed.createComponent(ErrorModalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  }));
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('cancel', () => {
+    component.onCancel();
+    expect(matDialogRef.close).toHaveBeenCalled();
   });
 });
