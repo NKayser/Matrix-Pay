@@ -9,7 +9,7 @@ import {Groupmember} from '../Group/Groupmember';
  * It is linked with the user's contact and saves all the user's groups.
  */
 export class User {
-  private static _singleUser: User;
+  private static _singleUser: User = null;
   private readonly _contact: Contact;
   private _currency: Currency;
   private _language: Language;
