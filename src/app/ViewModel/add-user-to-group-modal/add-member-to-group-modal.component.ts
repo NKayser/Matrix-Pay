@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Group} from '../../DataModel/Group/Group';
@@ -13,7 +13,7 @@ export interface AddMemberToGroupDialogData {
   templateUrl: './add-member-to-group-modal.component.html',
   styleUrls: ['./add-member-to-group-modal.component.css']
 })
-export class AddMemberToGroupModalComponent {
+export class AddMemberToGroupModalComponent implements OnInit{
 
   // Save the FormControl which checks the userName
   // use regex pattern according to matrix specification: https://matrix.org/docs/spec/index#users
@@ -22,6 +22,10 @@ export class AddMemberToGroupModalComponent {
   constructor(
     public dialogRef: MatDialogRef<AddMemberToGroupModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AddMemberToGroupDialogData) {
+  }
+
+  ngOnInit(): void {
+    this.formControlUser.setValue(this.data.user);
   }
 
   /**

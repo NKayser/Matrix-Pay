@@ -16,19 +16,19 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 export class SettingsComponent implements OnInit {
 
   // save the current language and currency
-  public selectedLanguage = Language.ENGLISH;
+  // public selectedLanguage = Language.ENGLISH;
   public selectedCurrency = Currency.USD;
 
   // these variables are there to save changes to the settings, so only changed settings need to be send to matrix
-  private oldSelectedLanguage: Language;
+  // private oldSelectedLanguage: Language;
   private oldSelectedCurrency: Currency;
 
   // load mappings
   public currencyMap = currencyMap;
-  public languageMap = languageMap;
+  // public languageMap = languageMap;
 
   // track if matrix response is loading
-  public loadingLanguage = false;
+  // public loadingLanguage = false;
   public loadingCurrency = false;
 
   constructor(private dataModelService: DataModelService, private matrixBasicDataService: MatrixBasicDataService, public dialog: MatDialog,
@@ -42,11 +42,11 @@ export class SettingsComponent implements OnInit {
   private initSettings(): void{
 
     // get current setting values from dataModel
-    this.selectedLanguage = this.dataModelService.getUser().language;
+    // this.selectedLanguage = this.dataModelService.getUser().language;
     this.selectedCurrency = this.dataModelService.getUser().currency;
 
     this.oldSelectedCurrency = this.selectedCurrency;
-    this.oldSelectedLanguage = this.selectedLanguage;
+    // this.oldSelectedLanguage = this.selectedLanguage;
 
   }
 
@@ -54,11 +54,10 @@ export class SettingsComponent implements OnInit {
    * Apply all changed settings by sending them to matrix
    */
   public applySettings(): void{
-    if (this.oldSelectedLanguage !== this.selectedLanguage){
+    /*if (this.oldSelectedLanguage !== this.selectedLanguage){
       this.oldSelectedLanguage = this.selectedLanguage;
 
       this.loadingLanguage = true;
-      // TODO Discuss string format for languages
 
       promiseTimeout(TIMEOUT, this.matrixBasicDataService.userChangeLanguage(this.selectedLanguage.toString())).then((data) => {
         console.log(data);
@@ -70,16 +69,20 @@ export class SettingsComponent implements OnInit {
         this.dialogProviderService.openErrorModal('error language 2: ' + err, this.dialog);
         this.loadingLanguage = false;
       });
-    }
+    }*/
 
     if (this.oldSelectedCurrency !== this.selectedCurrency){
       this.oldSelectedCurrency = this.selectedCurrency;
 
       this.loadingCurrency = true;
-      // TODO Discuss string format for currencies
-      promiseTimeout(TIMEOUT, this.matrixBasicDataService.userChangeDefaultCurrency(matrixCurrencyMap[this.selectedLanguage])).then((data) => {
+      promiseTimeout(TIMEOUT, this.matrixBasicDataService.userChangeDefaultCurrency(matrixCurrencyMap[this.selectedCurrency])).then((data) => {
+        console.log('success?');
+        console.log(data);
         if (!data.wasSuccessful()){
+          console.log('error');
+          console.log(this.dialogProviderService);
           this.dialogProviderService.openErrorModal('error currency 1: ' + data.getMessage(), this.dialog);
+          console.log('error2');
         }
         this.loadingCurrency = false;
       }, (err) => {

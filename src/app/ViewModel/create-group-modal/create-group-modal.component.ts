@@ -27,6 +27,7 @@ export class CreateGroupModalComponent implements OnInit{
 
   ngOnInit(): void {
     this.selectedCurrency = this.data.currency;
+    this.formControlGroupName.setValue(this.data.groupName);
   }
 
   /**
