@@ -284,9 +284,9 @@ export class ObservableService implements ObservableInterface {
               }
               // this.oldRoomMembershipChanges.push({groupId: room.roomId, userId: event.getStateKey(),
               //  date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
-              // alternativ für den Namen (auch bei dem Room.membership-listener): room.getMember(event.getStateKey()).user.displayName)
+              // alternativ für den Namen: room.getMember(event.getStateKey()).user.displayName)
               this.groupMembershipObservable.next(
-                {groupId: room.roomId, userId: event.getStateKey(), date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName}
+                {groupId: room.roomId, userId: event.getStateKey(), date: event.getDate(), isLeave, name: room.getMember(event.getStateKey()).user.displayName}
                 );
               break;
             }
@@ -347,18 +347,11 @@ export class ObservableService implements ObservableInterface {
       const userId = member.userId;
       const groupId = member.roomId;
       console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
-      if (userId === this.matrixClient.getUserId()) {
-        if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
-          // aus irgendeinem grund ist der raum hier null
-
-          // this.processNewRoom(this.matrixClient.getRoom(groupId));
-          // TODO call next() on observable for activity
-          if (Utils.log) console.log('user joined the room ' + groupId + ' date: ' + event.getDate());
-        } else if (oldMembership === 'join' && member.membership === 'leave') {
-          if (Utils.log) console.log('user left the room ' + groupId + ' date: ' + event.getDate());
-          this.groupsObservable.next({groupId, isLeave: true,
-            currency: undefined, groupName: undefined, userNames: undefined, userIds: undefined});
-        }
+      // Maybe cover the case user joining a group separately
+      if (userId === this.matrixClient.getUserId() && oldMembership === 'join' && member.membership === 'leave') {
+        if (Utils.log) console.log('user left the room ' + groupId + ' date: ' + event.getDate());
+        this.groupsObservable.next({groupId, isLeave: true,
+          currency: undefined, groupName: undefined, userNames: undefined, userIds: undefined});
       } else {
         let isLeave: boolean;
         if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
@@ -368,9 +361,8 @@ export class ObservableService implements ObservableInterface {
           isLeave = true;
           if (Utils.log) console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
         }
-        // TODO: no name
         this.groupMembershipObservable.next(
-          {groupId, isLeave, userId, date: event.getDate(), name: ""});
+          {groupId, isLeave, userId, date: event.getDate(), name: member.name});
       }
     });
   }
