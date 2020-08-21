@@ -115,7 +115,8 @@ export class GroupService {
 
     // check if user is the payer of the recommendation. Should already be the case
     if (payer != await client.getUserId()) {
-      return new UnsuccessfulResponse(GroupError.Unauthorized, 'user must be payer of the recommendation');
+      //return new UnsuccessfulResponse(GroupError.Unauthorized, 'user must be payer of the recommendation');
+      throw new Error('user must be payer of the recommendation');
     }
 
     // Part 2: Create Payback

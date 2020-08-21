@@ -274,4 +274,70 @@ describe('MatrixBasicDataService', () => {
       }
     );
   });
+
+  it('confirmPayback should throw Error if recommendation id invalid', async (done: DoneFn) => {
+    // Mock
+    const accountDataEvent = jasmine.createSpyObj('accountDataEvent', ['getOriginalContent']);
+    accountDataEvent.getOriginalContent.and.returnValue(
+      {
+        recipients: ['@id1:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'],
+        payers: ['@id2:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        amounts: [100, 200],
+        last_transaction: 'lastId'
+      });
+    mockedClient.getRoom.and.returnValue({
+        roomId: 'room_id_A',
+        memberIds: ['@id1:dsn.tm.kit.edu', '@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        accountData: {
+          recommendations: accountDataEvent
+        }
+      }
+    );
+
+    const invalidIds: number[] = [-1, -0.5, 0.5, 2];
+
+    for (const invalidId of invalidIds) {
+      await service.confirmPayback('groupId', invalidId).then(
+        () => {
+          fail();
+          done();
+        },
+        (err) => {
+          expect(err.message).toContain('invalid recommendation id');
+          done();
+        }
+      );
+    }
+  });
+
+  it('confirmPayback should throw Error if user is not payer', async (done: DoneFn) => {
+    // Mock
+    const accountDataEvent = jasmine.createSpyObj('accountDataEvent', ['getOriginalContent']);
+    accountDataEvent.getOriginalContent.and.returnValue(
+      {
+        recipients: ['@id1:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'],
+        payers: ['@id2:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        amounts: [100, 200],
+        last_transaction: 'lastId'
+      });
+    mockedClient.getRoom.and.returnValue({
+        roomId: 'room_id_A',
+        memberIds: ['@id1:dsn.tm.kit.edu', '@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        accountData: {
+          recommendations: accountDataEvent
+        }
+      }
+    );
+    mockedClient.getUserId.and.returnValue('@id1:dsn.tm.kit.edu');
+
+    await service.confirmPayback('groupId', 1).then(
+      () => {
+        fail('confirmPayback should fail');
+      },
+      (err) => {
+        expect(err.message).toContain('user must be payer of the recommendation');
+        done();
+      }
+    );
+  });
 });
