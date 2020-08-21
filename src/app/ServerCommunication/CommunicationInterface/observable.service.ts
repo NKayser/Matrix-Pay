@@ -370,7 +370,7 @@ export class ObservableService implements ObservableInterface {
         }
         // TODO: no name
         this.groupMembershipObservable.next(
-          {groupId, isLeave, userId, date: event.getDate(), name: null});
+          {groupId, isLeave, userId, date: event.getDate(), name: ""});
       }
     });
   }
@@ -401,7 +401,7 @@ export class ObservableService implements ObservableInterface {
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payerId,
-      payerAmount: undefined, // should be calculated in BasicDataUpdateService
+      payerAmount: this.SumUpRecipientAmounts(content.amounts), // should be calculated in BasicDataUpdateService
       recipientIds: content.recipientIds,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
