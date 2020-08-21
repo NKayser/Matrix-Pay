@@ -81,7 +81,27 @@ export class ObservableService implements ObservableInterface {
     this.roomListener();
     this.membershipListener();
 
-    await this.matrixClient.startClient({initialSyncLimit: 0, includeArchivedRooms: true});
+    const filter = Filter.fromJson(this.matrixClient.credentials.userId, 'edu.kit.tm.dsn.psess2020.matrixpay-v1', {
+      "room": {
+        "state": {
+          "types": ["m.room.*", "org.matrix.msc1840"],
+        },
+        "timeline": {
+          "limit": 10,
+          "types": ["com.matrixpay.currency", 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense'],
+        },
+        "ephemeral": {
+          "not_types": ["*"],
+        }
+      },
+      "presence": {
+        "not_types": ["*"],
+      },
+    });
+
+    console.log(filter);
+
+    await this.matrixClient.startClient({includeArchivedRooms: false, filter});
 
     // Get data about the user
     const userId = this.matrixClient.getUserId();
@@ -256,7 +276,7 @@ export class ObservableService implements ObservableInterface {
               //  date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
               // alternativ für den Namen (auch bei dem Room.membership-listener): room.getMember(event.getStateKey()).user.displayName)
               this.groupMembershipObservable.next(
-                {groupId: room.roomId, userId: event.getStateKey(), date: event.getDate(), isLeave, name: null}
+                {groupId: room.roomId, userId: event.getStateKey(), date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName}
                 );
               break;
             }
@@ -290,7 +310,9 @@ export class ObservableService implements ObservableInterface {
             case ('m.room.create'): {
               if (Utils.log) console.log('got a room creation. room: ' + room.name
                 + ' creator: ' + event.getContent().creator + ' date: ' + event.getDate());
-              this.groupActivityObservable.next({groupId: room.roomId, creatorId: event.getContent().creator, creationDate: event.getDate()});
+              this.groupActivityObservable.next(
+                {groupId: room.roomId, creatorId: event.getContent().creator, creationDate: event.getDate()}
+                );
               break;
             }
           }
