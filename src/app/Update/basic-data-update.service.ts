@@ -352,11 +352,13 @@ export class BasicDataUpdateService {
       else {recipientContact = group.getGroupmember(param.recipientIds[i]).contact; }
       recipients.push(new AtomarChange(recipientContact, param.recipientAmounts[i]));
     }
-    const sender = group.getGroupmember(param.senderId);
+    let senderMember: Groupmember;
+    if (group.getGroupmember(param.senderId) === null) {senderMember = new Groupmember(new Contact(param.senderId, ''), group); }
+    else {senderMember = group.getGroupmember(param.senderId); }
     const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
-      param.name, param.creationDate, group, payer, recipients, sender);
+      param.name, param.creationDate, group, payer, recipients, senderMember);
     group.addTransaction(newTransaction);
-    const activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, sender.contact, param.creationDate);
+    const activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, senderMember.contact, param.creationDate);
     group.addActivity(activity);
     return newTransaction;
   }
