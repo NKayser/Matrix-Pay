@@ -40,8 +40,8 @@ export class DataModelService {
 
   }
 
+  // Notifies the ViewModel when the dataModel has loaded
   private notifyViewModelWhenReady(): void{
-    console.log('say hello to viewmodel from me');
     this.emitter.next(true);
   }
 

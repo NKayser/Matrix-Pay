@@ -1,13 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LoginComponent } from './login.component';
-import {MatDialogRef} from '@angular/material/dialog';
-import {CreateGroupModalComponent} from '../create-group-modal/create-group-modal.component';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 import {MatrixEmergentDataService} from '../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {DataModelService} from '../../DataModel/data-model.service';
-import {AddMemberToGroupModalComponent} from '../add-user-to-group-modal/add-member-to-group-modal.component';
 import {SuccessfulResponse} from '../../ServerCommunication/Response/SuccessfulResponse';
 
 describe('LoginComponent', () => {

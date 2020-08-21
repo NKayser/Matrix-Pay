@@ -101,7 +101,7 @@ export class User {
   public createGroup(groupId: string, name: string, currency: Currency): Group {
     const group: Group = new Group(groupId, name, currency);
     this._groups.push(group);
-    //group.addGroupmember(new Groupmember(this._contact, group));
+    // group.addGroupmember(new Groupmember(this._contact, group));
     return group;
   }
 
@@ -109,7 +109,7 @@ export class User {
    * Removes a group from the array of groups of the user.
    * @param groupId  ID of he group that should be removed.
    */
-  public removeGroup(groupId: string) {
+  public removeGroup(groupId: string): void{
     this._groups.forEach( (item, index) => {
       if (item.groupId === groupId) { this._groups.splice(index, 1); }
     });

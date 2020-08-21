@@ -9,7 +9,6 @@ import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {currencyMap} from '../../DataModel/Utils/Currency';
 import {DialogProviderService} from '../dialog-provider.service';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
-import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
 
 // @ts-ignore
 import {MatrixEvent} from 'matrix-js-sdk';
@@ -188,8 +187,8 @@ export class GroupTransactionComponent implements OnChanges {
     return 0;
   }
 
-  fetchHistory(): void{
+  /*fetchHistory(): void{
 
-  }
+  }*/
 
 }

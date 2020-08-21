@@ -1,21 +1,9 @@
-import { LayoutModule } from '@angular/cdk/layout';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { NavigationMenuComponent } from './navigation-menu.component';
 import {MatDialog} from '@angular/material/dialog';
 import {MockDialogCancel} from '../_mockServices/MockDialog';
-import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
-import {DataModelService} from '../../DataModel/data-model.service';
-import {HomeComponent} from '../home/home.component';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
-import {SuccessfulResponse} from '../../ServerCommunication/Response/SuccessfulResponse';
-import {UnsuccessfulResponse} from '../../ServerCommunication/Response/UnsuccessfulResponse';
 
 describe('NavigationMenuComponent', () => {
   let component: NavigationMenuComponent;
