@@ -87,16 +87,21 @@ export class GroupService {
 
     // Part 1: Find the right recommendation
     const room = client.getRoom(groupId);
+    if (room === null) throw new Error('room not found');
+
     const accountDataEvent = room[GroupService.ACCOUNT_DATA_KEY][GroupService.RECOMMENDATIONS_KEY];
 
-    if (accountDataEvent == undefined) return new UnsuccessfulResponse(GroupError.NoRecommendations,
-      'no recommendations have been saved yet');
+    if (accountDataEvent === undefined) {
+      //return new UnsuccessfulResponse(GroupError.NoRecommendations, 'no recommendations have been saved yet');
+      throw new Error('no recommendations have been saved yet');
+    }
 
     const recommendations = accountDataEvent.getOriginalContent();
 
     if (!Number.isInteger(recommendationId) || recommendationId < 0
       || recommendationId >= recommendations['amounts'].length) {
-      return new UnsuccessfulResponse(GroupError.InvalidRecommendationId, 'invalid recommendation id');
+      //return new UnsuccessfulResponse(GroupError.InvalidRecommendationId, 'invalid recommendation id');
+      throw new Error('invalid recommendation id');
     }
 
     // Part 1.5: Read data from Recommendation

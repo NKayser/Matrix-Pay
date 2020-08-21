@@ -7,12 +7,13 @@ import {TransactionService} from "../GroupCommunication/transaction.service";
 import {ServerResponse} from "../Response/ServerResponse";
 import {SettingsError} from "../Response/ErrorTypes";
 import {MatrixEmergentDataService} from "./matrix-emergent-data.service";
+import {SuccessfulResponse} from "../Response/SuccessfulResponse";
 
 describe('MatrixBasicDataService', () => {
   let service: MatrixBasicDataService;
 
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent']);
+    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent', 'setRoomAccountData']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
     ['isPrepared', 'getClient']);
   const settingsService = new SettingsService(clientServiceSpy);
@@ -221,15 +222,54 @@ describe('MatrixBasicDataService', () => {
         }
       }
     );
-    mockedClient.getUserId.and.returnValue('@id3:dsn.tm.kit.edu');
+    mockedClient.getUserId.and.returnValue('@id4:dsn.tm.kit.edu');
     mockedClient.sendEvent.and.returnValue(Promise.resolve({event_id: 'new_transaction_id'}));
+    mockedClient.setRoomAccountData.and.returnValue(Promise.resolve());
 
     await service.confirmPayback('groupId', 1).then(
-      () => {
+      (response: ServerResponse) => {
+        expect(response instanceof SuccessfulResponse).toBe(true);
+        expect(response.getValue()).toBe('new_transaction_id');
+        expect(mockedClient.sendEvent).toHaveBeenCalled();
         done();
       },
       () => {
         fail('should return successful response');
+        done();
+      }
+    );
+  });
+
+  it('confirmPayback should throw Error if room not found', async (done: DoneFn) => {
+    // Mock
+    mockedClient.getRoom.and.returnValue(null);
+
+    await service.confirmPayback('groupId', 1).then(
+      () => {
+        fail('confirmPayback should fail');
+      },
+      (err) => {
+        expect(err.message).toContain('room not found');
+        done();
+      }
+    );
+  });
+
+  it('confirmPayback should throw Error if no recommendations saved', async (done: DoneFn) => {
+    // Mock
+    mockedClient.getRoom.and.returnValue({
+        roomId: 'room_id_A',
+        memberIds: ['@id1:dsn.tm.kit.edu', '@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        accountData: {}
+      }
+    );
+
+    await service.confirmPayback('groupId', 1).then(
+      () => {
+        fail('confirmPayback should fail');
+      },
+      (err) => {
+        expect(err.message).toContain('no recommendations have been saved yet');
         done();
       }
     );
