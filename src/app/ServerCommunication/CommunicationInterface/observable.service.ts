@@ -122,10 +122,20 @@ export class ObservableService implements ObservableInterface {
     const groupName = room.name;
     const userIds = [];
     const userNames = [];
-    if (Utils.log) console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames);
-    // TODO: no currency
+
+    const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('com.matrixpay.currency', ' ');
+    let currency: string;
+    if (currencyEvent === null) {
+      // no such event type or no valid events with this event type and state key
+      console.log('no currency set');
+    } else {
+      currency = currencyEvent.getContent().currency;
+      if (Utils.log) console.log(currencyEvent.getContent().currency);
+    }
+
+    if (Utils.log) console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames + ' currency: ' + currency);
     this.groupsObservable.next({
-      groupId, groupName, currency: null, userIds,
+      groupId, groupName, currency, userIds,
       userNames, isLeave: false
     });
 
@@ -136,10 +146,10 @@ export class ObservableService implements ObservableInterface {
     if (Utils.log) console.log(timelineWindow.getEvents());
     if (Utils.log) console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS));
     await this.paginateBackwardsUntilTheEnd(timelineWindow);
-    console.log('found old transactions in room ' + room.roomId + ': ' + this.transactions.hasOwnProperty(room.roomId));
+    if (Utils.log) console.log('found old transactions in room ' + room.roomId + ': ' + this.transactions.hasOwnProperty(room.roomId));
     if (this.transactions.hasOwnProperty(room.roomId)) {
       this.multipleNewTransactionsObservable.next(this.transactions[room.roomId]);
-      console.log('Anzahl Transaktionen: ' + this.transactions[room.roomId].length);
+      if (Utils.log) console.log('Anzahl Transaktionen: ' + this.transactions[room.roomId].length);
     }
 
     /*console.log('---new timelineSet---');
