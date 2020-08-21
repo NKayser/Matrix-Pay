@@ -75,6 +75,11 @@ export class BasicDataUpdateService {
               if (newGroup.getGroupmember(param.userIds[i]) === null) {
                 newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
               }
+              else {
+                if (newGroup.getGroupmember(param.userIds[i]).contact.name === '') {
+                  newGroup.getGroupmember(param.userIds[i]).contact.name = param.userNames[i];
+                }
+              }
             }
             this.checkBuffer(param.groupId);
           }
@@ -268,6 +273,11 @@ export class BasicDataUpdateService {
             member = new Groupmember(new Contact(param.userId, param.name), group);
             group.addGroupmember(member);
           }
+          else {
+            if (member.contact.name === '') {
+              member.contact.name = param.name;
+            }
+          }
           const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
           group.addActivity(activity);
 
@@ -329,12 +339,20 @@ export class BasicDataUpdateService {
     console.log('BasicDataUpdateService got new transaction ' + param.name + ' (' + param.transactionId + ')');
     const group = this.dataModel.getGroup(param.groupId);
     console.log(param);
-    let payer = new AtomarChange(group.getGroupmember(param.payerId).contact, param.payerAmount);
-    let recipients: AtomarChange[] = [];
+    let payerContact: Contact;
+    if (group.getGroupmember(param.payerId) === null) {payerContact = new Contact(param.payerId, ''); }
+    else {payerContact = group.getGroupmember(param.payerId).contact; }
+    const payer = new AtomarChange(payerContact, param.payerAmount);
+    const recipients: AtomarChange[] = [];
+    console.log('param0808');
+    console.log(param);
     for (let i = 0; i < param.recipientIds.length; i++) {
-      recipients.push(new AtomarChange(group.getGroupmember(param.recipientIds[i]).contact, param.recipientAmounts[i]));
+      let recipientContact: Contact;
+      if (group.getGroupmember(param.recipientIds[i]) === null) {recipientContact = new Contact(param.recipientIds[i], ''); }
+      else {recipientContact = group.getGroupmember(param.recipientIds[i]).contact; }
+      recipients.push(new AtomarChange(recipientContact, param.recipientAmounts[i]));
     }
-    let sender = group.getGroupmember(param.senderId);
+    const sender = group.getGroupmember(param.senderId);
     const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
       param.name, param.creationDate, group, payer, recipients, sender);
     group.addTransaction(newTransaction);
