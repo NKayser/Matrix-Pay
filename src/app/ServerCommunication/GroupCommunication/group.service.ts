@@ -224,26 +224,30 @@ export class GroupService {
    * @param groupId
    */
   public async leaveGroup(groupId: string): Promise<ServerResponse> {
-    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
+    if (!this.matrixClientService.isPrepared()) throw new Error('Client is not prepared');
     const client: MatrixClient = await this.matrixClientService.getClient();
 
     const room = client.getRoom(groupId);
-    if (room == undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound).promise();
+    if (room === undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound).promise();
 
-    await client.leave(groupId).catch((err) => {
-      let errCode: number = GroupError.Unknown;
-      const errMessage: string = err['data']['error'];
+    let response: ServerResponse;
 
-      switch (err['data']['errcode']) {
-        case GroupService.ERRCODE_UNKNOWN:
-          errCode = GroupError.RoomNotFound;
-          break;
-        default:
-          break;
-      }
-      return new UnsuccessfulResponse(errCode, errMessage);//.promise();
+    await client.leave(groupId).then(
+      () => response = new SuccessfulResponse(),
+      (err) => {
+        let errCode: number = GroupError.Unknown;
+        const errMessage: string = err['data']['error'];
+
+        switch (err['data']['errcode']) {
+          case GroupService.ERRCODE_UNKNOWN:
+            errCode = GroupError.RoomNotFound;
+            break;
+          default:
+            break;
+        }
+        response = new UnsuccessfulResponse(errCode, errMessage);//.promise();
     });
-    return new SuccessfulResponse();
+    return await response;
   }
 
   /**

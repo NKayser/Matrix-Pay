@@ -14,7 +14,7 @@ describe('MatrixBasicDataService', () => {
   let service: MatrixBasicDataService;
 
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent', 'setRoomAccountData', 'createRoom', 'sendStateEvent']);
+    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent', 'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
     ['isPrepared', 'getClient']);
   const settingsService = new SettingsService(clientServiceSpy);
@@ -432,4 +432,110 @@ describe('MatrixBasicDataService', () => {
       }
     );
   });
+
+  it('should fetch History', async (done: DoneFn) => {
+    mockedClient.scrollback.and.returnValue(Promise.resolve());
+
+    await service.fetchHistory('groupId').then(
+      (response: ServerResponse) => {
+        expect(response instanceof SuccessfulResponse).toBe(true);
+        expect(mockedClient.scrollback).toHaveBeenCalled();
+        done();
+      },
+      () => {
+        fail();
+        done();
+      }
+    );
+  });
+
+  it('should leave group', async (done: DoneFn) => {
+    mockedClient.leave.and.returnValue(Promise.resolve());
+    mockedClient.getRoom.and.returnValue({
+        roomId: 'room_id_A',
+        memberIds: ['@id1:dsn.tm.kit.edu', '@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        accountData: {}
+      }
+    );
+
+    await service.leaveGroup('groupId').then(
+      (response: ServerResponse) => {
+        expect(response instanceof SuccessfulResponse);
+        expect(mockedClient.leave).toHaveBeenCalled();
+        done();
+      },
+      () => {
+        fail('should have been successful');
+        done();
+      }
+    );
+  });
+
+  it('leaveGroup should be unsuccessful if room not found', async (done: DoneFn) => {
+    mockedClient.getRoom.and.returnValue(undefined);
+
+    await service.leaveGroup('groupId').then(
+      (response: ServerResponse) => {
+        expect(response instanceof UnsuccessfulResponse);
+        expect(mockedClient.leave).not.toHaveBeenCalled();
+        expect(GroupError[response.getError()]).toBe('RoomNotFound');
+        done();
+      },
+      () => {
+        fail('should have been successful');
+        done();
+      }
+    );
+  });
+
+  it('leaveGroup should be unsuccessful if room not found 2', async (done: DoneFn) => {
+    mockedClient.getRoom.and.returnValue({
+        roomId: 'room_id_A',
+        memberIds: ['@id1:dsn.tm.kit.edu', '@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        accountData: {}
+      }
+    );
+    mockedClient.leave.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'M_UNKNOWN'}}));
+
+    await service.leaveGroup('groupId').then(
+      (response: ServerResponse) => {
+        expect(response instanceof UnsuccessfulResponse);
+        expect(mockedClient.leave).toHaveBeenCalled();
+        expect(GroupError[response.getError()]).toBe('RoomNotFound');
+        done();
+      },
+      () => {
+        fail('should have been successful');
+        done();
+      }
+    );
+  });
+
+  it('leaveGroup should be unsuccessful if unknown error', async (done: DoneFn) => {
+    mockedClient.getRoom.and.returnValue({
+        roomId: 'room_id_A',
+        memberIds: ['@id1:dsn.tm.kit.edu', '@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu', '@id4:dsn.tm.kit.edu'],
+        accountData: {}
+      }
+    );
+    mockedClient.leave.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'abc'}}));
+
+    await service.leaveGroup('groupId').then(
+      (response: ServerResponse) => {
+        expect(response instanceof UnsuccessfulResponse);
+        expect(mockedClient.leave).toHaveBeenCalled();
+        expect(GroupError[response.getError()]).toBe('Unknown');
+        done();
+      },
+      () => {
+        fail('should have been successful');
+        done();
+      }
+    );
+  });
+
+
+  // create Transaction
+
+  // modify transaction
 });
