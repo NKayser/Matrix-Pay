@@ -159,28 +159,38 @@ export class GroupService {
       'topic': topic
     }
 
-    const room = await client.createRoom(options).catch((err: string) => {
-      let errCode: number = GroupError.Unknown;
-      const errMessage: string = err['data']['error'];
+    let response: ServerResponse;
 
-      switch (err['data']['errcode']) {
-        case GroupService.ERRCODE_UNKNOWN:
-          errCode = GroupError.InvalidName;
-          break;
-        case GroupService.ERRCODE_INUSE:
-          errCode = GroupError.InUse;
-          break;
-        default:
-          break;
+    const room = await client.createRoom(options).catch(
+      (err) => {
+        let errCode: number = GroupError.Unknown;
+        const errMessage: string = err['data']['error'];
+
+        switch (err['data']['errcode']) {
+          case GroupService.ERRCODE_UNKNOWN:
+            errCode = GroupError.InvalidName;
+            break;
+          case GroupService.ERRCODE_INUSE:
+            errCode = GroupError.InUse;
+            break;
+          default:
+            break;
+        }
+        response = new UnsuccessfulResponse(errCode, errMessage);
       }
-      return new UnsuccessfulResponse(errCode, errMessage).promise();
-    });
+    );
+
+    if (room === undefined) {
+      return response;
+    }
+
     const roomId: string = room['room_id'];
 
-    await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, GroupService.CURRENCY_KEY)
-      .catch((err) => {return new UnsuccessfulResponse(GroupError.SetCurrency, err).promise()});
+    await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, 'currency').then(
+      () => response = new SuccessfulResponse(roomId),
+      (err) => response = new UnsuccessfulResponse(GroupError.SetCurrency, err));
 
-    return new SuccessfulResponse(roomId);
+    return await response;
   }
 
   /**

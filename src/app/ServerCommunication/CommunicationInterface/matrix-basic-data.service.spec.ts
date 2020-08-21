@@ -5,15 +5,16 @@ import {SettingsService} from "../SettingsCommunication/settings.service";
 import {GroupService} from "../GroupCommunication/group.service";
 import {TransactionService} from "../GroupCommunication/transaction.service";
 import {ServerResponse} from "../Response/ServerResponse";
-import {SettingsError} from "../Response/ErrorTypes";
+import {GroupError, SettingsError} from "../Response/ErrorTypes";
 import {MatrixEmergentDataService} from "./matrix-emergent-data.service";
 import {SuccessfulResponse} from "../Response/SuccessfulResponse";
+import {UnsuccessfulResponse} from "../Response/UnsuccessfulResponse";
 
 describe('MatrixBasicDataService', () => {
   let service: MatrixBasicDataService;
 
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent', 'setRoomAccountData']);
+    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent', 'setRoomAccountData', 'createRoom', 'sendStateEvent']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
     ['isPrepared', 'getClient']);
   const settingsService = new SettingsService(clientServiceSpy);
@@ -42,7 +43,7 @@ describe('MatrixBasicDataService', () => {
         expect(response.wasSuccessful()).toBe(true);
         expect(clientServiceSpy.getClient).toHaveBeenCalled();
         expect(mockedClient.setAccountData.calls.mostRecent().args).toEqual(
-          ['com.matrixpay.currency', {'com.matrixpay.currency': 'EUR'}]);
+          ['com.matrixpay.currency', {'currency': 'EUR'}]);
         done();
       },
       (err) => fail('should not throw error'));
@@ -59,7 +60,7 @@ describe('MatrixBasicDataService', () => {
         expect(response.wasSuccessful()).toBe(true);
         expect(clientServiceSpy.getClient).toHaveBeenCalled();
         expect(mockedClient.setAccountData.calls.mostRecent().args).toEqual(
-          ['com.matrixpay.language', {'com.matrixpay.language': 'English'}]);
+          ['com.matrixpay.language', {'language': 'English'}]);
         done();
       },
       (err) => fail('should not throw error'));
@@ -78,7 +79,7 @@ describe('MatrixBasicDataService', () => {
         expect(response.getMessage()).toBe('reason');
         expect(clientServiceSpy.getClient).toHaveBeenCalled();
         expect(mockedClient.setAccountData.calls.mostRecent().args).toEqual(
-          ['com.matrixpay.currency', {'com.matrixpay.currency': 'EUR'}]);
+          ['com.matrixpay.currency', {'currency': 'EUR'}]);
         done();
       },
       (err) => fail('should not throw error'));
@@ -97,7 +98,7 @@ describe('MatrixBasicDataService', () => {
         expect(response.getMessage()).toBe('reason');
         expect(clientServiceSpy.getClient).toHaveBeenCalled();
         expect(mockedClient.setAccountData.calls.mostRecent().args).toEqual(
-          ['com.matrixpay.language', {'com.matrixpay.language': 'English'}]);
+          ['com.matrixpay.language', {'language': 'English'}]);
         done();
       },
       (err) => fail('should not throw error'));
@@ -336,6 +337,97 @@ describe('MatrixBasicDataService', () => {
       },
       (err) => {
         expect(err.message).toContain('user must be payer of the recommendation');
+        done();
+      }
+    );
+  });
+
+  it('createGroup should be successful with valid input', async (done: DoneFn) => {
+    // Mock
+    mockedClient.createRoom.and.returnValue(Promise.resolve({'room_id': 'roomId'}));
+    mockedClient.sendStateEvent.and.returnValue(Promise.resolve());
+
+    await service.groupCreate('groupId', 'EUR').then(
+      (response: ServerResponse) => {
+        expect(response instanceof SuccessfulResponse).toBe(true);
+        expect(response.getValue()).toBe('roomId');
+        done();
+      },
+      () => {
+        fail('should have succeeded');
+        done();
+      }
+    );
+  });
+
+  it('createGroup should be unsuccessful with invalid name', async (done: DoneFn) => {
+    // Mock
+    mockedClient.createRoom.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'M_UNKNOWN'}}));
+
+    await service.groupCreate('groupId', 'EUR').then(
+      (response: ServerResponse) => {
+        expect(response instanceof UnsuccessfulResponse).toBe(true);
+        expect(GroupError[response.getError()]).toBe('InvalidName');
+        expect(response.getMessage()).toContain('message');
+        done();
+      },
+      (err) => {
+        fail('should be Unsuccessful, not throw error ' + err.message);
+        done();
+      }
+    );
+  });
+
+  it('createGroup should be unsuccessful when room in use', async (done: DoneFn) => {
+    // Mock
+    mockedClient.createRoom.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'M_ROOM_IN_USE'}}));
+
+    await service.groupCreate('groupId', 'EUR').then(
+      (response: ServerResponse) => {
+        expect(response instanceof UnsuccessfulResponse).toBe(true);
+        expect(GroupError[response.getError()]).toBe('InUse');
+        expect(response.getMessage()).toContain('message');
+        done();
+      },
+      (err) => {
+        fail('should be Unsuccessful, not throw error ' + err.message);
+        done();
+      }
+    );
+  });
+
+  it('createGroup should be unsuccessful with invalid input', async (done: DoneFn) => {
+    // Mock
+    mockedClient.createRoom.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'foo'}}));
+
+    await service.groupCreate('groupId', 'EUR').then(
+      (response: ServerResponse) => {
+        expect(response instanceof UnsuccessfulResponse).toBe(true);
+        expect(GroupError[response.getError()]).toBe('Unknown');
+        expect(response.getMessage()).toContain('message');
+        done();
+      },
+      (err) => {
+        fail('should be Unsuccessful, not throw error ' + err.message);
+        done();
+      }
+    );
+  });
+
+  it('createGroup should be unsuccessful if setting currency fails', async (done: DoneFn) => {
+    // Mock
+    mockedClient.createRoom.and.returnValue(Promise.resolve({'room_id': 'roomId'}));
+    mockedClient.sendStateEvent.and.returnValue(Promise.reject('error'));
+
+    await service.groupCreate('groupId', 'EUR').then(
+      (response: ServerResponse) => {
+        expect(response instanceof UnsuccessfulResponse).toBe(true);
+        expect(GroupError[response.getError()]).toBe('SetCurrency');
+        expect(response.getMessage()).toContain('error');
+        done();
+      },
+      (err) => {
+        fail('should be Unsuccessful, not throw error ' + err.message);
         done();
       }
     );
