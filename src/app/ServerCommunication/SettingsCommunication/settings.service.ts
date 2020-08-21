@@ -33,7 +33,7 @@ export class SettingsService {
     // Set Value
     let response: ServerResponse;
     await client.setAccountData(SettingsService.CURRENCY_CONTENT_KEY,
-      {[SettingsService.CURRENCY_CONTENT_KEY]: currency}).then(
+      {'currency': currency}).then(
       () => response = new SuccessfulResponse(),
       (err: string) => response = new UnsuccessfulResponse(SettingsError.Setter, err));
 
@@ -64,7 +64,7 @@ export class SettingsService {
     // Set Value
     let response: ServerResponse;
     await client.setAccountData(SettingsService.LANGUAGE_CONTENT_KEY,
-      {[SettingsService.LANGUAGE_CONTENT_KEY]: language}).then(
+      {'language': language}).then(
       () => response = new SuccessfulResponse(),
       (err: string) => response = new UnsuccessfulResponse(SettingsError.Setter, err));
 

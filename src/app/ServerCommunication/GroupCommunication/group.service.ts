@@ -171,7 +171,7 @@ export class GroupService {
     });
     const roomId: string = room['room_id'];
 
-    await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {currency}, GroupService.CURRENCY_KEY)
+    await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, GroupService.CURRENCY_KEY)
       .catch((err) => {return new UnsuccessfulResponse(GroupError.SetCurrency, err).promise()});
 
     return new SuccessfulResponse(roomId);
