@@ -10,6 +10,8 @@ import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
 import {Subject} from 'rxjs';
+import {Recommendation} from './Group/Recommendation';
+import {AtomarChange} from './Group/AtomarChange';
 
 @Injectable({
   providedIn: 'root'
@@ -140,6 +142,28 @@ export class DataModelService {
     const group = this.getGroup(groupId);
 
     const problem = this.balanceCalculator.calculateBalances(group.groupmembers, transactions);
+
+    const solution = this.greedyOptimisation.calculateOptimisation(problem);
+    console.log('solution hat been returned');
+    console.log(solution);
+    const recommendations: Recommendation[] = [];
+    console.log('length of solution.PayerIds' + solution.getPayerIds().length);
+    for (let i = 0; i < solution.getPayerIds().length; i++) {
+      console.log('iteration' + i + '.0');
+      console.log(solution.getPayerIds());
+      console.log(group);
+      const payer = new AtomarChange(group.getGroupmember(solution.getPayerIds()[i]).contact, solution.getAmounts()[i]);
+      console.log('iteration' + i + '.1');
+      const recipient = new AtomarChange(group.getGroupmember(solution.getRecipientIds()[i]).contact, solution.getAmounts()[i]);
+      console.log('iteration' + i + '.2');
+      const recommendation = new Recommendation(group, payer, recipient);
+      console.log('iteration' + i + '.3');
+      recommendations.push(recommendation);
+    }
+    group.setRecommendations(recommendations);
+    console.log('recommendations: ');
+    console.log(group.recommendations);
+
     /*OLD COMMUNICATION METHOD const response = await this.matrixEmergentData.setBalances(groupId, problem.getBalances(), problem.getUsers(), lastTransactionId);
       this.status.newResponse(response);
     if (!response.wasSuccessful()) {
