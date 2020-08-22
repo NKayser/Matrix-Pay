@@ -80,6 +80,7 @@ export class ObservableService implements ObservableInterface {
     this.timelineListener();
     this.roomListener();
     this.membershipListener();
+    this.timelineResetListener();
 
     const filter = Filter.fromJson(this.matrixClient.credentials.userId, 'edu.kit.tm.dsn.psess2020.matrixpay-v1', {
       "room": {
@@ -364,6 +365,15 @@ export class ObservableService implements ObservableInterface {
         this.groupMembershipObservable.next(
           {groupId, isLeave, userId, date: event.getDate(), name: member.name});
       }
+    });
+  }
+
+  // Fires whenever the live timeline in a room is reset.
+  // When a 'limited' sync (for example, after a network outage) is recieved,
+  // the live timeline is reset to be empty before the recent events are added to the new timeline.
+  private timelineResetListener(): void {
+    this.matrixClient.on('Room.timelineReset', (room, timelineSet, resetAllTimelines) => {
+      console.log('LiveTimeline in room ' + room.roomId + ' has been reset. Events may have been missed.');
     });
   }
 
