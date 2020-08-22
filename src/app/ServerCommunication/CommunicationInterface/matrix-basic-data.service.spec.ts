@@ -534,8 +534,46 @@ describe('MatrixBasicDataService', () => {
     );
   });
 
+  it('should create transaction successfully with valid input', async (done: DoneFn) => {
+    // Mock
+    mockedClient.sendEvent.and.returnValue(Promise.resolve({'event_id': 'transactionId'}));
 
-  // create Transaction
+    await service.createTransaction('groupId', 'Description', '@id1:dsn.tm.kit.edu',
+      ['@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'], [100, 200], false).then(
+      (response: ServerResponse) => {
+        expect(response instanceof SuccessfulResponse).toBe(true);
+        expect(response.getValue()).toBe('transactionId');
+        expect(mockedClient.sendEvent.calls.mostRecent().args).toEqual(['groupId', 'com.matrixpay.expense', {
+          'name': 'Description',
+          'payer': '@id1:dsn.tm.kit.edu',
+          'recipients': ['@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'],
+          'amounts': [100, 200]
+        }, '']);
+        done();
+      },
+      () => {
+        fail('should be unsuccessful, not throw error');
+        done();
+      });
+  });
+
+  it('createTransaction should be unsuccessful if sendEvent fails', async (done: DoneFn) => {
+    // Mock
+    mockedClient.sendEvent.and.returnValue(Promise.reject('message'));
+
+    await service.createTransaction('groupId', 'Description', '@id1:dsn.tm.kit.edu',
+      ['@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'], [100, 200], false).then(
+      (response: ServerResponse) => {
+        expect(response instanceof UnsuccessfulResponse).toBe(true);
+        expect(response.getMessage()).toContain('message');
+        expect(GroupError[response.getError()]).toBe('SendEvent');
+        done();
+      },
+      () => {
+        fail('should be unsuccessful, not throw error');
+        done();
+      });
+  });
 
   // modify transaction
 });
