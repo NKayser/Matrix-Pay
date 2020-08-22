@@ -90,9 +90,9 @@ export class MatrixClientService implements ClientInterface {
     console.log(currencyEventContent);
 
     if (currencyEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
-      {'com.matrixpay.currency': MatrixClientService.DEFAULT_CURRENCY}); // TODO: find a way to avoid Magic number here
+      {'currency': MatrixClientService.DEFAULT_CURRENCY}); // TODO: find a way to avoid Magic number here
     if (languageEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
-      {'com.matrixpay.language': MatrixClientService.DEFAULT_LANGUAGE});
+      {'language': MatrixClientService.DEFAULT_LANGUAGE});
 
 
     const listener = async (state, prevState, res) => {

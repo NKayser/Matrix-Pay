@@ -18,12 +18,7 @@ install_dependencies:
     changes:
       - package-lock.json
 
-build_a:
-  stage: build
-  script:
-    - echo "This job builds something."
-
-build_b:
+build:
   stage: build
   cache:
     key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
@@ -36,24 +31,18 @@ build_b:
   #  paths:
   #    - build
 
-test_a:
-  stage: test
-  script:
-    - echo "This job tests something. It will only run when all jobs in the"
-    - echo "build stage are complete."
-
-#test_b:
+#test:
 #  stage: test
 #  script:
 #    - ng test
 
-deploy_a:
+echo:
   stage: deploy
   script:
     - echo "This job deploys something. It will only run when all jobs in the"
     - echo "test stage complete."
 
-#deploy_b:
+#deploy:
 #  stage: deploy
 #  script:
 #    - ng deploy
