@@ -8,12 +8,12 @@ import {EventEmitter} from 'events';
 describe('ObservableService', () => {
   let service: ObservableService;
 
-  const mockedClient = jasmine.createSpyObj('MatrixClient',
+  let mockedClient = jasmine.createSpyObj('MatrixClient',
     ['credentials', 'startClient', 'getUserId', 'getAccountDataFromServer', 'getUser', 'on']);
-  const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
+  let clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
     ['getLoggedInEmitter', 'isPrepared', 'getClient']);
-  const loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
-  const clientEmitter: EventEmitter = new EventEmitter();
+  let loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
+  let clientEmitter: EventEmitter = new EventEmitter();
 
   beforeEach(() => {
 
@@ -49,7 +49,7 @@ describe('ObservableService', () => {
     // clientEmitter.emit('com.matrixpay.language', {'language': 'English'});
   });
 
-  /*it('should be created', () => {
+  it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
@@ -62,7 +62,7 @@ describe('ObservableService', () => {
 
     // Expected
     expect(actual).toBeDefined();
-  });*/
+  });
 
   it('currency observable should emit changes', async (done: DoneFn) => {
 
