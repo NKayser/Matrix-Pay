@@ -1,13 +1,12 @@
-import { TestBed } from '@angular/core/testing';
-
 import { SettingsService } from './settings.service';
+import {MatrixClientService} from '../CommunicationInterface/matrix-client.service';
 
 describe('SettingsServiceService', () => {
   let service: SettingsService;
+  const clientServiceSpy = jasmine.createSpyObj('MatrixClientService', ['getClient']);
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(SettingsService);
+    service = new SettingsService(clientServiceSpy);
   });
 
   it('should be created', () => {

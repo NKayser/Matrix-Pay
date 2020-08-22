@@ -58,7 +58,6 @@ describe('GroupTransactionComponentCancel', () => {
     const c1 = new Contact('c1', 'Alice');
     const c2 = new Contact('c1', 'Bob');
     const c3 = new Contact('c1', 'Eve');
-    const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
 
     const g1 = new Group('g1', 'name_g1', Currency.USD);
     const mg1 = new Groupmember(c1, g1);
@@ -131,7 +130,6 @@ describe('GroupTransactionComponentConfirm', () => {
     const c1 = new Contact('c1', 'Alice');
     const c2 = new Contact('c1', 'Bob');
     const c3 = new Contact('c1', 'Eve');
-    const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
 
     const g1 = new Group('g1', 'name_g1', Currency.USD);
     const mg1 = new Groupmember(c1, g1);
@@ -152,6 +150,7 @@ describe('GroupTransactionComponentConfirm', () => {
     const c1 = new Contact('c1', 'Alice');
     const c2 = new Contact('c1', 'Bob');
     const c3 = new Contact('c1', 'Eve');
+    const c4 = new Contact('c1', 'Charlie');
 
     const g1 = new Group('g1', 'name_g1', Currency.USD);
     const mg1 = new Groupmember(c1, g1);
@@ -160,6 +159,8 @@ describe('GroupTransactionComponentConfirm', () => {
     g1.addGroupmember(mg2);
     const mg3 = new Groupmember(c3, g1);
     g1.addGroupmember(mg3);
+    const mg4 = new Groupmember(c4, g1);
+    g1.addGroupmember(mg4);
 
     const t1 = new Transaction(TransactionType.EXPENSE, 't1', 'name_t1', new Date('05.05.2005'), g1,
       new AtomarChange(c1, 10),

@@ -2,7 +2,6 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PaymentModalComponent } from './payment-modal.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DialogProviderService} from '../dialog-provider.service';
 import {Contact} from '../../DataModel/Group/Contact';
 
 describe('PaymentModalComponent', () => {
@@ -56,6 +55,52 @@ describe('PaymentModalComponent', () => {
 
     component.onSave();
     expect(matDialogRef.close).toHaveBeenCalledWith(data);
+
+  });
+
+  it('check modal description error', () => {
+
+    const c1 = new Contact('c1', 'Alice');
+    const c2 = new Contact('c2', 'Bob');
+    const c3 = new Contact('c2', 'Bob');
+    const amountArray = [3, 4, 7];
+    const data = {
+      modalTitle: 'testModal',
+      description: '',
+      payer: c1,
+      recipients: [c1, c2, c3],
+      amount: amountArray,
+      isAdded: [true, true, true]
+    };
+
+    component.data = data;
+    component.ngOnInit();
+
+    component.onSave();
+    expect(matDialogRef.close).not.toHaveBeenCalledWith(data);
+
+  });
+
+  it('check user Amount error', () => {
+
+    const c1 = new Contact('c1', 'Alice');
+    const c2 = new Contact('c2', 'Bob');
+    const c3 = new Contact('c2', 'Bob');
+    const amountArray = [3, 4.55555, 7];
+    const data = {
+      modalTitle: 'testModal',
+      description: '',
+      payer: c1,
+      recipients: [c1, c2, c3],
+      amount: amountArray,
+      isAdded: [true, true, true]
+    };
+
+    component.data = data;
+    component.ngOnInit();
+
+    component.onSave();
+    expect(matDialogRef.close).not.toHaveBeenCalledWith(data);
 
   });
 

@@ -1,26 +1,15 @@
-import { LayoutModule } from '@angular/cdk/layout';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { GroupSelectionComponent } from './group-selection.component';
 import {MatDialog} from '@angular/material/dialog';
 import {DataModelService} from '../../DataModel/data-model.service';
-import {MockDataModelService} from '../_mockServices/MockDataModelService';
 import {MockDialog, MockDialogCancel} from '../_mockServices/MockDialog';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
-import {MockMatrixBasicDataService} from '../_mockServices/MockMatrixBasicDataService';
 import {GroupTransactionComponent} from '../group-transaction/group-transaction.component';
 import {HistoryComponent} from '../history/history.component';
 import {GroupBalanceComponent} from '../group-balance/group-balance.component';
-import {HomeComponent} from '../home/home.component';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
@@ -146,7 +135,7 @@ describe('GroupSelectionComponentConfirm', () => {
     component = fixture.componentInstance;
   }));
 
-  it('check add member to group cancel', () => {
+  it('check add member to group confirm', () => {
     const c1 = new Contact('c1', 'Alice');
     const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
     dataModelService.getUser.and.returnValue(stubValueUser);
@@ -160,7 +149,7 @@ describe('GroupSelectionComponentConfirm', () => {
     expect(matrixBasicDataService.groupAddMember).toHaveBeenCalled();
   });
 
-  it('check leave group cancel', () => {
+  it('check leave group confirm', () => {
     const c1 = new Contact('c1', 'Alice');
     const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
     dataModelService.getUser.and.returnValue(stubValueUser);
@@ -174,7 +163,7 @@ describe('GroupSelectionComponentConfirm', () => {
     expect(matrixBasicDataService.leaveGroup).toHaveBeenCalled();
   });
 
-  it('check create group cancel', () => {
+  it('check create group confirm', () => {
     const c1 = new Contact('c1', 'Alice');
     const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
     dataModelService.getUser.and.returnValue(stubValueUser);
