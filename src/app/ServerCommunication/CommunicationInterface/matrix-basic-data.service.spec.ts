@@ -14,7 +14,8 @@ describe('MatrixBasicDataService', () => {
   let service: MatrixBasicDataService;
 
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent', 'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave']);
+    ['setAccountData', 'invite', 'getRoom', 'getUserId', 'sendEvent', 'setRoomAccountData', 'createRoom',
+      'sendStateEvent', 'scrollback', 'leave']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
     ['isPrepared', 'getClient']);
   const settingsService = new SettingsService(clientServiceSpy);
