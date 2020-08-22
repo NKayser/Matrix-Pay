@@ -65,7 +65,7 @@ export class HomeComponent implements OnInit {
       if (group.currency === currency){
         // if (Utils.log) console.log(group.groupmembers);
         for (const member of group.groupmembers){
-          console.log(member);
+          //console.log(member);
           // if (Utils.log) console.log('mem: ' + member.contact.contactId + ' ' + this.userContact.contactId);
           // if (Utils.log) console.log(member.balance);
           if (member.contact.contactId === this.userContact.contactId){
