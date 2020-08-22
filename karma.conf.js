@@ -31,7 +31,7 @@ module.exports = function (config) {
         ]
       }
     },
-    browsers: ['ChromeHeadless'],
+    browsers: ['ChromeHeadless'], // 'Chrome'
     singleRun: true,
     reporters: ['progress', 'kjhtml'],
     port: 9876,
