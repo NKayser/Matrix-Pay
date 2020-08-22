@@ -143,10 +143,9 @@ export class DataModelService {
 
     const problem = this.balanceCalculator.calculateBalances(group.groupmembers, transactions);
 
-    const solution = this.greedyOptimisation.calculateOptimisation(problem);
+    /*const solution = this.greedyOptimisation.calculateOptimisation(problem);
     console.log('solution hat been returned');
-
-    /*console.log(solution);
+    console.log(solution);
     const recommendations: Recommendation[] = [];
     console.log('length of solution.PayerIds' + solution.getPayerIds().length);
     for (let i = 0; i < solution.getPayerIds().length; i++) {
