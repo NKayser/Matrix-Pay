@@ -145,7 +145,8 @@ export class DataModelService {
 
     const solution = this.greedyOptimisation.calculateOptimisation(problem);
     console.log('solution hat been returned');
-    console.log(solution);
+
+    /*console.log(solution);
     const recommendations: Recommendation[] = [];
     console.log('length of solution.PayerIds' + solution.getPayerIds().length);
     for (let i = 0; i < solution.getPayerIds().length; i++) {
@@ -162,7 +163,7 @@ export class DataModelService {
     }
     group.setRecommendations(recommendations);
     console.log('recommendations: ');
-    console.log(group.recommendations);
+    console.log(group.recommendations);*/
 
     /*OLD COMMUNICATION METHOD const response = await this.matrixEmergentData.setBalances(groupId, problem.getBalances(), problem.getUsers(), lastTransactionId);
       this.status.newResponse(response);
