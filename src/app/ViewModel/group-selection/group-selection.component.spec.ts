@@ -135,7 +135,7 @@ describe('GroupSelectionComponentConfirm', () => {
     component = fixture.componentInstance;
   }));
 
-  it('check add member to group cancel', () => {
+  it('check add member to group confirm', () => {
     const c1 = new Contact('c1', 'Alice');
     const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
     dataModelService.getUser.and.returnValue(stubValueUser);
@@ -149,7 +149,7 @@ describe('GroupSelectionComponentConfirm', () => {
     expect(matrixBasicDataService.groupAddMember).toHaveBeenCalled();
   });
 
-  it('check leave group cancel', () => {
+  it('check leave group confirm', () => {
     const c1 = new Contact('c1', 'Alice');
     const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
     dataModelService.getUser.and.returnValue(stubValueUser);
@@ -163,7 +163,7 @@ describe('GroupSelectionComponentConfirm', () => {
     expect(matrixBasicDataService.leaveGroup).toHaveBeenCalled();
   });
 
-  it('check create group cancel', () => {
+  it('check create group confirm', () => {
     const c1 = new Contact('c1', 'Alice');
     const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
     dataModelService.getUser.and.returnValue(stubValueUser);

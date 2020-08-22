@@ -85,7 +85,7 @@ describe('DataModelService', () => {
     expect(dataModelService.getTransaction('g1', 't3000')).toBe(null);
   });
 
-  it('check transactions', () => {
+  it('check balance calculation', () => {
     const u1 = dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     const g1 = u1.createGroup('g1', 'name_g1', Currency.EUR);
 
@@ -108,7 +108,7 @@ describe('DataModelService', () => {
     expect(balanceCalculatorService.calculateBalances).toHaveBeenCalled();
   });
 
-  it('check transactions', () => {
+  it('check status', () => {
     dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     expect(dataModelService.getStatus()).not.toEqual(null);
   });
