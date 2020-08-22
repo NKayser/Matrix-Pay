@@ -335,10 +335,12 @@ export class ObservableService implements ObservableInterface {
     // Fires whenever invited to a room or joining a room
     this.matrixClient.on('Room', async room => {
       const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
-      if (!(members[this.matrixClient.getUserId()].membership === 'join')) {
-        return;
+      if (members[this.matrixClient.getUserId()].membership === 'invite') {
+        this.matrixClient.joinRoom(room.roomId);
       }
-      await this.processNewRoom(room);
+      if (members[this.matrixClient.getUserId()].membership === 'join') {
+        await this.processNewRoom(room);
+      }
     });
   }
 
@@ -348,14 +350,21 @@ export class ObservableService implements ObservableInterface {
       const userId = member.userId;
       const groupId = member.roomId;
       console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
-      // Maybe cover the case user joining a group separately
-      if (userId === this.matrixClient.getUserId() && oldMembership === 'join' && member.membership === 'leave') {
-        if (Utils.log) console.log('user left the room ' + groupId + ' date: ' + event.getDate());
-        this.groupsObservable.next({groupId, isLeave: true,
-          currency: undefined, groupName: undefined, userNames: undefined, userIds: undefined});
+      if (userId === this.matrixClient.getUserId()) {
+        if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
+          this.groupMembershipObservable.next(
+            {groupId, isLeave: false, userId, date: event.getDate(), name: member.name});
+        }
+        if (oldMembership === 'join' && member.membership === 'leave') {
+          if (Utils.log) console.log('user left the room ' + groupId + ' date: ' + event.getDate());
+          this.groupsObservable.next({
+            groupId, isLeave: true,
+            currency: undefined, groupName: undefined, userNames: undefined, userIds: undefined
+          });
+        }
       } else {
         let isLeave: boolean;
-        if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
+        if (member.membership === 'invite' || member.membership === 'join') {
           isLeave = false;
           if (Utils.log) console.log('membership change: userId: ' + userId + 'isLeave: ' + isLeave + ' date: ' + event.getDate());
         } else if (oldMembership === 'join' && member.membership === 'leave') {
