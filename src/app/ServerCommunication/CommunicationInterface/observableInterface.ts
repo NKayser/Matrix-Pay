@@ -32,10 +32,4 @@ export interface ObservableInterface {
 
   getSettingsCurrencyObservable(): Observable<CurrencyType>;
 
-  /*
-
-  getOldTransactionsObservable(): Observable<string>;
-
-  getOldGroupCreationActivityObservable(): Observable<string>; */
-
 }
