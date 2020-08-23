@@ -79,9 +79,7 @@ export class GroupService {
    * @param groupId
    * @param recommendationId
    */
-  // TODO: almost works. Sometimes there is a weird encryption error when creating the transaction.
   public async confirmRecommendation(groupId: string, recommendationId: number): Promise<ServerResponse> {
-    // TODO: seperate into private methods and avoid magic numbers
     if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
     const client: MatrixClient = this.matrixClientService.getClient();
 
