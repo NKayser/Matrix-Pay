@@ -12,10 +12,12 @@ export class SuccessfulResponse<T> extends ServerResponse {
     return null;
   }
 
+  // Only defined if response failed.
   getMessage(): string {
     return "";
   }
 
+  // Optional, can be of any type.
   getValue(): T {
     return this.value;
   }

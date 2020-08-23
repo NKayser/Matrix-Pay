@@ -10,7 +10,7 @@ import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 import {GroupError} from '../Response/ErrorTypes';
 import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {MatrixEmergentDataService} from '../CommunicationInterface/matrix-emergent-data.service';
-import {EmergentDataInterface} from "../CommunicationInterface/EmergentDataInterface";
+import {EmergentDataInterface} from '../CommunicationInterface/EmergentDataInterface';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +30,7 @@ export class GroupService {
   private static readonly ACCOUNT_DATA_KEY: string = 'accountData';
   private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways
 
+  // This service needs the transaction Service to forward method calls and the EmergentDataService to confirm Paybacks
   constructor(transactionService: TransactionService,
               matrixClientService: MatrixClientService,
               matrixEmergentDataService: MatrixEmergentDataService) {
@@ -38,67 +39,56 @@ export class GroupService {
     this.matrixEmergentDataService = matrixEmergentDataService;
   }
 
-  /**
-   *
-   * @param groupId
-   * @param userId
-   */
   public async addMember(groupId: string, userId: string): Promise<ServerResponse> {
+    // get Client. Method should only be called when client is prepared.
     if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
     const client: MatrixClient = this.matrixClientService.getClient();
     let response: ServerResponse;
+
+    // Actually send the invite and throw Errors if they were caused by invalid input that should not be have been
+    // possible because of checks in the ViewModel.
     await client.invite(groupId, userId).then(() => {
       response = new SuccessfulResponse();
     },
       (err) => {
-      //let errCode: number = GroupError.Unknown;
-      //const errMessage: string = err['data']['error'];
-
       switch (err['data']['errcode']) {
         case GroupService.ERRCODE_UNKNOWN:
         case GroupService.ERRCODE_UNRECOGNIZED:
-          //errCode = GroupError.RoomNotFound;
           throw new Error('GroupId invalid');
           break;
         case GroupService.ERRCODE_INVALID_PARAM:
-          //errCode = GroupError.InvalidUsers;
           throw new Error('UserId invalid');
           break;
         default:
           throw new Error('unknown error');
           break;
       }
-      //response = new UnsuccessfulResponse(errCode, errMessage);
     });
 
     return await response;
   }
 
-  /**
-   *
-   * @param groupId
-   * @param recommendationId
-   */
   public async confirmRecommendation(groupId: string, recommendationId: number): Promise<ServerResponse> {
     if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
     const client: MatrixClient = this.matrixClientService.getClient();
 
     // Part 1: Find the right recommendation
+
+    // Get the room for the account data
     const room = client.getRoom(groupId);
     if (room === null) throw new Error('room not found');
 
     const accountDataEvent = room[GroupService.ACCOUNT_DATA_KEY][GroupService.RECOMMENDATIONS_KEY];
 
     if (accountDataEvent === undefined) {
-      //return new UnsuccessfulResponse(GroupError.NoRecommendations, 'no recommendations have been saved yet');
       throw new Error('no recommendations have been saved yet');
     }
 
     const recommendations = accountDataEvent.getOriginalContent();
 
+    // Input should only be valid recommendation Id, but throw Error if check in ViewModel failed
     if (!Number.isInteger(recommendationId) || recommendationId < 0
       || recommendationId >= recommendations['amounts'].length) {
-      //return new UnsuccessfulResponse(GroupError.InvalidRecommendationId, 'invalid recommendation id');
       throw new Error('invalid recommendation id');
     }
 
@@ -113,7 +103,6 @@ export class GroupService {
 
     // check if user is the payer of the recommendation. Should already be the case
     if (payer != await client.getUserId()) {
-      //return new UnsuccessfulResponse(GroupError.Unauthorized, 'user must be payer of the recommendation');
       throw new Error('user must be payer of the recommendation');
     }
 
@@ -125,6 +114,7 @@ export class GroupService {
     }
     const transactionId: string = transaction.getValue();
 
+    // Create new arrays for the updated recommendations
     amounts.splice(recommendationId, 1);
     payers.splice(recommendationId, 1);
     recipients.splice(recommendationId, 1);
@@ -145,6 +135,7 @@ export class GroupService {
   public async createGroup(name: string, currency: string, alias?: string, topic?: string): Promise<ServerResponse> {
     const client: MatrixClient = await this.matrixClientService.getClient();
 
+    // Alias is optional
     if (alias != undefined && (alias.includes(' ') || alias.includes(':'))) {
       alias = undefined;
     }
@@ -159,6 +150,7 @@ export class GroupService {
 
     let response: ServerResponse;
 
+    // Create Room
     const room = await client.createRoom(options).catch(
       (err) => {
         let errCode: number = GroupError.Unknown;
@@ -184,6 +176,7 @@ export class GroupService {
 
     const roomId: string = room['room_id'];
 
+    // Set the group settings (currency)
     await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, 'currency').then(
       () => response = new SuccessfulResponse(roomId),
       (err) => response = new UnsuccessfulResponse(GroupError.SetCurrency, err));
@@ -191,51 +184,41 @@ export class GroupService {
     return await response;
   }
 
-  /**
-   *
-   * @param groupId
-   * @param description
-   * @param payerId
-   * @param recipientIds
-   * @param amounts
-   * @param isPayback
-   */
   public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
     return this.transactionService.createTransaction(groupId, description, payerId, recipientIds, amounts, isPayback);
   }
 
-  /**
-   * Load older room events.
-   *
-   * @param groupId
-   */
   public async fetchHistory(groupId: string): Promise<ServerResponse> {
+    // Get Client (if prepared)
     if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
     const client: MatrixClient = await this.matrixClientService.getClient();
+
+    // Get room, to call scrollback method on this room.
+    // This will cause Matrix to send older Events on the EventEmitters of the MatrixClient.
     const room: Room = await client.getRoom(groupId);
     const scrollbackResponse: any = await client.scrollback(room, GroupService.SCROLLBACK_LIMIT);
     return new SuccessfulResponse();
   }
 
-  /**
-   *
-   * @param groupId
-   */
   public async leaveGroup(groupId: string): Promise<ServerResponse> {
+    // Get MatrixClient if prepared
     if (!this.matrixClientService.isPrepared()) throw new Error('Client is not prepared');
     const client: MatrixClient = await this.matrixClientService.getClient();
 
+    // Get room
     const room = client.getRoom(groupId);
     if (room === undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound).promise();
 
     let response: ServerResponse;
 
+    // Leave Group
     await client.leave(groupId).then(
       () => response = new SuccessfulResponse(),
       (err) => {
         let errCode: number = GroupError.Unknown;
         const errMessage: string = err['data']['error'];
 
+        // Throw error if group does not exist
         switch (err['data']['errcode']) {
           case GroupService.ERRCODE_UNKNOWN:
             errCode = GroupError.RoomNotFound;
@@ -248,15 +231,7 @@ export class GroupService {
     return await response;
   }
 
-  /**
-   *
-   * @param groupId
-   * @param transactionId
-   * @param description
-   * @param payerId
-   * @param recipientIds
-   * @param amounts
-   */
+  // Not in use yet.
   public async modifyTransaction(groupId: string, transactionId: string, description?: string, payerId?: string,
                            recipientIds?: string[], amounts?: number[]): Promise<ServerResponse> {
     return this.transactionService.modifyTransaction(groupId, transactionId, description, payerId, recipientIds, amounts);

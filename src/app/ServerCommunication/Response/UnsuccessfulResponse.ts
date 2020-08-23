@@ -18,6 +18,7 @@ export class UnsuccessfulResponse extends ServerResponse {
     return this.message;
   }
 
+  // Not defined because response unsuccessful.
   public getValue(): any {
     return null;
   }
@@ -27,7 +28,8 @@ export class UnsuccessfulResponse extends ServerResponse {
   }
 
   promise(): Promise<ServerResponse> {
-    //return Promise.reject(this);
+    // Always resolve promises.
+    // Promises are only "rejected" if an error is thrown.
     return Promise.resolve(this);
   }
 }
