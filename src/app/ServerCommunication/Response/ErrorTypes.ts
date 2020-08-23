@@ -1,17 +1,11 @@
 export enum ClientError {
-  AlreadyLoggedIn,
   Autodiscovery,
-  UserIdFormat,
-  ServerUnreachable,
   InvalidPassword,
-  Unknown,
-  Timeout
+  Unknown
 }
 
 export enum SettingsError {
-  NoClient,
-  Setter,
-  Getter
+  Setter
 }
 
 export enum GroupError {
@@ -22,15 +16,5 @@ export enum GroupError {
   InvalidName, // or invalid Alias
   SetCurrency,
   InUse,
-
-  RoomNotFound,
-  BalanceNotSettled,
-
-  NoRecommendations,
-  InvalidRecommendationId,
-  Unauthorized,
-}
-
-export enum EmergentDataError {
-  Unknown
+  RoomNotFound
 }

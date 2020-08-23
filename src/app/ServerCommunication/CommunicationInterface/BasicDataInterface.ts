@@ -15,8 +15,8 @@ export interface BasicDataInterface {
                       isPayback: boolean): Promise<ServerResponse>;
 
     // Setze die Daten des Payments mit der Id transactionId in der Gruppe mit Id groupId auf die angegebenen Daten.
-    modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string,
-                      recipientIds: string[], amounts: number[]) : Promise<ServerResponse>;
+    modifyTransaction(groupId: string, transactionId: string, description?: string, payerId?: string,
+                      recipientIds?: string[], amounts?: number[]) : Promise<ServerResponse>;
 
     // Ändere die Standardwährung des Benutzers zu currency.
     userChangeDefaultCurrency(currency: string): Promise<ServerResponse>;
