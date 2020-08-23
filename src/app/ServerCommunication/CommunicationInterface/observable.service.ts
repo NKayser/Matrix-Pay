@@ -23,32 +23,11 @@ import {ClientInterface} from './ClientInterface';
   providedIn: 'root'
 })
 export class ObservableService implements ObservableInterface {
-
-
-  constructor(clientService: MatrixClientService) {
-    this.clientService = clientService;
-
-    if (Utils.log) { console.log('this is ObservableService'); }
-    this.userObservable = new Subject();
-    this.groupsObservable = new Subject();
-    this.balancesObservable = new Subject();
-    this.recommendationsObservable = new Subject();
-    this.settingsCurrencyObservable = new Subject();
-    this.groupMembershipObservable = new Subject();
-    this.newTransactionObservable = new Subject();
-    this.modifiedTransactionsObservable = new Subject();
-    this.multipleNewTransactionsObservable = new Subject();
-    this.settingsLanguageObservable = new Subject();
-    this.groupActivityObservable = new Subject();
-    this.clientService.getLoggedInEmitter().subscribe(async () => {
-      await this.setUp();
-    });
-  }
-  // TODO: remove magic numbers
-
   private static TRANSACTION_TYPE_PAYBACK = 'PAYBACK';
   private static TRANSACTION_TYPE_EXPENSE = 'EXPENSE';
+
   private matrixClient: MatrixClient;
+
   private clientService: MatrixClientService;
   private userObservable: Subject<UserType>;
   private groupsObservable: Subject<GroupsType>;
@@ -62,13 +41,28 @@ export class ObservableService implements ObservableInterface {
   private newTransactionObservable: Subject<TransactionType>;
   private groupActivityObservable: Subject<GroupActivityType>;
 
-  private window: TimelineWindow; // for testing, is only extended backwards
-  // TODO: replace "object" with arrays of the interfaces in parameterTypes as soon as they are finished
-  // maybe get rid of these
-  /*private oldRoomCreations: object;
-  private oldRoomMembershipChanges: GroupMemberType[];
-  private oldModifiedTransactions: TransactionType[];*/
   private transactions = {};
+
+
+  constructor(clientService: MatrixClientService) {
+    this.clientService = clientService;
+
+    this.userObservable = new Subject();
+    this.groupsObservable = new Subject();
+    this.balancesObservable = new Subject();
+    this.recommendationsObservable = new Subject();
+    this.settingsCurrencyObservable = new Subject();
+    this.groupMembershipObservable = new Subject();
+    this.newTransactionObservable = new Subject();
+    this.modifiedTransactionsObservable = new Subject();
+    this.multipleNewTransactionsObservable = new Subject();
+    this.settingsLanguageObservable = new Subject();
+    this.groupActivityObservable = new Subject();
+
+    this.clientService.getLoggedInEmitter().subscribe(async () => {
+      await this.setUp();
+    });
+  }
 
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
@@ -100,7 +94,7 @@ export class ObservableService implements ObservableInterface {
       },
     });
 
-    console.log(filter);
+    if (Utils.log) console.log(filter);
 
     await this.matrixClient.startClient({includeArchivedRooms: false, filter});
 
@@ -112,10 +106,6 @@ export class ObservableService implements ObservableInterface {
       this.userObservable.next({contactId: userId, name: this.matrixClient.getUser(userId).displayName,
         currency: currencyEventContent.currency, language: languageEventContent.language});
     }
-  }
-
-  public async tearDown(): Promise<void> {
-  // TODO: implement
   }
 
   private async processNewRoom(room: Room): Promise<void> {
@@ -152,30 +142,6 @@ export class ObservableService implements ObservableInterface {
       this.multipleNewTransactionsObservable.next(this.transactions[room.roomId]);
       if (Utils.log) console.log('Anzahl Transaktionen: ' + this.transactions[room.roomId].length);
     }
-
-    /*console.log('---new timelineSet---');
-    // TODO: set the content of the filter
-    const filterDefinition: object = {room: {}};
-    const filter: Filter = await this.matrixClient.createFilter({});
-    console.log(filter);
-    filter.setDefinition(filterDefinition);
-    // TypeError: matrix_js_sdk__WEBPACK_IMPORTED_MODULE_3__.FilterComponent is not a constructor
-    // filter._room_timeline_filter = new FilterComponent({});
-    const ownTimelineSet = room.getOrCreateFilteredTimelineSet(filter);
-    // TypeError: timelineFilter.getRoomTimelineFilterComponent is not a function
-    // let ownTimelineSet = this.createFilteredTimelineSetWithoutPopulatingIt(room, this.matrixClient.createFilter({}));
-    console.log(ownTimelineSet);
-    const ownTimelineWindow = new TimelineWindow(this.matrixClient, ownTimelineSet);
-    ownTimelineWindow.load();
-    console.log(ownTimelineWindow.canPaginate(EventTimeline.BACKWARDS));
-    ownTimelineWindow.paginate(EventTimeline.BACKWARDS, 2);  */
-    /*await this.matrixClient.paginateEventTimeline(ownTimeline, {backwards: true, limit: 2})
-      .then(moreEvents => {
-        if (!moreEvents) {
-          return;
-        }
-      });*/
-
   }
 
   private async paginateBackwardsUntilTheEnd(window: TimelineWindow): Promise<void> {
@@ -192,10 +158,6 @@ export class ObservableService implements ObservableInterface {
   private accountDataListener(): void {
     // Fires whenever new user-scoped account_data is added.
     this.matrixClient.on('accountData', (event, oldEvent) => {
-
-      console.log(event);
-
-      console.log('emitter wurde getriggerd');
       // if (Utils.log) console.log('got account data change' + event.getType());
       switch (event.getType()) {
         case ('com.matrixpay.currency'): {
@@ -212,8 +174,8 @@ export class ObservableService implements ObservableInterface {
     });
   }
 
+  // not necessary in current version
   private roomAccountDataListener(): void {
-    // not necessary in current version
     // Fires whenever room account data changes
     this.matrixClient.on('Room.accountData', (event, room, oldEvent) => {
       // if (Utils.log) console.log('got account data change' + event.getType());
@@ -225,7 +187,7 @@ export class ObservableService implements ObservableInterface {
           const contacts = content.contacts;
           const last_transaction = content.last_transaction;
           if (Utils.log) { console.log('got balances change in room ' + room.name + ' userIds: ' + contacts + ' amounts: ' + balances); }
-          // TODO: call next() on observable
+          // call next() on observable
           break;
         }
         case ('com.matrixpay.recommendation'): {
@@ -235,7 +197,7 @@ export class ObservableService implements ObservableInterface {
           const payers = content.payers;
           const amount = content.amounts;
           const last_transaction = content.last_transaction;
-          // TODO: call next() on observable
+          // call next() on observable
           break;
         }
       }
@@ -287,9 +249,6 @@ export class ObservableService implements ObservableInterface {
                 if (Utils.log) console.log('got an old room membership change: ' + event.getStateKey() + ' left the room ' + room.name);
                 isLeave = true;
               }
-              // this.oldRoomMembershipChanges.push({groupId: room.roomId, userId: event.getStateKey(),
-              //  date: event.getDate(), isLeave, name: this.matrixClient.getUser(event.getStateKey()).displayName});
-              // alternativ für den Namen: room.getMember(event.getStateKey()).user.displayName)
               this.groupMembershipObservable.next(
                 {groupId: room.roomId, userId: event.getStateKey(), date: event.getDate(), isLeave, name: room.getMember(event.getStateKey()).user.displayName}
                 );
@@ -297,7 +256,6 @@ export class ObservableService implements ObservableInterface {
             }
           }
         }
-        // only data.liveEvent instead of !toStartOfTimeline && data.liveEvent ? yes
         if (data.liveEvent) {
           // Process the events retrieved by /sync
           switch (event.getType()) {
@@ -401,7 +359,7 @@ export class ObservableService implements ObservableInterface {
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payer,
-      payerAmount: this.SumUpRecipientAmounts(content.amounts), // TODO payer amount is currently wrong
+      payerAmount: this.SumUpRecipientAmounts(content.amounts),
       recipientIds: content.recipients,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
@@ -416,7 +374,7 @@ export class ObservableService implements ObservableInterface {
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payerId,
-      payerAmount: this.SumUpRecipientAmounts(content.amounts), // should be calculated in BasicDataUpdateService
+      payerAmount: this.SumUpRecipientAmounts(content.amounts), // maybe do that calculation in BasicDataUpdateService
       recipientIds: content.recipientIds,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
@@ -428,50 +386,6 @@ export class ObservableService implements ObservableInterface {
       sum += recipientAmounts[i];
     }
     return sum;
-  }
-
-  // similar to Room.prototype.getOrCreateFilteredTimelineSet
-  private createFilteredTimelineSetWithoutPopulatingIt(room: Room, filter: Filter): void {
-    const opts = {timelineSupport: true, filter};
-    const timelineSet = new EventTimelineSet(room, opts);
-    /* not sure what that does
-    room.reEmitter.reEmit(timelineSet, ["Room.timeline", "Room.timelineReset"]);
-    room._filteredTimelineSets[filter.filterId] = timelineSet;
-    room._timelineSets.push(timelineSet);*/
-
-    const unfilteredLiveTimeline = room.getLiveTimeline();
-
-    // find the earliest unfiltered timeline
-    let timeline = unfilteredLiveTimeline;
-    while (timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS)) {
-      timeline = timeline.getNeighbouringTimeline(EventTimeline.BACKWARDS);
-    }
-
-    timelineSet.getLiveTimeline().setPaginationToken(
-      timeline.getPaginationToken(EventTimeline.BACKWARDS),
-      EventTimeline.BACKWARDS,
-    );
-
-    return timelineSet;
-  }
-
-  private canPaginateWithHelpfulLog(window: TimelineWindow, direction: string): boolean {
-    const tl = window.getTimelineIndex(direction);
-    if (!tl) {
-      if (Utils.log) console.log('TimelineWindow: no timeline yet');
-      return false;
-    }
-    if (direction === EventTimeline.BACKWARDS) {
-      if (tl.index > tl.minIndex()) {
-        return true;
-      }
-    } else {
-      if (tl.index < tl.maxIndex()) {
-        return true;
-      }
-    }
-    return Boolean(tl.timeline.getNeighbouringTimeline(direction) ||
-      tl.timeline.getPaginationToken(direction));
   }
 
   public getUserObservable(): Observable<UserType> {
