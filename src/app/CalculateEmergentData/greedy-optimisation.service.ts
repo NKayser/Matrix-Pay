@@ -44,7 +44,7 @@ export class GreedyOptimisationService implements OptimisationInterface{
       const contactIds = problem.getUsers();
       const maxIndex = GreedyOptimisationService.getMaxIndex(balances);
       const minIndex = GreedyOptimisationService.getMinIndex(balances);
-      if (balances[minIndex] === 0 && balances[maxIndex] === 0) {break; }
+      if (balances[minIndex] === 0 || balances[maxIndex] === 0) {break; }
       const minAbsoluteValue = Math.min(-balances[minIndex], balances[maxIndex]);
       balances[maxIndex] -= minAbsoluteValue;
       balances[minIndex] += minAbsoluteValue;
