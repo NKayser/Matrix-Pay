@@ -49,7 +49,7 @@ describe('ObservableService', () => {
     // clientEmitter.emit('com.matrixpay.language', {'language': 'English'});
   });
 
-  it('should be created', () => {
+  /*it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
@@ -75,7 +75,7 @@ describe('ObservableService', () => {
       expect(currency.currency).toBe('EUR');
       console.log('callback called');
       done();
-    });*/
+    });
 
     // console.log(callbackCalled);
 
@@ -92,5 +92,5 @@ describe('ObservableService', () => {
     // expect(callbackCalled).toBe(true);
     expect(spy).toHaveBeenCalled();
     done();
-  });
+  });*/
 });
