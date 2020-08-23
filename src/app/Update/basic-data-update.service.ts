@@ -10,8 +10,9 @@ import {Utils} from "../ServerCommunication/Response/Utils";
 import {Transaction} from "../DataModel/Group/Transaction";
 import {TransactionType} from "../DataModel/Group/TransactionType";
 import {
+  CurrencyType,
   GroupActivityType,
-  GroupMemberType, GroupsType,
+  GroupMemberType, GroupsType, LanguageType,
   TransactionType as TransactionTypeInterface
 } from '../ServerCommunication/CommunicationInterface/parameterTypes';
 import {AtomarChange} from "../DataModel/Group/AtomarChange";
@@ -27,6 +28,8 @@ export class BasicDataUpdateService {
   private activityBuffer: GroupActivityType[] = [];
   private membershipBuffer: GroupMemberType[] = [];
   private groupBuffer: GroupsType[] = [];
+  private languageBuffer: LanguageType[] = [];
+  private currencyBuffer: CurrencyType[] = [];
 
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     if (Utils.log) console.log('This is BasicDataUpdateService');
@@ -50,6 +53,8 @@ export class BasicDataUpdateService {
       this.dataModel.initializeUserThisSession(param.contactId, param.name, this.currencyStringToEnum(param.currency),
         this.languageStringToEnum(param.language));
       this.emptyGroupBuffer();
+      this.emptyCurrencyBuffer();
+      this.emptyLanguageBuffer();
     });
   }
 
@@ -104,7 +109,7 @@ export class BasicDataUpdateService {
         this.checkBuffer(param.groupId);
       }
       else {
-        if (Utils.log) console.log('Group deleted:' + param.groupId);
+        if (Utils.log) { console.log('Group deleted:' + param.groupId); }
         this.dataModel.user.removeGroup(param.groupId)}
     }
     else {
@@ -115,7 +120,11 @@ export class BasicDataUpdateService {
 
   private emptyGroupBuffer(): void {
     console.log('LOG0071 emptying groupBuffer');
-    for (const group of this.groupBuffer){
+    const copyGroupBuffer = [...this.groupBuffer];
+    this.groupBuffer = [];
+    console.log(this.groupBuffer);
+    console.log(copyGroupBuffer);
+    for (const group of copyGroupBuffer){
       this.addGroupFromBuffer(group);
     }
   }
@@ -180,8 +189,12 @@ export class BasicDataUpdateService {
    */
   private async updateDefaultCurrency(): Promise<void> {
     this.observables.getSettingsCurrencyObservable().subscribe(param => {
-      if (Utils.log) console.log('BasicDataUpdateService got currency ' + param.currency);
-      this.dataModel.getUser().currency = this.currencyStringToEnum(param.currency);
+      if (this.dataModel.userExists){
+        if (Utils.log) { console.log('BasicDataUpdateService got currency: ' + param.currency); }
+        this.dataModel.getUser().currency = this.currencyStringToEnum(param.currency);
+      }
+      else {this.currencyBuffer.push(param); }
+      if (Utils.log) { console.log('BasicDataUpdateService pushed currency to buffer: ' + param.currency); }
     });
   }
 
@@ -190,9 +203,51 @@ export class BasicDataUpdateService {
    */
   private async updateDefaultLanguage(): Promise<void> {
     this.observables.getSettingsLanguageObservable().subscribe(param => {
-      if (Utils.log) console.log('BasicDataUpdateService got language ' + param.language);
-      this.dataModel.getUser().language = this.languageStringToEnum(param.language);
+      if (this.dataModel.userExists){
+        if (Utils.log) console.log('BasicDataUpdateService got language: ' + param.language);
+        this.dataModel.getUser().language = this.languageStringToEnum(param.language);
+      }
+      else {this.languageBuffer.push(param); }
+      if (Utils.log) { console.log('BasicDataUpdateService pushed language to buffer: ' + param.language); }
     });
+  }
+
+  private updateCurrencyFromBuffer(param: CurrencyType): void {
+    if (this.dataModel.userExists){
+      if (Utils.log) { console.log('BasicDataUpdateService got currency from buffer: ' + param.currency); }
+      this.dataModel.getUser().currency = this.currencyStringToEnum(param.currency);
+    }
+    else {this.currencyBuffer.push(param); }
+    if (Utils.log) { console.log('BasicDataUpdateService pushed currency BACK to buffer: ' + param.currency); }
+  }
+
+  private updateLanguageFromBuffer(param: LanguageType): void {
+    if (this.dataModel.userExists){
+      if (Utils.log) { console.log('BasicDataUpdateService got language from buffer: ' + param.language); }
+      this.dataModel.getUser().language = this.languageStringToEnum(param.language);
+    }
+    else {this.languageBuffer.push(param); }
+    if (Utils.log) { console.log('BasicDataUpdateService pushed language BACK to buffer: ' + param.language); }
+  }
+
+  private emptyCurrencyBuffer(): void {
+    const copyCurrencyBuffer = [...this.currencyBuffer];
+    this.currencyBuffer = [];
+    console.log(this.currencyBuffer);
+    console.log(copyCurrencyBuffer);
+    for (const currency of copyCurrencyBuffer){
+      this.updateCurrencyFromBuffer(currency);
+    }
+  }
+
+  private emptyLanguageBuffer(): void {
+    const copyLanguageBuffer = [...this.languageBuffer];
+    this.languageBuffer = [];
+    console.log(this.languageBuffer);
+    console.log(copyLanguageBuffer);
+    for (const language of copyLanguageBuffer){
+      this.updateLanguageFromBuffer(language);
+    }
   }
 
   /**
