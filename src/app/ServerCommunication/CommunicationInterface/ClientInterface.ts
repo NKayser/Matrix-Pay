@@ -8,5 +8,7 @@ export interface ClientInterface {
   getClient(): Promise<MatrixClient>;
   isPrepared(): boolean;
   isLoggedIn(): boolean;
+
+  // returns an EventEmitter that emits if logged in
   getLoggedInEmitter(): EventEmitter<void>
 }

@@ -9,7 +9,7 @@ import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {ClientError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
 import {matrixCurrencyMap} from '../../DataModel/Utils/Currency';
-import {MatrixClassProviderService} from "./matrix-class-provider.service";
+import {MatrixClassProviderService} from './matrix-class-provider.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,13 +24,12 @@ export class MatrixClientService implements ClientInterface {
 
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
-  private static readonly TIMEOUT: number = 100000; // how long to wait until client is "prepared" (after first sync)
-  // TODO: decide where to save these constants
   private static readonly CURRENCY_KEY: string = 'com.matrixpay.currency';
   private static readonly LANGUAGE_KEY: string = 'com.matrixpay.language';
   private static readonly DEFAULT_CURRENCY: string = matrixCurrencyMap[0];
   private static readonly DEFAULT_LANGUAGE: string = 'English';
 
+  // The MatrixClassProviderService encapsules global methods of the matrix-js-sdk, which is needed in this service.
   constructor(private matrixClassProviderService: MatrixClassProviderService) {
     this.loggedInEmitter = new EventEmitter();
   }
@@ -54,6 +53,7 @@ export class MatrixClientService implements ClientInterface {
     }
     this.serverAddress = config['m.homeserver']['base_url'];
 
+    // Configure Client Store
     const opts = {
       localStorage: window.localStorage,
       indexedDB: window.indexedDB
@@ -64,6 +64,7 @@ export class MatrixClientService implements ClientInterface {
     // Create a Client
     this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, store);
 
+    // Declared to be defined later. This is important for waiting on the "then" block.
     let response: ServerResponse;
 
     // Login and get Access Token
@@ -78,23 +79,23 @@ export class MatrixClientService implements ClientInterface {
         response = new UnsuccessfulResponse(ClientError.InvalidPassword, reason);
       });
 
+    // Only continue if getting access token was successful.
     if (await response instanceof UnsuccessfulResponse) return response;
 
-    // Start the Client (now in ObservableService)
-    // this.matrixClient.startClient({initialSyncLimit: 8});
-
     // Set settings to default values if non existent
+    // First: get current settings, catch if not yet set
     const currencyEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.CURRENCY_KEY).catch((err) => console.log('caught ' + err)); // content of the matrix event
     const languageEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.LANGUAGE_KEY).catch((err) => console.log('caught ' + err));
 
     console.log(currencyEventContent);
 
+    // Secondly: Set default settings on AccountData if previously not set.
     if (currencyEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
       {'currency': MatrixClientService.DEFAULT_CURRENCY}); // TODO: find a way to avoid Magic number here
     if (languageEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
       {'language': MatrixClientService.DEFAULT_LANGUAGE});
 
-
+    // Set prepared to true when the Client state is prepared
     const listener = async (state, prevState, res) => {
       this.prepared = (state === "PREPARED" || state === "SYNCING");
       console.log("Matrix Client prepared: " + this.prepared);
@@ -106,19 +107,14 @@ export class MatrixClientService implements ClientInterface {
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.on('sync', listener);
 
-    // move to the end of the method?
-    // Call Observable Service
-    // this.observableService.setUp();
-    // this.matrixEmergentDataService.setClient(this.matrixClient);
-
     const resp = await response;
+
+    // Emit on the loggedInEmitter if logged in
     if (resp instanceof SuccessfulResponse) {
       this.loggedInEmitter.emit();
     }
 
     return resp;
-
-    // TODO: Initialization of Data
   }
 
   public getLoggedInEmitter(): EventEmitter<void> {
@@ -130,8 +126,6 @@ export class MatrixClientService implements ClientInterface {
       await this.matrixClient.logout();
       this.loggedIn = false;
       this.prepared = false;
-      //this.observableService.tearDown();
-      //this.matrixEmergentDataService.setClient(undefined);
     }
 
     // User was already logged out
