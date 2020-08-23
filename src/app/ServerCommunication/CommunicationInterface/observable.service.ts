@@ -192,6 +192,10 @@ export class ObservableService implements ObservableInterface {
   private accountDataListener(): void {
     // Fires whenever new user-scoped account_data is added.
     this.matrixClient.on('accountData', (event, oldEvent) => {
+
+      console.log(event);
+
+      console.log('emitter wurde getriggerd');
       // if (Utils.log) console.log('got account data change' + event.getType());
       switch (event.getType()) {
         case ('com.matrixpay.currency'): {
