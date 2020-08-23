@@ -46,16 +46,7 @@ export class TransactionService {
     return this.sendTransaction(groupId, messageType, content, recipientIds, payerId);
   }
 
-  /**
-   * Modify a specific transaction provided via the transactionId.
-   * @param groupId
-   * @param transactionId
-   * @param description
-   * @param payerId
-   * @param recipientIds
-   * @param amounts
-   */
-  // TODO: modifying events and listening to modified events not tested yet
+  // Not in use yet.
   public async modifyTransaction(groupId: string, transactionId: string, description?: string, payerId?: string, recipientIds?: string[], amounts?: number[]): Promise<ServerResponse> {
     // Check if referenced Transaction exists. Should already be validated in ViewModel
     const client = await this.matrixClientService.getClient();
@@ -70,11 +61,13 @@ export class TransactionService {
     let newRecipientIds: string[] = recipientIds;
     let newAmounts: number[] = amounts;
 
+    // Use old values if new values not given
     if (newDescription == undefined) newDescription = oldContent['content']['name'];
     if (newPayerId == undefined) newPayerId = oldContent['content']['payer'];
     if (newRecipientIds == undefined) newRecipientIds = oldContent['content']['recipients'];
     if (newAmounts == undefined) newAmounts = oldContent['content']['amounts'];
 
+    // Relict, because method not used yet. Actually, the message type should not change.
     const newMessageType = newRecipientIds.length == 1 ? TransactionService.MESSAGE_TYPE_PAYBACK : TransactionService.MESSAGE_TYPE_EXPENSE;
 
     const newContent = {
@@ -97,11 +90,7 @@ export class TransactionService {
 
   private async sendTransaction(groupId: string, messageType: string, content: object, recipientIds: string[],
                                 payerId: string): Promise<ServerResponse> {
-
-
     const client = await this.matrixClientService.getClient();
-
-    console.log('3');
 
     // Input Validation (check if users exist in room). Should already be done in ViewModel.
     const validIds = await this.areGroupMembers(groupId, recipientIds.concat(payerId))
@@ -110,21 +99,17 @@ export class TransactionService {
 
     let response: ServerResponse;
 
-
-    console.log('2');
     // Actually send the event
     const event = await client.sendEvent(groupId, messageType, content, '').then(
         (val: MatrixEvent) => {response = new SuccessfulResponse(val['event_id'])},
         (reason: string) => {response = new UnsuccessfulResponse(GroupError.SendEvent, reason)});
-    console.log("x: " + event);
-
-    console.log('1');
 
     // Return the new event_id
     return await response;
   }
 
-  // TODO: activate later ?
+  // This method was originally used to double check if the userIds are valid.
+  // However, this caused errors when members had not accepted the invitation yet.
   private async areGroupMembers(roomId: string, userIds: string[]): Promise<boolean> {
     /*
     const client = await this.matrixClientService.getClient();

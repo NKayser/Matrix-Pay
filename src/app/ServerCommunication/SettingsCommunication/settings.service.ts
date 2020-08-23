@@ -39,18 +39,7 @@ export class SettingsService {
 
     return await response;
 
-    // Check if value was actually changed
-    // Event of type
-    // {event: {type: "currency", content: {currency: "EURO"}}, sender: null, target: null, status: null, error: null, …}
-    /*
-    const getValue: MatrixEvent = await client.getAccountDataFromServer(SettingsService.CURRENCY_CONTENT_KEY);
-    console.log(getValue);
-
-    if (getValue[SettingsService.CURRENCY_CONTENT_KEY] == currency) {
-      return new SuccessfulResponse();
-    } else {
-      return new UnsuccessfulResponse(SettingsError.Getter, getValue["error"]).promise();
-    }*/
+    // Don't check if value was actually changed, because this can take a while and caused Errors.
   }
 
   /**
@@ -69,17 +58,5 @@ export class SettingsService {
       (err: string) => response = new UnsuccessfulResponse(SettingsError.Setter, err));
 
     return await response;
-
-    // Check if value was actually changed
-    // Event of type
-    // {event: {type: "language", content: {language: "EN"}}, sender: null, target: null, status: null, error: null, …}
-    /*const getValue: MatrixEvent = await client.getAccountDataFromServer(SettingsService.LANGUAGE_CONTENT_KEY);
-    console.log(getValue);
-
-    if (getValue[SettingsService.LANGUAGE_CONTENT_KEY] == language) {
-      return new SuccessfulResponse();
-    } else {
-      return new UnsuccessfulResponse(SettingsError.Getter, getValue["error"]).promise();
-    }*/
   }
 }
