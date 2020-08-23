@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Currency, currencyMap, matrixCurrencyMap} from '../../DataModel/Utils/Currency';
-import {Language, languageMap} from '../../DataModel/Utils/Language';
 import {MatDialog} from '@angular/material/dialog';
 import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {DialogProviderService} from '../dialog-provider.service';
@@ -60,7 +59,6 @@ export class SettingsComponent implements OnInit {
       this.loadingLanguage = true;
 
       promiseTimeout(TIMEOUT, this.matrixBasicDataService.userChangeLanguage(this.selectedLanguage.toString())).then((data) => {
-        console.log(data);
         if (!data.wasSuccessful()){
           this.dialogProviderService.openErrorModal('error language 1: ' + data.getMessage(), this.dialog);
         }
@@ -75,14 +73,10 @@ export class SettingsComponent implements OnInit {
       this.oldSelectedCurrency = this.selectedCurrency;
 
       this.loadingCurrency = true;
-      promiseTimeout(TIMEOUT, this.matrixBasicDataService.userChangeDefaultCurrency(matrixCurrencyMap[this.selectedCurrency])).then((data) => {
-        console.log('success?');
-        console.log(data);
+      promiseTimeout(TIMEOUT, this.matrixBasicDataService.userChangeDefaultCurrency(
+        matrixCurrencyMap[this.selectedCurrency])).then((data) => {
         if (!data.wasSuccessful()){
-          console.log('error');
-          console.log(this.dialogProviderService);
           this.dialogProviderService.openErrorModal('error currency 1: ' + data.getMessage(), this.dialog);
-          console.log('error2');
         }
         this.loadingCurrency = false;
       }, (err) => {

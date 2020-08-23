@@ -15,6 +15,7 @@ export interface ConfirmPaybackDialogData {
 })
 export class ConfirmPaybackModalComponent {
 
+  // use the currencyMap from DataModel/Utils/Currency to map the correct currency symbol
   currencyMap = currencyMap;
 
   constructor(

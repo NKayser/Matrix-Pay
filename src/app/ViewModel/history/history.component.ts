@@ -19,7 +19,7 @@ export class HistoryComponent implements OnChanges {
   }
 
   /**
-   * get reference to activities of groups merge and sort them
+   * get reference to activities of groups
    */
   ngOnChanges(): void {
 
