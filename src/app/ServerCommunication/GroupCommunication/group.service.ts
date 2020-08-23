@@ -259,8 +259,8 @@ export class GroupService {
    * @param recipientIds
    * @param amounts
    */
-  public async modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string,
-                           recipientIds: string[], amounts: number[]): Promise<ServerResponse> {
+  public async modifyTransaction(groupId: string, transactionId: string, description?: string, payerId?: string,
+                           recipientIds?: string[], amounts?: number[]): Promise<ServerResponse> {
     return this.transactionService.modifyTransaction(groupId, transactionId, description, payerId, recipientIds, amounts);
   }
 }

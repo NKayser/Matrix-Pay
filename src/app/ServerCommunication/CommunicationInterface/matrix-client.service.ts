@@ -9,7 +9,7 @@ import {SuccessfulResponse} from '../Response/SuccessfulResponse';
 import {ClientError} from '../Response/ErrorTypes';
 import {DiscoveredClientConfig} from '../../../matrix';
 import {matrixCurrencyMap} from '../../DataModel/Utils/Currency';
-import {MatrixClassProviderService} from "../ServerUtils/matrix-class-provider.service";
+import {MatrixClassProviderService} from "./matrix-class-provider.service";
 
 @Injectable({
   providedIn: 'root'

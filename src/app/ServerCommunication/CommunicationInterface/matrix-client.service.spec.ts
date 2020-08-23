@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { MatrixClientService } from './matrix-client.service';
-import {MatrixClassProviderService} from "../ServerUtils/matrix-class-provider.service";
+import {MatrixClassProviderService} from "./matrix-class-provider.service";
 import {SuccessfulResponse} from "../Response/SuccessfulResponse";
 import {ServerResponse} from "../Response/ServerResponse";
 import {UnsuccessfulResponse} from "../Response/UnsuccessfulResponse";
