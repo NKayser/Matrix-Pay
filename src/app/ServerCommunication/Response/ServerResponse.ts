@@ -6,7 +6,7 @@ import {UnsuccessfulResponse} from "./UnsuccessfulResponse";
 
 export abstract class ServerResponse {
   abstract wasSuccessful(): boolean;
-  abstract getError(): any;
+  abstract getError(): number;
   abstract getMessage(): string;
   abstract getValue(): any;
   abstract promise(): Promise<ServerResponse>;
