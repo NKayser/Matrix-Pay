@@ -3,6 +3,10 @@
   /*TODO make it so that this view isn't scrollable anymore*/
 }
 
+.spinner{
+  margin-left: 10px;
+}
+
 .sidenav {
   width: 200px;
 }

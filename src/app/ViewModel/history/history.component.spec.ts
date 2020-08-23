@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HistoryComponent } from './history.component';
+import {Group} from '../../DataModel/Group/Group';
+import {Currency} from '../../DataModel/Utils/Currency';
+import {Activity} from '../../DataModel/Group/Activity';
 
 describe('HistoryComponent', () => {
   let component: HistoryComponent;
@@ -11,15 +14,32 @@ describe('HistoryComponent', () => {
       declarations: [ HistoryComponent ]
     })
     .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(HistoryComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  }));
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('change test', () => {
+
+    const g1 = new Group('g1', 'name_g1', Currency.USD);
+    const g2 = new Group('g2', 'name_g2', Currency.USD);
+
+    const a1 = new Activity(null, null, null, null);
+    const a2 = new Activity(null, null, null, null);
+    const a3 = new Activity(null, null, null, null);
+    const a4 = new Activity(null, null, null, null);
+    g1.addActivity(a1);
+    g1.addActivity(a2);
+    g2.addActivity(a3);
+    g2.addActivity(a4);
+
+    component.group = g1;
+    component.ngOnChanges();
+    expect(component.activities).toEqual([a1, a2]);
+
+    component.group = g2;
+    component.ngOnChanges();
+    expect(component.activities).toEqual([a3, a4]);
+
   });
 });

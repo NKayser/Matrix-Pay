@@ -1,54 +1,63 @@
-export class BalancesType {
+export interface UserType {
+  contactId: string;
+  name: string;
+  currency: string;
+  language: string;
+}
+
+export interface BalancesType {
   groupId: string;
   balances: number[];
   participantIds: string[];
-
-  constructor(groupId: string, balances: number[], participantIds: string[]) {
-    this.groupId = groupId;
-    this.balances = balances;
-    this.participantIds = participantIds;
-  }
 }
 
-export class RecommendationsType {
+export interface RecommendationsType {
   groupId: string;
   amounts: number[];
+  payerIds: string[];
   receiverIds: string[];
-
-  constructor(groupId: string, amounts: number[], receiverIds: string[]) {
-    this.groupId = groupId;
-    this.amounts = amounts;
-    this.receiverIds = receiverIds;
-  }
 }
 
-export class GroupsType {
+export interface GroupsType {
   groupId: string;
   groupName: string;
+  currency: string;
   userIds: string[];
   userNames: string[];
   isLeave: boolean;
-
-  constructor(groupId: string, groupName: string, userIds: string[], userNames: string[], isLeave: boolean) {
-    this.groupId = groupId;
-    this.groupName = groupName;
-    this.userIds = userIds;
-    this.userNames = userNames;
-    this.isLeave = isLeave;
-  }
-
 }
 
-export class GroupMemberType{
+export interface GroupActivityType {
+  groupId: string;
+  creatorId: string;
+  creationDate: Date;
+}
+
+export interface GroupMemberType{
   groupId: string;
   userId: string;
-  names: string[];
+  name: string;
+  isLeave: boolean;
   date: Date;
+}
 
-  constructor(groupId: string, userId: string, names: string[], date: Date) {
-    this.groupId = groupId;
-    this.userId = userId;
-    this.names = names;
-    this.date = date;
-  }
+export interface CurrencyType{
+  currency: string;
+}
+
+export interface LanguageType{
+  language: string;
+}
+
+export interface TransactionType{
+  transactionType: string;
+  transactionId: string;
+  name: string;
+  creationDate: Date;
+  groupId: string,
+  payerId: string,
+  payerAmount: number;
+  recipientIds: string[];
+  recipientAmounts: number[];
+  senderId: string;
 }

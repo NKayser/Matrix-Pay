@@ -6,6 +6,10 @@
 
 }
 
+.balance{
+  margin-bottom: 10px;
+}
+
 /*Controls the Balance Label*/
 .balance_label{
   font-size: 200%;

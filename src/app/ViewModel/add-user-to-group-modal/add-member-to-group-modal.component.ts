@@ -1,9 +1,10 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Group} from '../../DataModel/Group/Group';
 
 export interface AddMemberToGroupDialogData {
-  group: string;
+  group: Group;
   user: string;
 }
 
@@ -12,10 +13,11 @@ export interface AddMemberToGroupDialogData {
   templateUrl: './add-member-to-group-modal.component.html',
   styleUrls: ['./add-member-to-group-modal.component.css']
 })
-export class AddMemberToGroupModalComponent implements OnInit {
+export class AddMemberToGroupModalComponent implements OnInit{
 
-  // Save the FormControl which checks the GroupName TODO Add regex
-  formControlUser = new FormControl('', [Validators.required]);
+  // Save the FormControl which checks the userName
+  // use regex pattern according to matrix specification: https://matrix.org/docs/spec/index#users
+  formControlUser = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
 
   constructor(
     public dialogRef: MatDialogRef<AddMemberToGroupModalComponent>,
@@ -23,20 +25,29 @@ export class AddMemberToGroupModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.formControlUser.setValue(this.data.user);
   }
 
-  onCancel(): void {
+  /**
+   * Closes the dialog without returning the data
+   */
+  public onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
-  onSave(): void {
+  /**
+   * Closes the dialog and returns the data
+   */
+  public onSave(): void {
     if (!this.formControlUser.invalid){
       this.dialogRef.close({user: this.formControlUser.value, group: this.data.group});
     }
   }
 
-  getInvalidUserErrorMessage(): string{
+  /**
+   * Returns error message if the user inputs invalid member
+   */
+  public getInvalidUserErrorMessage(): string{
     return 'Not a valid user name';
   }
 

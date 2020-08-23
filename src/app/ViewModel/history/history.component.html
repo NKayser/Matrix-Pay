@@ -3,7 +3,30 @@
   <mat-list>
 
     <mat-list-item *ngFor="let activity of activities" class="activity_item">
-      <mat-card class="card">{{activity}}</mat-card>
+      <mat-card>
+        <div class="label_div">
+          <div *ngIf="activity.activityType===activityTypes.NEWPAYBACK">
+            <mat-label>{{activity.actor.name}} paid back in {{activity.subject.name}}</mat-label>
+          </div>
+          <div *ngIf="activity.activityType===activityTypes.NEWCONTACTINGROUP">
+            <mat-label>{{activity.actor.name}} has been added to {{activity.subject.name}}</mat-label>
+          </div>
+          <div *ngIf="activity.activityType===activityTypes.GROUPCREATION">
+            <mat-label>{{activity.actor.name}} created {{activity.subject.name}}</mat-label>
+          </div>
+          <div *ngIf="activity.activityType===activityTypes.CONTACTLEFTGROUP">
+            <mat-label>{{activity.actor.name}} left {{activity.subject.name}}</mat-label>
+          </div>
+          <div *ngIf="activity.activityType===activityTypes.EXPENSECHANGE">
+            <mat-label>{{activity.actor.name}} edited transaction {{activity.subject.name}} in {{activity.subject.group.name}}</mat-label>
+          </div>
+          <div *ngIf="activity.activityType===activityTypes.NEWEXPENSE">
+            <mat-label>{{activity.actor.name}} created {{activity.subject.name}} in {{activity.subject.group.name}}</mat-label>
+          </div>
+        </div>
+        <mat-label class="date">{{activity.creationDate.getDay()}}.{{activity.creationDate.getMonth()}}.{{activity.creationDate.getFullYear()}}</mat-label>
+      </mat-card>
+
     </mat-list-item>
 
   </mat-list>

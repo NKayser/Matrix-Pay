@@ -11,7 +11,6 @@ import {LoginComponent} from '../login/login.component';
 const routes: Routes = [
   { path: 'settings', component: SettingsComponent },
   { path: 'groups', component: GroupSelectionComponent},
-  { path: 'history', component: HistoryComponent},
   { path: 'home', component: HomeComponent},
   { path: 'login', component: LoginComponent},
   { path: '',   redirectTo: '/home', pathMatch: 'full' }, // redirect to home site

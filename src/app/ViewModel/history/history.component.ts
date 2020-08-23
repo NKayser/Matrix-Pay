@@ -1,30 +1,56 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Activity} from '../../DataModel/Group/Activity';
+import {ActivityType} from '../../DataModel/Group/ActivityType';
+import {Group} from '../../DataModel/Group/Group';
 
 @Component({
   selector: 'app-history',
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.css']
 })
-export class HistoryComponent implements OnInit {
+export class HistoryComponent implements OnChanges {
 
-  activities: string[];
+  activities: Activity[] = [];
+  activityTypes = ActivityType;
+
+  @Input() group: Group;
 
   constructor() {
+  }
 
-    this.activities = ['Filler Message 1', 'Filler Message 2', 'wegwgg', 'qsuiofgqöweojeggjörl', 'Filler Message 1', 'Filler Message 2',
-      'wegwgg', 'qsuiofgqöweojeggjörl', 'Filler Message 1', 'Filler Message 2', 'wegwgg', 'qsuiofgqöweojeggjörl'];
+  /**
+   * get reference to activities of groups
+   */
+  ngOnChanges(): void {
+
+    this.activities = this.group.activities;
+
+    /*
+    // Either check out other methods or implement a time that refreshes after a fixed time intervall
+    const groups = this.dataModelService.getGroups();
+
+    for (const group of groups){
+      for (const activity of group.activities){
+        this.activities.push(activity);
+      }
+    }
+
+    this.sortByDate();*/
+  }
+
+  /*public fetchHistory(): void{
 
   }
 
-  ngOnInit(): void {
+  private getTime(date: Date): number {
+    return date != null ? date.getTime() : 0;
   }
 
-  public getActivities(): void {
 
-  }
-
-  public fetchHistory(): void{
-
-  }
+  private sortByDate(): void {
+    this.activities.sort((a: Activity, b: Activity) => {
+      return this.getTime(a.creationDate) - this.getTime(b.creationDate);
+    });
+  }*/
 
 }

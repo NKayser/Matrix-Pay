@@ -8,13 +8,14 @@ import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTabsModule} from '@angular/material/tabs';
-import {MatDialogModule} from '@angular/material/dialog';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatListModule} from '@angular/material/list';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -35,6 +36,10 @@ import {NgxChartsModule} from '@swimlane/ngx-charts';
 import { LeaveGroupModalComponent } from './ViewModel/leave-group-modal/leave-group-modal.component';
 import { CreateGroupModalComponent } from './ViewModel/create-group-modal/create-group-modal.component';
 import { AddMemberToGroupModalComponent } from './ViewModel/add-user-to-group-modal/add-member-to-group-modal.component';
+import { ConfirmPaybackModalComponent } from './ViewModel/confirm-payback-modal/confirm-payback-modal.component';
+import { ErrorModalComponent } from './ViewModel/error-modal/error-modal.component';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {DialogProviderService} from './ViewModel/dialog-provider.service';
 
 
 @NgModule({
@@ -52,32 +57,40 @@ import { AddMemberToGroupModalComponent } from './ViewModel/add-user-to-group-mo
     PageNotFoundComponent,
     LeaveGroupModalComponent,
     CreateGroupModalComponent,
-    AddMemberToGroupModalComponent
+    AddMemberToGroupModalComponent,
+    ConfirmPaybackModalComponent,
+    ErrorModalComponent
   ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatCardModule,
-    FormsModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatRadioModule,
-    ReactiveFormsModule,
-    LayoutModule,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatListModule,
-    MatTabsModule,
-    MatDialogModule,
-    AppRoutingModule,
-    NgxChartsModule,
-    MatSlideToggleModule,
-    MatCheckboxModule
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatCardModule,
+        FormsModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatRadioModule,
+        ReactiveFormsModule,
+        LayoutModule,
+        MatToolbarModule,
+        MatSidenavModule,
+        MatListModule,
+        MatTabsModule,
+        MatDialogModule,
+        AppRoutingModule,
+        NgxChartsModule,
+        MatSlideToggleModule,
+        MatCheckboxModule,
+        MatProgressSpinnerModule,
+        MatGridListModule,
+    ],
+  providers: [
+    { provide: MatDialogRef, useValue: {} },
+    { provide: MAT_DIALOG_DATA, useValue: [] },
+    DialogProviderService,
   ],
-  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

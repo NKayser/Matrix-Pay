@@ -1,22 +1,38 @@
 import {Observable} from 'rxjs';
-import {GroupsType, BalancesType, GroupMemberType, RecommendationsType} from './parameterTypes';
+import {
+  GroupsType,
+  BalancesType,
+  GroupMemberType,
+  RecommendationsType,
+  CurrencyType,
+  UserType,
+  TransactionType, LanguageType, GroupActivityType
+} from './parameterTypes';
 
 export interface ObservableInterface {
+  getUserObservable(): Observable<UserType>;
+
   getGroupsObservable(): Observable<GroupsType>;
 
   getBalancesObservable(): Observable<BalancesType>;
 
   getRecommendationsObservable(): Observable<RecommendationsType>;
 
- /* getGroupMembershipObservable(): Observable<string>;
+  getGroupMembershipObservable(): Observable<GroupMemberType>;
 
-  getNewTransactionObservable(): Observable<string>;
+  getNewTransactionObservable(): Observable<TransactionType>;
 
-  getModifiedTransactionObservable(): Observable<string>;
+  getMultipleNewTransactionsObservable(): Observable<TransactionType[]>;
 
-  getSettingsLanguageObservable(): Observable<string>;
+  getModifiedTransactionObservable(): Observable<TransactionType>;
 
-  getSettingsCurrencyObservable(): Observable<string>;
+  getSettingsLanguageObservable(): Observable<LanguageType>;
+
+  getGroupActivityObservable(): Observable<GroupActivityType>;
+
+  getSettingsCurrencyObservable(): Observable<CurrencyType>;
+
+  /*
 
   getOldTransactionsObservable(): Observable<string>;
 

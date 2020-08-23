@@ -1,9 +1,11 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
+import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
 
 export interface GroupCreateDialogData {
   groupName: string;
+  currency: Currency;
 }
 
 @Component({
@@ -11,10 +13,13 @@ export interface GroupCreateDialogData {
   templateUrl: './create-group-modal.component.html',
   styleUrls: ['./create-group-modal.component.css']
 })
-export class CreateGroupModalComponent implements OnInit {
+export class CreateGroupModalComponent implements OnInit{
 
-  // Save the FormControl which checks the GroupName TODO Add regex
+  // Save the FormControl which checks the GroupName
   formControlGroupName = new FormControl('', [Validators.required]);
+  // Save the currently selected currency
+  selectedCurrency: Currency;
+  currencyMap = currencyMap;
 
   constructor(
     public dialogRef: MatDialogRef<CreateGroupModalComponent>,
@@ -22,20 +27,30 @@ export class CreateGroupModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.selectedCurrency = this.data.currency;
+    this.formControlGroupName.setValue(this.data.groupName);
   }
 
-  onCancel(): void {
+  /**
+   * Close the dialog without returning the data
+   */
+  public onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
-  onSave(): void {
+  /**
+   * Close the dialog and return the data
+   */
+  public onSave(): void {
     if (!this.formControlGroupName.invalid){
-      this.dialogRef.close({groupName: this.formControlGroupName.value});
+      this.dialogRef.close({groupName: this.formControlGroupName.value, currency: this.selectedCurrency});
     }
   }
 
-  getInvalidGroupNameErrorMessage(): string{
+  /**
+   * Return error message if the group name is invalid
+   */
+  public getInvalidGroupNameErrorMessage(): string{
     return 'Not a valid group name';
   }
 

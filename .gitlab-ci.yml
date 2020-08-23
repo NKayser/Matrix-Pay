@@ -1,0 +1,48 @@
+stages:
+  - install_dependencies
+  - build
+  - test
+  - deploy
+
+image: alpine
+
+install_dependencies:
+  stage: install_dependencies
+  cache:
+    key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
+    paths:
+      - node_modules/
+  script:
+    - npm ci
+  only:
+    changes:
+      - package-lock.json
+
+build:
+  stage: build
+  cache:
+    key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
+    paths:
+      - node_modules/
+    policy: pull
+  script:
+    - ng build
+  #artifacts:
+  #  paths:
+  #    - build
+
+#test:
+#  stage: test
+#  script:
+#    - ng test
+
+echo:
+  stage: deploy
+  script:
+    - echo "This job deploys something. It will only run when all jobs in the"
+    - echo "test stage complete."
+
+#deploy:
+#  stage: deploy
+#  script:
+#    - ng deploy

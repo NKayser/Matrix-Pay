@@ -5,8 +5,7 @@
       [opened]="(isHandset$ | async) === false">
     <mat-toolbar>Group Menu</mat-toolbar>
     <mat-action-list>
-      <!--Iterate through all groups and bind the index correctly to the function-->
-      <a mat-list-item *ngFor="let group of groups, index as i" (click)="selectGroup(i)">{{group}}</a>
+      <a mat-list-item *ngFor="let group of groups, index as i" (click)="selectGroup(i)">{{group.name}}</a>
     </mat-action-list>
   </mat-sidenav>
 
@@ -20,7 +19,8 @@
         *ngIf="isHandset$ | async">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
-      <mat-label>{{currentGroup}}</mat-label>
+      <mat-label>{{currentGroup.name}}</mat-label>
+      <mat-spinner *ngIf="loadingAddGroup || loadingLeaveGroup || loadingAddMember" class="spinner" color="accent" [diameter]="30"></mat-spinner>
       <div class="buttonDiv">
         <button mat-raised-button class = "groupButtons" (click)="leaveGroup()">Leave Group</button>
         <button mat-raised-button class = "groupButtons" (click)="addGroup()">Create Group</button>
@@ -33,6 +33,7 @@
       <!--Pass the current selected group to the transaction and group component, so the correct data can be fetched-->
       <mat-tab label="Transactions"><app-group-transaction [group]="currentGroup"></app-group-transaction></mat-tab>
       <mat-tab label="Balances"><app-group-balance [group]="currentGroup"></app-group-balance></mat-tab>
+      <mat-tab label="History"><app-history [group]="currentGroup"></app-history></mat-tab>
     </mat-tab-group>
   </mat-sidenav-content>
 

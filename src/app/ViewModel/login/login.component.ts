@@ -1,10 +1,16 @@
-import { Component, Output, EventEmitter} from '@angular/core';
+import {Component, Output, EventEmitter, OnInit, OnDestroy} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
-import {ClientInterface} from "../../ServerCommunication/CommunicationInterface/ClientInterface";
-import {ServerResponse} from "../../ServerCommunication/Response/ServerResponse";
-import {LoginError} from "../../ServerCommunication/Response/ErrorTypes";
-import {SettingsService} from "../../ServerCommunication/SettingsCommunication/settings.service";
+import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
+import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
+import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {MatrixEmergentDataService} from '../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {Subscription} from 'rxjs';
+
+// @ts-ignore
+import {MatrixEvent} from 'matrix-js-sdk';
+
 
 
 @Component({
@@ -12,28 +18,44 @@ import {SettingsService} from "../../ServerCommunication/SettingsCommunication/s
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
-  private clientService: ClientInterface;
-  private settingsService: SettingsService; // delete later
+export class LoginComponent implements OnInit, OnDestroy{
 
   // emitter to tell the App Component to display the Menu when logged in
   @Output() loggedIn = new EventEmitter<boolean>();
 
   // Manages if the password is shown in the view
-  hide = true;
+  public hidePassword = true;
+  public loadingLogIn = false;
+
+  private subscription: Subscription;
 
   // gets the input values of the user and checks if they obey all requirements
-  matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('.*')]);
-  passwordControl = new FormControl('', [Validators.required]);
+  public matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
+  public passwordControl = new FormControl('', [Validators.required]);
 
-  constructor(clientService: MatrixClientService, settingsService: SettingsService) {
-    this.clientService = clientService;
-    this.settingsService = settingsService;
+  constructor(private clientService: MatrixClientService,
+              private emergentDataService: MatrixEmergentDataService,
+              private basicDataService: MatrixBasicDataService, private dataModelService: DataModelService) {
+  }
+
+  ngOnInit(): void {
+    this.subscription = this.dataModelService.navItem$.subscribe(item => {if (item){this.loggedIn.emit(true);
+                                                                                    this.loadingLogIn = false; } });
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription !== undefined){
+      this.subscription.unsubscribe();
+    }
   }
 
 
-  // login the user with the current values if matrixUrl and password
-  async login() {
+  /**
+   * login the user
+   */
+  public async login(): Promise<void> {
+
+      this.loadingLogIn = true;
 
       // check all formControls to make sure all values are correct
       this.matrixUrlControl.markAllAsTouched();
@@ -47,33 +69,24 @@ export class LoginComponent {
           this.passwordControl.value);
 
         if (loginResponse.wasSuccessful()) {
-          console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+          console.log('----------------- logIn successful! ----------------');
         } else {
-          console.log('logIn failed :/    :( because ' + LoginError[loginResponse.getError()]);
+          console.log('logIn failed because ' + ClientError[loginResponse.getError()]);
         }
-
-        const currencyResponse: ServerResponse = await this.settingsService.changeCurrency("EURO");
-
-        if (currencyResponse.wasSuccessful()) {
-          console.log('currency changed');
-        } else {
-          console.log('currency not changed ' + currencyResponse);
-        }
-
-        //console.log(this.matrixUrlControl.value + ' ' + this.passwordControl.value);
-
-        // Tell AppComponent, that user is logged in
-        this.loggedIn.emit(true);
       }
   }
 
-  // get the error message for the password form
-  getPasswordErrorMessage(): string{
+  /**
+   * Get the error message if the password is invalid
+   */
+  public getPasswordErrorMessage(): string{
     return 'Please enter a password';
   }
 
-  // get the error message for the matrixUrl form
-  getMatrixUrlErrorMessage(): string{
+  /**
+   * Get the error message if the matrixUrl is invalid
+   */
+  public getMatrixUrlErrorMessage(): string{
     if (this.matrixUrlControl.hasError('required')){
       return 'Please enter a matrixUrl';
     } else {

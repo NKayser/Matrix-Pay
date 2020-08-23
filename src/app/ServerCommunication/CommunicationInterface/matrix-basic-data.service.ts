@@ -1,14 +1,8 @@
 import { Injectable } from '@angular/core';
-import {BasicDataInterface} from "./BasicDataInterface";
-import {ServerResponse} from "../Response/ServerResponse";
-import {GroupService} from "../GroupCommunication/group.service";
-import {SettingsService} from "../SettingsCommunication/settings.service";
-
-// TODO: delete later
-interface Currency {
-}
-interface Language {
-}
+import {BasicDataInterface} from './BasicDataInterface';
+import {ServerResponse} from '../Response/ServerResponse';
+import {GroupService} from '../GroupCommunication/group.service';
+import {SettingsService} from '../SettingsCommunication/settings.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,39 +16,91 @@ export class MatrixBasicDataService implements BasicDataInterface {
     this.settingsService = settingsService;
   }
 
-  public confirmPayback(amount: number, payerId: string, recipientId: string): ServerResponse {
-    return undefined;
+  /**
+   *
+   * @param groupId
+   * @param amount
+   * @param payerId
+   * @param recipientId
+   */
+  public confirmPayback(groupId: string, recommendationId: number): Promise<ServerResponse> {
+    return this.groupService.confirmRecommendation(groupId, recommendationId);
   }
 
-  public createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]): ServerResponse {
-    return undefined;
+  /**
+   *
+   * @param groupId
+   * @param description
+   * @param payerId
+   * @param recipientIds
+   * @param amounts
+   * @param isPayback
+   */
+  public createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
+    return this.groupService.createTransaction(groupId, description, payerId, recipientIds, amounts, isPayback);
   }
 
-  public fetchHistory(groupId: string): ServerResponse {
-    return undefined;
+  /**
+   *
+   * @param groupId
+   */
+  public fetchHistory(groupId: string): Promise<ServerResponse> {
+    return this.groupService.fetchHistory(groupId);
   }
 
-  public groupAddMember(groupId: string, contactId: string): ServerResponse {
-    return undefined;
+  /**
+   *
+   * @param groupId
+   * @param contactId
+   */
+  public groupAddMember(groupId: string, contactId: string): Promise<ServerResponse> {
+    return this.groupService.addMember(groupId, contactId);
   }
 
-  public groupCreate(name: string, currency: Currency): ServerResponse {
+  /**
+   *
+   * @param name
+   * @param currency
+   */
+  public groupCreate(name: string, currency: string): Promise<ServerResponse> {
     return this.groupService.createGroup(name, currency);
   }
 
-  public leaveGroup(groupId: string): ServerResponse {
-    return undefined;
+  /**
+   *
+   * @param groupId
+   */
+  public leaveGroup(groupId: string): Promise<ServerResponse> {
+    return this.groupService.leaveGroup(groupId);
   }
 
-  public modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]): ServerResponse {
-    return undefined;
+  /**
+   *
+   * @param groupId
+   * @param transactionId
+   * @param description
+   * @param payerId
+   * @param recipientIds
+   * @param amounts
+   */
+  public modifyTransaction(groupId: string, transactionId: string, description?: string, payerId?: string,
+                           recipientIds?: string[], amounts?: number[]): Promise<ServerResponse> {
+    return this.groupService.modifyTransaction(groupId, transactionId, description, payerId, recipientIds, amounts);
   }
 
-  public userChangeDefaultCurrency(currency: Currency): ServerResponse {
-    return undefined;
+  /**
+   *
+   * @param currency
+   */
+  public userChangeDefaultCurrency(currency: string): Promise<ServerResponse> {
+    return this.settingsService.changeCurrency(currency);
   }
 
-  public userChangeLanguage(language: Language): ServerResponse {
-    return undefined;
+  /**
+   *
+   * @param language
+   */
+  public userChangeLanguage(language: string): Promise<ServerResponse> {
+    return this.settingsService.changeLanguage(language);
   }
 }

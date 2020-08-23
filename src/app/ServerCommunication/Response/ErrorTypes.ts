@@ -1,18 +1,20 @@
-export enum LoginError {
-  AlreadyLoggedIn,
+export enum ClientError {
   Autodiscovery,
-  UserIdFormat,
-  ServerUnreachable,
   InvalidPassword,
   Unknown
 }
 
 export enum SettingsError {
-  NoClient,
-  Setter,
-  Getter
+  Setter
 }
 
 export enum GroupError {
-  SendEvent
+  SendEvent,
+  NoOriginal,
+  InvalidUsers,
+  Unknown,
+  InvalidName, // or invalid Alias
+  SetCurrency,
+  InUse,
+  RoomNotFound
 }

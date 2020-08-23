@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
-import {ServerResponse} from "../Response/ServerResponse";
-import {TransactionService} from "./transaction.service";
-import {MatrixClientService} from "../CommunicationInterface/matrix-client.service";
-import {ClientInterface} from "../CommunicationInterface/ClientInterface";
+// @ts-ignore
+import {MatrixClient, Room} from 'matrix-js-sdk';
 
-// TODO: delete later
-class Currency {
-}
+import {TransactionService} from './transaction.service';
+import {MatrixClientService} from '../CommunicationInterface/matrix-client.service';
+import {ClientInterface} from '../CommunicationInterface/ClientInterface';
+import {ServerResponse} from '../Response/ServerResponse';
+import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
+import {GroupError} from '../Response/ErrorTypes';
+import {SuccessfulResponse} from '../Response/SuccessfulResponse';
+import {MatrixEmergentDataService} from '../CommunicationInterface/matrix-emergent-data.service';
+import {EmergentDataInterface} from "../CommunicationInterface/EmergentDataInterface";
 
 @Injectable({
   providedIn: 'root'
@@ -14,114 +18,249 @@ class Currency {
 export class GroupService {
   private transactionService: TransactionService;
   private matrixClientService: ClientInterface;
+  private matrixEmergentDataService: EmergentDataInterface;
 
-  private static readonly ROOM_VISIBILITY: "private";
+  private static readonly ROOM_VISIBILITY: string = 'private';
+  private static readonly ERRCODE_UNKNOWN: string = 'M_UNKNOWN';
+  private static readonly ERRCODE_INUSE: string = 'M_ROOM_IN_USE';
+  private static readonly ERRCODE_UNRECOGNIZED: string = 'M_UNRECOGNIZED';
+  private static readonly ERRCODE_INVALID_PARAM: string = 'M_INVALID_PARAM';
+  private static readonly CURRENCY_KEY: string = 'com.matrixpay.currency';
+  private static readonly RECOMMENDATIONS_KEY: string = 'recommendations';
+  private static readonly ACCOUNT_DATA_KEY: string = 'accountData';
+  private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways
 
-  constructor(transactionService: TransactionService, matrixClientService: MatrixClientService) {
+  constructor(transactionService: TransactionService,
+              matrixClientService: MatrixClientService,
+              matrixEmergentDataService: MatrixEmergentDataService) {
     this.transactionService = transactionService;
     this.matrixClientService = matrixClientService;
+    this.matrixEmergentDataService = matrixEmergentDataService;
   }
 
-  public addMember(groupId: string, userId: string): ServerResponse {
-    return ServerResponse.makeStandardRequest(
-      this.matrixClientService.getClient().inviteUserToGroup(groupId, userId));
+  /**
+   *
+   * @param groupId
+   * @param userId
+   */
+  public async addMember(groupId: string, userId: string): Promise<ServerResponse> {
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
+    const client: MatrixClient = this.matrixClientService.getClient();
+    let response: ServerResponse;
+    await client.invite(groupId, userId).then(() => {
+      response = new SuccessfulResponse();
+    },
+      (err) => {
+      //let errCode: number = GroupError.Unknown;
+      //const errMessage: string = err['data']['error'];
+
+      switch (err['data']['errcode']) {
+        case GroupService.ERRCODE_UNKNOWN:
+        case GroupService.ERRCODE_UNRECOGNIZED:
+          //errCode = GroupError.RoomNotFound;
+          throw new Error('GroupId invalid');
+          break;
+        case GroupService.ERRCODE_INVALID_PARAM:
+          //errCode = GroupError.InvalidUsers;
+          throw new Error('UserId invalid');
+          break;
+        default:
+          throw new Error('unknown error');
+          break;
+      }
+      //response = new UnsuccessfulResponse(errCode, errMessage);
+    });
+
+    return await response;
   }
 
-  public confirmRecommendation(groupId: string, recommendationId: number): ServerResponse {
+  /**
+   *
+   * @param groupId
+   * @param recommendationId
+   */
+  // TODO: almost works. Sometimes there is a weird encryption error when creating the transaction.
+  public async confirmRecommendation(groupId: string, recommendationId: number): Promise<ServerResponse> {
     // TODO: seperate into private methods and avoid magic numbers
-    let client = this.matrixClientService.getClient();
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
+    const client: MatrixClient = this.matrixClientService.getClient();
 
     // Part 1: Find the right recommendation
-    let accountDataEvents = client.getRoom(groupId)["account_data"]["events"];
-    let recommendations = null;
+    const room = client.getRoom(groupId);
+    if (room === null) throw new Error('room not found');
 
-    for (let event of accountDataEvents["type"]) {
-      if (event["type"] == "recommendations") {
-        recommendations = event;
-      }
+    const accountDataEvent = room[GroupService.ACCOUNT_DATA_KEY][GroupService.RECOMMENDATIONS_KEY];
+
+    if (accountDataEvent === undefined) {
+      //return new UnsuccessfulResponse(GroupError.NoRecommendations, 'no recommendations have been saved yet');
+      throw new Error('no recommendations have been saved yet');
     }
 
-    if (recommendations == null) {
-      return new ServerResponse(false, "recommendation not found");
-    }
+    const recommendations = accountDataEvent.getOriginalContent();
 
     if (!Number.isInteger(recommendationId) || recommendationId < 0
-      || recommendationId >= recommendations["amounts"].length) {
-      return new ServerResponse(false, "invalid recommendation id");
+      || recommendationId >= recommendations['amounts'].length) {
+      //return new UnsuccessfulResponse(GroupError.InvalidRecommendationId, 'invalid recommendation id');
+      throw new Error('invalid recommendation id');
     }
 
     // Part 1.5: Read data from Recommendation
-    let recipient = recommendations["recipients"][recommendationId];
-    let payer = recommendations["payers"][recommendationId];
-    let amount = recommendations["amounts"][recommendationId];
+    const amounts: number[] = recommendations['amounts'];
+    const payers: string[] = recommendations['payers'];
+    const recipients: string[] = recommendations['recipients'];
 
-    if (payer != client.getUserId()) {
-      return new ServerResponse(false, "user not payer of recommendation");
+    const amount = amounts[recommendationId];
+    const payer = payers[recommendationId];
+    const recipient = recipients[recommendationId];
+
+    // check if user is the payer of the recommendation. Should already be the case
+    if (payer != await client.getUserId()) {
+      //return new UnsuccessfulResponse(GroupError.Unauthorized, 'user must be payer of the recommendation');
+      throw new Error('user must be payer of the recommendation');
     }
 
     // Part 2: Create Payback
-    let transaction = this.createTransaction(groupId, "Payback", payer, [recipient], [amount]);
+    const description = 'Payback from ' + payer + ' to ' + recipient + ' for ' + amount;
+    const transaction: ServerResponse = await this.createTransaction(groupId, description, payer, [recipient], [amount], true);
     if (!transaction.wasSuccessful()) {
       return transaction;
     }
+    const transactionId: string = transaction.getValue();
+
+    amounts.splice(recommendationId, 1);
+    payers.splice(recommendationId, 1);
+    recipients.splice(recommendationId, 1);
 
     // Part 3: delete Recommendation
-    recommendations.splice(recommendationId, 1);
-    return ServerResponse.makeStandardRequest(client.setRoomAccountData(groupId, "recommendations", recommendations));
+    await this.matrixEmergentDataService.setRecommendations(groupId, amounts, payers, recipients, transactionId);
+    return new SuccessfulResponse(transactionId);
   }
 
-  public createGroup(name: string, currency: Currency): ServerResponse {
-    let client = this.matrixClientService.getClient();
+  /**
+   * Create a new room. This can take a while. Returns the room_id as value of Server Response if successful.
+   *
+   * @param name
+   * @param currency String of the currency that is being used for transactions in this room.
+   * @param alias How to find this room. Unique identifier. Optional
+   * @param topic
+   */
+  public async createGroup(name: string, currency: string, alias?: string, topic?: string): Promise<ServerResponse> {
+    const client: MatrixClient = await this.matrixClientService.getClient();
 
-    let options = {
-      "room_alias_name": "",
-      "visibility": GroupService.ROOM_VISIBILITY,
-      "invite": [],
-      "name": name,
-      "topic": ""
+    if (alias != undefined && (alias.includes(' ') || alias.includes(':'))) {
+      alias = undefined;
     }
 
-    let room = client.createRoom(options);
-    if (!room.wasSuccessful()) {
-      return room;
+    const options = {
+      'room_alias_name': alias,
+      'visibility': GroupService.ROOM_VISIBILITY,
+      'invite': [],
+      'name': name,
+      'topic': topic
     }
 
-    // TODO: not sure if this is the way to send a state event...
-    return ServerResponse.makeStandardRequest(
-      client.sendEvent(room["room_id"], "currency", currency));
-  }
+    let response: ServerResponse;
 
-  public createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[]): ServerResponse {
-    return this.transactionService.createTransaction(groupId, description, payerId, recipientIds, amounts);
-  }
+    const room = await client.createRoom(options).catch(
+      (err) => {
+        let errCode: number = GroupError.Unknown;
+        const errMessage: string = err['data']['error'];
 
-  public fetchHistory(groupId: string): ServerResponse {
-    // TODO: implementation unclear. Is syncing already being done automatically in background (-> UpdateService would see this)
-    return undefined;
-  }
-
-  public leaveGroup(groupId: string): ServerResponse {
-    let client = this.matrixClientService.getClient();
-
-    // TODO: check if balance in that group is zero in order to be allowed to leave.
-    // There should be a better way to do this
-    let accountDataEvents = client.getRoom(groupId)["account_data"]["events"];
-    let allowedToLeave: boolean = false;
-
-    for (let event of accountDataEvents) if (event["type"] == "balances") {
-      event["content"]["contacts"].forEach(function (element, index) {
-        if (element == client.getUserId() && event["content"]["balances"][index] == 0) {
-          allowedToLeave = true;
+        switch (err['data']['errcode']) {
+          case GroupService.ERRCODE_UNKNOWN:
+            errCode = GroupError.InvalidName;
+            break;
+          case GroupService.ERRCODE_INUSE:
+            errCode = GroupError.InUse;
+            break;
+          default:
+            break;
         }
-      })
+        response = new UnsuccessfulResponse(errCode, errMessage);
+      }
+    );
+
+    if (room === undefined) {
+      return response;
     }
 
-    return ServerResponse.makeStandardRequest(
-      this.matrixClientService.getClient().leaveGroup(groupId));
+    const roomId: string = room['room_id'];
+
+    await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, 'currency').then(
+      () => response = new SuccessfulResponse(roomId),
+      (err) => response = new UnsuccessfulResponse(GroupError.SetCurrency, err));
+
+    return await response;
   }
 
-  public modifyTransaction(groupId: string, transactionId: string, description: string, payerId: string,
-                           recipientIds: string[], amounts: number[]): ServerResponse {
+  /**
+   *
+   * @param groupId
+   * @param description
+   * @param payerId
+   * @param recipientIds
+   * @param amounts
+   * @param isPayback
+   */
+  public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
+    return this.transactionService.createTransaction(groupId, description, payerId, recipientIds, amounts, isPayback);
+  }
+
+  /**
+   * Load older room events.
+   *
+   * @param groupId
+   */
+  public async fetchHistory(groupId: string): Promise<ServerResponse> {
+    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
+    const client: MatrixClient = await this.matrixClientService.getClient();
+    const room: Room = await client.getRoom(groupId);
+    const scrollbackResponse: any = await client.scrollback(room, GroupService.SCROLLBACK_LIMIT);
+    return new SuccessfulResponse();
+  }
+
+  /**
+   *
+   * @param groupId
+   */
+  public async leaveGroup(groupId: string): Promise<ServerResponse> {
+    if (!this.matrixClientService.isPrepared()) throw new Error('Client is not prepared');
+    const client: MatrixClient = await this.matrixClientService.getClient();
+
+    const room = client.getRoom(groupId);
+    if (room === undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound).promise();
+
+    let response: ServerResponse;
+
+    await client.leave(groupId).then(
+      () => response = new SuccessfulResponse(),
+      (err) => {
+        let errCode: number = GroupError.Unknown;
+        const errMessage: string = err['data']['error'];
+
+        switch (err['data']['errcode']) {
+          case GroupService.ERRCODE_UNKNOWN:
+            errCode = GroupError.RoomNotFound;
+            break;
+          default:
+            break;
+        }
+        response = new UnsuccessfulResponse(errCode, errMessage);//.promise();
+    });
+    return await response;
+  }
+
+  /**
+   *
+   * @param groupId
+   * @param transactionId
+   * @param description
+   * @param payerId
+   * @param recipientIds
+   * @param amounts
+   */
+  public async modifyTransaction(groupId: string, transactionId: string, description?: string, payerId?: string,
+                           recipientIds?: string[], amounts?: number[]): Promise<ServerResponse> {
     return this.transactionService.modifyTransaction(groupId, transactionId, description, payerId, recipientIds, amounts);
   }
 }

@@ -1,7 +1,15 @@
 .activity_item{
-  margin-bottom: 15px;
+  margin-bottom: 30px;
+  margin-top: 30px;
 }
 
-.card{
-  background-color: lightblue;
+.date{
+  color: grey;
+  position: absolute;
+  right: 18px;
+  bottom: 10px;
+}
+
+.label_div{
+  margin-bottom: 15px;
 }

@@ -1,13 +1,14 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
+import {Contact} from '../../DataModel/Group/Contact';
 
 export interface PaymentDialogData {
   // the titel of the dialog, this is not the title of the transaction
   modalTitle: string;
   description: string;
-  payerId: string;
-  recipientsId: string[];
+  payer: Contact;
+  recipients: Contact[];
   amount: number[];
   isAdded: boolean[];
 }
@@ -21,10 +22,8 @@ export class PaymentModalComponent implements OnInit{
 
   // Save the FormControls which check the amounts of the recipients
   formControlAmount: FormControl[];
-  // Save the FormControl which check the description TODO Add regex
-  formControlDescription = new FormControl('', [Validators.required]);
-  // Save the FormControl which checks the payer TODO Add regex
-  formControlPayer = new FormControl('', [Validators.required]);
+  // Save the FormControl which check the description
+  formControlDescription: FormControl;
   // Helper variable if the form is valid
   formInvalid = false;
 
@@ -33,18 +32,23 @@ export class PaymentModalComponent implements OnInit{
     @Inject(MAT_DIALOG_DATA) public data: PaymentDialogData) {
   }
 
-  /*
-  * Init all formControls for the Amount, because we need to know the amount of recipients before we can create them
-  * */
+  /**
+   * Init all formControls for the Amount, because we need to know the amount of recipients before we can create them
+   */
   ngOnInit(): void {
     this.formControlAmount = new Array<FormControl>(this.data.amount.length);
     for (let i = 0; i < this.data.amount.length; i++){
-      this.formControlAmount[i] = new FormControl('', [Validators.required]);
+      this.formControlAmount[i] = new FormControl(this.data.amount[i] / 100, [Validators.required, Validators.pattern('[0-9]*[.]?[0-9]?[0-9]?')]);
     }
+
+    this.formControlDescription = new FormControl(this.data.description, [Validators.required]);
+    // this.formControlPayer = new FormControl(this.data.payer.name, [Validators.required]);
   }
 
-  // Checks if all inputs of the form are valid
-  checkForm(): boolean {
+  /**
+   * Check if all inputs of all forms a valid
+   */
+  private checkForm(): boolean {
 
     let tempValid = false;
     for (let i = 0; i < this.data.amount.length; i++){
@@ -53,11 +57,7 @@ export class PaymentModalComponent implements OnInit{
       }
     }
 
-    if (this.formControlPayer.invalid){
-      tempValid = true;
-    }
-
-    if (this.formControlDescription.invalid){
+    if (this.formControlDescription.invalid || this.data.payer == null){
       tempValid = true;
     }
 
@@ -65,12 +65,16 @@ export class PaymentModalComponent implements OnInit{
   }
 
 
-  // Close the dialog without saving
+  /**
+   * Close the dialog without returning the data
+   */
   onCancel(): void {
     this.dialogRef.close();
   }
 
-  // Save the dialog and return the data, if the form is valid
+  /**
+   * Close the dialog and return the data
+   */
   onSave(): void {
 
     this.formInvalid = this.checkForm();
@@ -83,33 +87,37 @@ export class PaymentModalComponent implements OnInit{
   // Create the return data, with the existing data
   private createReturnData(): PaymentDialogData{
     const newDescription = this.formControlDescription.value;
-    const payer = this.formControlPayer.value;
-    const recipients = new Array<string>(0);
+    const newPayer = this.data.payer;
+    const newRecipients = new Array<Contact>(0);
     const newAmount = new Array<number>(0);
     for (let i = 0; i < this.data.amount.length; i++){
-        recipients.push(this.data.recipientsId[i]);
-        newAmount.push(this.formControlAmount[i].value);
+        newRecipients.push(this.data.recipients[i]);
+        newAmount.push(Math.round(this.formControlAmount[i].value * 100));
     }
 
-    return {modalTitle: '', description: newDescription, payerId: payer, recipientsId: recipients, amount: newAmount,
+    return {modalTitle: this.data.modalTitle, description: newDescription, payer: newPayer, recipients: newRecipients, amount: newAmount,
       isAdded: this.data.isAdded};
 
   }
 
-  // Return error messages
-  getInvalidNumberErrorMessage(): string{
+  /**
+   * Return an error message if the number in amount is invalid
+   */
+  public getInvalidNumberErrorMessage(): string{
     return 'Not a valid number';
   }
 
-  getInvalidDescriptionErrorMessage(): string{
-    return 'Not a valid number';
+  /**
+   * Return an error message if the description is invalid
+   */
+  public getInvalidDescriptionErrorMessage(): string{
+    return 'Not a description';
   }
 
-  getInvalidPayerErrorMessage(): string{
-    return 'Not a valid number';
-  }
-
-  getInvalidFormErrorMessage(): string{
+  /**
+   * Return an error message if there is an error in the form
+   */
+  public getInvalidFormErrorMessage(): string{
     return 'Not all inputs are valid';
   }
 
