@@ -38,6 +38,7 @@ export class GroupBalanceComponent implements OnChanges {
    * @param name the name of the data entry
    */
   public getCustomColor = (name) => {
+    // this could be speed up with a hashmap instead iterating over the data until the correct user is found
     for (const entry of this.balanceData){
       if (entry.name === name){
         if (entry.value >= 0){
@@ -67,12 +68,19 @@ export class GroupBalanceComponent implements OnChanges {
       this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance / 100});
     }
 
+
     this.recommendations = this.group.recommendations;
 
+    // initialize the number of the grid list columns for the recommendations
     this.breakpoint = gridListResize(window.innerWidth, 1920, 3);
   }
 
+  /**
+   * Calculate the number of columns for the grid list, when the screen size changes;
+   * @param event when the screen changes size
+   */
   onResize(event): void {
+    // TODO Magic numbers in the function
     this.breakpoint = gridListResize(event.target.innerWidth, 1920, 3);
   }
 

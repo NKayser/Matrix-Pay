@@ -26,6 +26,7 @@ export class GroupSelectionComponent implements OnInit{
   private leaveGroupData: LeaveGroupDialogData;
   private addUserToGroupData: AddMemberToGroupDialogData;
 
+  // saves if operation is Loading currently
   public loadingLeaveGroup = false;
   public loadingAddMember = false;
   public loadingAddGroup = false;

@@ -17,6 +17,7 @@ export class CreateGroupModalComponent implements OnInit{
 
   // Save the FormControl which checks the GroupName
   formControlGroupName = new FormControl('', [Validators.required]);
+  // Save the currently selected currency
   selectedCurrency: Currency;
   currencyMap = currencyMap;
 

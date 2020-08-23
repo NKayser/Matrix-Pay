@@ -47,10 +47,16 @@ export class HomeComponent implements OnInit {
       this.usedCurrencies.add(group.currency);
     }
 
+    // initialize the number of the grid list columns for the recommendations
     this.breakpoint = gridListResize(window.innerWidth, 2200, 4);
   }
 
+  /**
+   * Calculate the number of columns for the grid list, when the screen size changes;
+   * @param event when the screen changes size
+   */
   onResize(event): void {
+    // TODO Magic numbers in the function
     this.breakpoint = gridListResize(event.target.innerWidth, 2200, 4);
   }
 

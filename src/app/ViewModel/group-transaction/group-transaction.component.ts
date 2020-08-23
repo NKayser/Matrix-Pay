@@ -27,6 +27,7 @@ export class GroupTransactionComponent implements OnChanges {
   private data: PaymentDialogData;
   public transactions: Transaction[] = [];
 
+  // Save if operation is loading
   public loadingCreateExpense = false;
   public loadingEditExpense = false;
 
@@ -133,7 +134,7 @@ export class GroupTransactionComponent implements OnChanges {
     }
   }
 
-  // Generate input data for expense Modal form the current transaction
+  // Generate input data for expense Modal from the current transaction
   private generateEditExpenseData(transaction: Transaction): PaymentDialogData {
 
     const modalTitle = 'Edit Transaction';
@@ -170,7 +171,7 @@ export class GroupTransactionComponent implements OnChanges {
     return {modalTitle, description, payer, recipients, amount, isAdded};
   }
 
-  // get the amount of a recipient, if the recipient is not in the transaction return 0
+  // get the amounts of a recipient, if the recipient is not in the transaction return 0
   private getRecipientAmountFromTransaction(recipientId: string, transaction: Transaction): number {
 
     for (const recipient of transaction.recipients){
