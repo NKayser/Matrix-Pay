@@ -95,11 +95,11 @@ export class GroupBalanceComponent implements OnChanges {
 
           // TODO Missing recommendationId
           promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.dialogData.recommendation.group.groupId,
-            'Payback from ' + this.dialogData.recommendation.payer.contact.name + ' to ' + this.dialogData.recommendation.recipient.contact.name,
+            'Payback from ' + this.dialogData.recommendation.payer.contact.name + ' to ' +
+            this.dialogData.recommendation.recipient.contact.name,
             this.dialogData.recommendation.payer.contact.contactId, [this.dialogData.recommendation.recipient.contact.contactId],
             [this.dialogData.recommendation.recipient.amount], true))
             .then((data) => {
-              console.log(data);
               if (!data.wasSuccessful()){
                 this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
               }

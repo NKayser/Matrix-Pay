@@ -63,11 +63,7 @@ export class HomeComponent implements OnInit {
     let balance = 0;
     for (const group of groups){
       if (group.currency === currency){
-        // if (Utils.log) console.log(group.groupmembers);
         for (const member of group.groupmembers){
-          //console.log(member);
-          // if (Utils.log) console.log('mem: ' + member.contact.contactId + ' ' + this.userContact.contactId);
-          // if (Utils.log) console.log(member.balance);
           if (member.contact.contactId === this.userContact.contactId){
 
             balance += member.balance;
@@ -100,11 +96,11 @@ export class HomeComponent implements OnInit {
         this.loadingConfirmPayback = true;
         // TODO Missing recommendationId
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.dialogData.recommendation.group.groupId,
-          'Payback from ' + this.dialogData.recommendation.payer.contact.name + ' to ' + this.dialogData.recommendation.recipient.contact.name,
+          'Payback from ' + this.dialogData.recommendation.payer.contact.name + ' to ' +
+          this.dialogData.recommendation.recipient.contact.name,
           this.dialogData.recommendation.payer.contact.contactId, [this.dialogData.recommendation.recipient.contact.contactId],
           [this.dialogData.recommendation.recipient.amount], true))
           .then((data) => {
-            console.log(data);
             if (!data.wasSuccessful()){
               this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
             }

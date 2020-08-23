@@ -69,15 +69,11 @@ export class GroupTransactionComponent implements OnChanges {
 
         }
 
-        console.log(this.data);
-        console.log(this.group.groupId);
-
 
         this.loadingCreateExpense = true;
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.group.groupId, this.data.description,
           this.data.payer.contactId, recipientIds, sendAmounts, false))
           .then((data) => {
-            console.log(data);
             if (!data.wasSuccessful()){
               this.dialogProviderService.openErrorModal('error create transaction 1: ' + data.getMessage(), this.dialog);
             }
@@ -122,7 +118,6 @@ export class GroupTransactionComponent implements OnChanges {
           promiseTimeout(TIMEOUT, this.matrixBasicDataService.modifyTransaction(this.group.groupId, expense.transactionId,
             this.data.description, this.data.payer.contactId, recipientIds, sendAmounts))
             .then((data) => {
-              console.log(data);
               if (!data.wasSuccessful()){
                 this.dialogProviderService.openErrorModal('error edit transaction 1: ' + data.getMessage(), this.dialog);
               }

@@ -1,7 +1,6 @@
 import {Component, Output, EventEmitter, OnInit, OnDestroy} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
-import {ClientInterface} from '../../ServerCommunication/CommunicationInterface/ClientInterface';
 import {ClientError} from '../../ServerCommunication/Response/ErrorTypes';
 import {ServerResponse} from '../../ServerCommunication/Response/ServerResponse';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
@@ -70,9 +69,9 @@ export class LoginComponent implements OnInit, OnDestroy{
           this.passwordControl.value);
 
         if (loginResponse.wasSuccessful()) {
-          console.log('logIn successful !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+          console.log('----------------- logIn successful! ----------------');
         } else {
-          console.log('logIn failed :/    :( because ' + ClientError[loginResponse.getError()]);
+          console.log('logIn failed because ' + ClientError[loginResponse.getError()]);
         }
       }
   }

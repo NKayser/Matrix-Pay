@@ -1,10 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HistoryComponent } from './history.component';
-import {MatDialog} from '@angular/material/dialog';
-import {MockDialog} from '../_mockServices/MockDialog';
-import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
-import {DataModelService} from '../../DataModel/data-model.service';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
 import {Activity} from '../../DataModel/Group/Activity';
@@ -37,16 +33,12 @@ describe('HistoryComponent', () => {
     g2.addActivity(a3);
     g2.addActivity(a4);
 
-    console.log(g1.activities);
-
     component.group = g1;
     component.ngOnChanges();
-    console.log(component.activities);
     expect(component.activities).toEqual([a1, a2]);
 
     component.group = g2;
     component.ngOnChanges();
-    console.log(component.activities);
     expect(component.activities).toEqual([a3, a4]);
 
   });

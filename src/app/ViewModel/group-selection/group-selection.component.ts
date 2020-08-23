@@ -74,7 +74,7 @@ export class GroupSelectionComponent implements OnInit{
       if (this.leaveGroupData !== undefined){
           this.loadingLeaveGroup = true;
           promiseTimeout(TIMEOUT, this.matrixBasicDataService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
-            console.log(data);
+
             if (!data.wasSuccessful()){
               this.dialogProviderService.openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
             }
@@ -101,13 +101,11 @@ export class GroupSelectionComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.createGroupData = result;
       if (this.createGroupData !== undefined){
-        console.log(this.createGroupData.groupName);
 
         this.loadingAddGroup = true;
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupCreate(this.createGroupData.groupName,
           this.createGroupData.currency.toString()))
           .then((data) => {
-          console.log(data);
           if (!data.wasSuccessful()){
             this.dialogProviderService.openErrorModal('error add group 1: ' + data.getMessage(), this.dialog);
           }
@@ -133,13 +131,11 @@ export class GroupSelectionComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.addUserToGroupData = result;
       if (this.addUserToGroupData !== undefined){
-        console.log(this.addUserToGroupData.user);
 
         this.loadingAddGroup = true;
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupAddMember(this.addUserToGroupData.group.groupId,
           this.addUserToGroupData.user))
           .then((data) => {
-            console.log(data);
             if (!data.wasSuccessful()){
               this.dialogProviderService.openErrorModal('error add member 1: ' + data.getMessage(), this.dialog);
             }
