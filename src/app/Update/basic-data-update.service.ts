@@ -51,7 +51,7 @@ export class BasicDataUpdateService {
    */
   public createUser(): void {
     this.observables.getUserObservable().subscribe(param => {
-      if (Utils.log) console.log('updateService: createUser: ' + param.contactId + " , " + param.name);
+      console.log('updateService: createUser: user filled in: ' + param.contactId + " , " + param.name);
       this.dataModel.fillInUserData(param.contactId, param.name, this.currencyStringToEnum(param.currency),
         this.languageStringToEnum(param.language));
     });
@@ -86,7 +86,7 @@ export class BasicDataUpdateService {
           }
           else {
             this.dataModel.user.removeGroup(param.groupId)
-            if (Utils.log) console.log('updateService: addGroup: Group deleted:' + param.groupId + ' , ' + param.groupName);
+            console.log('updateService: addGroup: Group deleted:' + param.groupId + ' , ' + param.groupName);
           }
         }
         else {
