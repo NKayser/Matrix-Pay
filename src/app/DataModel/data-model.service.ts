@@ -10,8 +10,6 @@ import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
 import {Subject} from 'rxjs';
-import {Recommendation} from './Group/Recommendation';
-import {AtomarChange} from './Group/AtomarChange';
 
 @Injectable({
   providedIn: 'root'
@@ -40,6 +38,10 @@ export class DataModelService {
               private greedyOptimisation: GreedyOptimisationService,
               private matrixEmergentData: MatrixEmergentDataService) {
 
+    const contact = new Contact("", "");
+    const user = new User(contact, Currency.EUR, Language.ENGLISH);
+    this.status = new Status();
+    this._userExists = true;
   }
 
   // Notifies the ViewModel when the dataModel has loaded
@@ -59,13 +61,13 @@ export class DataModelService {
    * though any currency can be manually selected as well.
    * @param language  Language of the user. This parameter sets the language displayed in the view.
    */
-  public initializeUserThisSession(userContactId: string, userName: string, currency: Currency, language: Language): User{
+  public fillInUserData(userContactId: string, userName: string, currency: Currency, language: Language): User{
     const contact = new Contact(userContactId, userName);
-    const user = new User(contact, currency, language);
-    this.status = new Status();
-    this._userExists = true;
+    this.user.contact = contact;
+    this.user.currency = currency;
+    this.user.language = language;
     this.notifyViewModelWhenReady();
-    return user;
+    return this.user;
   }
 
   /**
