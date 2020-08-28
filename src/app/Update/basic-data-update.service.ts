@@ -333,7 +333,11 @@ export class BasicDataUpdateService {
     } else {
       payerContact = group.getGroupmember(param.payerId).contact;
     }
-    const payer = new AtomarChange(payerContact, param.payerAmount);
+    let sum = 0;
+    for (const amount of param.recipientAmounts) {
+      sum = sum + amount;
+    }
+    const payer = new AtomarChange(payerContact, sum);
     const recipients: AtomarChange[] = [];
     for (let i = 0; i < param.recipientIds.length; i++) {
       let recipientContact: Contact;
