@@ -5,10 +5,10 @@ import {DataModelService} from '../DataModel/data-model.service';
 import {Currency, matrixCurrencyMap} from '../DataModel/Utils/Currency';
 import {Contact} from '../DataModel/Group/Contact';
 import {Language} from '../DataModel/Utils/Language';
-import {Groupmember} from "../DataModel/Group/Groupmember";
-import {Utils} from "../ServerCommunication/Response/Utils";
-import {Transaction} from "../DataModel/Group/Transaction";
-import {TransactionType} from "../DataModel/Group/TransactionType";
+import {Groupmember} from '../DataModel/Group/Groupmember';
+import {Utils} from '../ServerCommunication/Response/Utils';
+import {Transaction} from '../DataModel/Group/Transaction';
+import {TransactionType} from '../DataModel/Group/TransactionType';
 import {
   CurrencyType,
   GroupActivityType,
@@ -17,9 +17,9 @@ import {
   LanguageType,
   TransactionType as TransactionTypeInterface
 } from '../ServerCommunication/CommunicationInterface/parameterTypes';
-import {AtomarChange} from "../DataModel/Group/AtomarChange";
-import {Activity} from "../DataModel/Group/Activity";
-import {ActivityType} from "../DataModel/Group/ActivityType";
+import {AtomarChange} from '../DataModel/Group/AtomarChange';
+import {Activity} from '../DataModel/Group/Activity';
+import {ActivityType} from '../DataModel/Group/ActivityType';
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +34,7 @@ export class BasicDataUpdateService {
   private currencyBuffer: CurrencyType[] = [];
 
   constructor(observables: ObservableService, private dataModel: DataModelService) {
-    if (Utils.log) console.log('This is BasicDataUpdateService');
+    if (Utils.log) { console.log('This is BasicDataUpdateService'); }
     this.observables = observables; // TODO imlement observableInterface
     this.createUser();
     this.addGroup();
@@ -51,7 +51,7 @@ export class BasicDataUpdateService {
    */
   public createUser(): void {
     this.observables.getUserObservable().subscribe(param => {
-      console.log('updateService: createUser: user filled in: ' + param.contactId + " , " + param.name);
+      console.log('updateService: createUser: user filled in: ' + param.contactId + ' , ' + param.name);
       this.dataModel.fillInUserData(param.contactId, param.name, this.currencyStringToEnum(param.currency),
         this.languageStringToEnum(param.language));
     });
@@ -64,9 +64,9 @@ export class BasicDataUpdateService {
     this.observables.getGroupsObservable().subscribe(param => {
       if (this.dataModel.userExists) {
         if (this.dataModel.getGroup(param.groupId) === null) {
-          //console.log ('LOG007.4 user wasnt null');
+          // console.log ('LOG007.4 user wasnt null');
           if (!param.isLeave) {
-            //if (Utils.log) {console.log('New group detected:' + param.groupId);}
+            // if (Utils.log) {console.log('New group detected:' + param.groupId);}
             this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
             console.log ('updateService: addGroup: group created: ' + param.groupId + ' , ' + param.groupName);
             const newGroup = this.dataModel.getGroup(param.groupId);
@@ -85,7 +85,7 @@ export class BasicDataUpdateService {
             }
           }
           else {
-            this.dataModel.user.removeGroup(param.groupId)
+            this.dataModel.user.removeGroup(param.groupId);
             console.log('updateService: addGroup: Group deleted:' + param.groupId + ' , ' + param.groupName);
           }
         }
@@ -99,7 +99,6 @@ export class BasicDataUpdateService {
       }
       else {
         console.log('updateService: addGroup: user wasnt ready yet. this should never happen.');
-        this.groupBuffer.push(param);
       }
     });
   }
@@ -170,11 +169,11 @@ export class BasicDataUpdateService {
       let group = this.dataModel.getGroup(param.groupId);
       if (group === null) {
         group = this.dataModel.user.createGroup(param.groupId, '', Currency.EUR);
-        console.log('updateService: addGroupActivity: added empty group: ' + param.groupId + " , " + group.name);
+        console.log('updateService: addGroupActivity: added empty group: ' + param.groupId + ' , ' + group.name);
       }
       const activity = new Activity(ActivityType.GROUPCREATION, group, group.getGroupmember(param.creatorId).contact, param.creationDate);
       group.addActivity(activity);
-      console.log('updateService: addGroupActivity: ' + param.groupId + " , " + group.name);
+      console.log('updateService: addGroupActivity: ' + param.groupId + ' , ' + group.name);
     });
   }
 
@@ -182,7 +181,8 @@ export class BasicDataUpdateService {
     if (this.dataModel.userExists && this.dataModel.getGroup(groupActivity.groupId) !== null) {
       if (Utils.log) console.log('Added group activity from buffer: ' + groupActivity.groupId);
       const group = this.dataModel.getGroup(groupActivity.groupId);
-      const activity = new Activity(ActivityType.GROUPCREATION, group, group.getGroupmember(groupActivity.creatorId).contact, groupActivity.creationDate);
+      const activity = new Activity(ActivityType.GROUPCREATION, group, group.getGroupmember(groupActivity.creatorId).contact,
+      groupActivity.creationDate);
       group.addActivity(activity);
     }
     else {
@@ -207,7 +207,7 @@ export class BasicDataUpdateService {
   private async updateDefaultLanguage(): Promise<void> {
     this.observables.getSettingsLanguageObservable().subscribe(param => {
         this.dataModel.getUser().language = this.languageStringToEnum(param.language);
-      console.log('updateService: updateDefaultLanguage: ' + param.language);
+        console.log('updateService: updateDefaultLanguage: ' + param.language);
     });
   }
 
@@ -260,7 +260,7 @@ export class BasicDataUpdateService {
       let group = this.dataModel.getGroup(param.groupId);
       if (group === null) {
         group = this.dataModel.user.createGroup(param.groupId, '', Currency.EUR);
-        console.log('updateService: addGroupMember: created empty group: ' + param.groupId + " , " + group.name);
+        console.log('updateService: addGroupMember: created empty group: ' + param.groupId + ' , ' + group.name);
       }
       let member = group.getGroupmember(param.userId);
       if (!param.isLeave) {
@@ -269,19 +269,19 @@ export class BasicDataUpdateService {
           group.addGroupmember(member);
           const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
           group.addActivity(activity);
-          console.log('updateService: addGroupMember: created member: ' + param.userId + " , " + param.name);
+          console.log('updateService: addGroupMember: created member: ' + param.userId + ' , ' + param.name);
         } else {
           if (member.contact.name === '') {
             member.contact.name = param.name;
             const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
             group.addActivity(activity);
-            console.log('updateService: addGroupMember: filled in member: ' + param.userId + " , " + param.name);
+            console.log('updateService: addGroupMember: filled in member: ' + param.userId + ' , ' + param.name);
           }
         }
       } else { // isleave
         group.removeGroupmember(param.userId);
         // TODO: MEMBERLEFTGROUPACTIVITY
-        console.log('updateService: addGroupMember: removed member: ' + param.userId + " , " + param.name);
+        console.log('updateService: addGroupMember: removed member: ' + param.userId + ' , ' + param.name);
       }
     });
   }
@@ -396,7 +396,7 @@ export class BasicDataUpdateService {
 
       const multipleTransactions: Transaction[] = [];
       for (const transactionType of param) {
-        let currentTransaction = this.updateSingleTransaction(transactionType);
+        const currentTransaction = this.updateSingleTransaction(transactionType);
         multipleTransactions.push(currentTransaction);
       }
       const promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
