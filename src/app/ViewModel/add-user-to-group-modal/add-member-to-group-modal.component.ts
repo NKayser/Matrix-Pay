@@ -17,7 +17,7 @@ export class AddMemberToGroupModalComponent implements OnInit{
 
   // Save the FormControl which checks the userName
   // use regex pattern according to matrix specification: https://matrix.org/docs/spec/index#users
-  formControlUser = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
+  formControlUser = new FormControl('', [Validators.required, Validators.pattern('@[_a-z0-9.-]+:[a-z0-9.-]+')]);
 
   constructor(
     public dialogRef: MatDialogRef<AddMemberToGroupModalComponent>,
