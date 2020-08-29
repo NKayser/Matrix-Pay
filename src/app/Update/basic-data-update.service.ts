@@ -257,6 +257,7 @@ export class BasicDataUpdateService {
     this.observables.getGroupMembershipObservable().subscribe( param => {
       /*console.log(this.dataModel.getGroups());
       console.log(param.groupId);*/
+      console.log(param);
       let group = this.dataModel.getGroup(param.groupId);
       if (group === null) {
         group = this.dataModel.user.createGroup(param.groupId, '', Currency.EUR);
