@@ -63,6 +63,7 @@ export class MatrixClientService implements ClientInterface {
 
     // Create a Client
     this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, store);
+    this.matrixClient.clearStores();
 
     // Declared to be defined later. This is important for waiting on the "then" block.
     let response: ServerResponse;
