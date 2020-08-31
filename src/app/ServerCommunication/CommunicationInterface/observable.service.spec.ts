@@ -4,16 +4,17 @@ import { ObservableService } from './observable.service';
 import {Observable} from 'rxjs';
 import {CurrencyType, UserType} from './parameterTypes';
 import {EventEmitter} from 'events';
+// import {EventTimeline} from "matrix-js-sdk";
 
 describe('ObservableService', () => {
   let service: ObservableService;
 
-  let mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['credentials', 'startClient', 'getUserId', 'getAccountDataFromServer', 'getUser', 'on']);
-  let clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
+  const mockedClient = jasmine.createSpyObj('MatrixClient',
+    ['credentials', 'startClient', 'getUserId', 'getAccountDataFromServer', 'getUser', 'on', 'joinRoom']);
+  const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
     ['getLoggedInEmitter', 'isPrepared', 'getClient']);
-  let loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
-  let clientEmitter: EventEmitter = new EventEmitter();
+  const loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
+  const clientEmitter: EventEmitter = new EventEmitter();
 
   beforeEach(() => {
 
@@ -44,12 +45,13 @@ describe('ObservableService', () => {
     mockedClient.on.and.callFake((type: string, callback: any) => {
       clientEmitter.on(type, callback);
     });
+    mockedClient.joinRoom.and.returnValue({});
     // set initial settings
     // clientEmitter.emit('com.matrixpay.currency', {'currency': 'USD'});
     // clientEmitter.emit('com.matrixpay.language', {'language': 'English'});
   });
 
-  /*it('should be created', () => {
+  it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
@@ -75,22 +77,43 @@ describe('ObservableService', () => {
       expect(currency.currency).toBe('EUR');
       console.log('callback called');
       done();
-    });
+    });*/
 
     // console.log(callbackCalled);
 
-    clientEmitter.emit('accountData',
+    service.accountDataCallback(
           {
             getType(): string {
               return 'com.matrixpay.currency';
             },
-            getContent() {
+            getContent(): object {
               return {currency: 'EUR'};
             },
-          });
+          },
+      {});
 
     // expect(callbackCalled).toBe(true);
     expect(spy).toHaveBeenCalled();
+    // expect(spy).toHaveBeenCalledWith({currency: 'com.matrixpay.currency'});
     done();
-  });*/
+  });
+
+  it('should join the room', () => {
+    service.roomCallback({
+      getLiveTimeline(): object {
+        return {
+          getState(direction: string): object {
+            return {
+              members: {
+                '@id1:dsn.tm.kit.edu': {
+                  membership: 'invite'
+                }
+              }
+            };
+          }
+        };
+      }
+    });
+    expect(mockedClient.joinRoom).toHaveBeenCalled();
+  });
 });
