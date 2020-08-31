@@ -15,6 +15,7 @@ describe('ObservableService', () => {
     ['getLoggedInEmitter', 'isPrepared', 'getClient']);
   const loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
   const clientEmitter: EventEmitter = new EventEmitter();
+  const timelineWindow = jasmine.createSpyObj('TimelineWindow', ['load']);
 
   beforeEach(() => {
 
@@ -81,7 +82,8 @@ describe('ObservableService', () => {
 
     // console.log(callbackCalled);
 
-    service.accountDataCallback(
+    // workaround: service.accountDataCallback(...)
+    clientEmitter.emit('accountData',
           {
             getType(): string {
               return 'com.matrixpay.currency';
@@ -116,4 +118,23 @@ describe('ObservableService', () => {
     });
     expect(mockedClient.joinRoom).toHaveBeenCalled();
   });
+
+  /*it('should paginate', () => {
+    service.roomCallback({
+      getLiveTimeline(): object {
+        return {
+          getState(direction: string): object {
+            return {
+              members: {
+                '@id1:dsn.tm.kit.edu': {
+                  membership: 'join'
+                }
+              }
+            };
+          }
+        };
+      }
+    });
+    expect(timelineWindow.load).toHaveBeenCalled();
+  });*/
 });
