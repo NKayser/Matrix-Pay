@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {fakeAsync, tick} from '@angular/core/testing';
 
-import { ObservableService } from './observable.service';
+import {ObservableService} from './observable.service';
 import {Observable} from 'rxjs';
 import {CurrencyType, UserType} from './parameterTypes';
 import {EventEmitter} from 'events';
@@ -16,6 +16,32 @@ describe('ObservableService', () => {
   const loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
   const clientEmitter: EventEmitter = new EventEmitter();
   const timelineWindow = jasmine.createSpyObj('TimelineWindow', ['load']);
+
+  function fakeRoom(members: object, currency: string): object {
+    return {
+      getLiveTimeline(): object {
+        return {
+          getState(direction: string): object {
+            return {
+              members,
+              getStateEvents(eventType: string, stateKey: string): object {
+                if (eventType === 'com.matrixpay.currency') {
+                  return {
+                    getContent(): object {
+                      return {
+                        currency
+                      };
+                    }
+                  };
+                }
+              }
+            };
+          },
+          getTimelineSet(): object { return {}; }
+        };
+      }
+    };
+  }
 
   beforeEach(() => {
 
@@ -67,74 +93,55 @@ describe('ObservableService', () => {
     expect(actual).toBeDefined();
   });
 
-  it('currency observable should emit changes', async (done: DoneFn) => {
-
-    const currencyObservable: Observable<CurrencyType> = service.getSettingsCurrencyObservable();
-    // const callbackCalled = false;
-    // @ts-ignore
-    const spy = spyOn(currencyObservable, 'next');
-
-    /*currencyObservable.subscribe((currency: CurrencyType) => {
-      expect(currency.currency).toBe('EUR');
-      console.log('callback called');
-      done();
-    });*/
-
-    // console.log(callbackCalled);
-
-    // workaround: service.accountDataCallback(...)
-    clientEmitter.emit('accountData',
-          {
-            getType(): string {
-              return 'com.matrixpay.currency';
-            },
-            getContent(): object {
-              return {currency: 'EUR'};
-            },
-          },
-      {});
-
-    // expect(callbackCalled).toBe(true);
-    expect(spy).toHaveBeenCalled();
-    // expect(spy).toHaveBeenCalledWith({currency: 'com.matrixpay.currency'});
-    done();
-  });
+  // it('currency observable should emit changes', fakeAsync(() => {
+  //
+  //   const currencyObservable: Observable<CurrencyType> = service.getSettingsCurrencyObservable();
+  //   // const callbackCalled = false;
+  //   // @ts-ignore
+  //   const spy = spyOn(currencyObservable, 'next');
+  //
+  //   /*currencyObservable.subscribe((currency: CurrencyType) => {
+  //     expect(currency.currency).toBe('EUR');
+  //     console.log('callback called');
+  //     done();
+  //   });*/
+  //
+  //   // console.log(callbackCalled);
+  //
+  //   // workaround: service.accountDataCallback(...)
+  //   clientEmitter.emit('accountData',
+  //     {
+  //       getType(): string {
+  //         return 'com.matrixpay.currency';
+  //       },
+  //       getContent(): object {
+  //         return {currency: 'EUR'};
+  //       },
+  //     },
+  //     {});
+  //
+  //   tick(1000000);
+  //   // expect(callbackCalled).toBe(true);
+  //   expect(spy).toHaveBeenCalled();
+  //   // expect(spy).toHaveBeenCalledWith({currency: 'com.matrixpay.currency'});
+  //   // done();
+  // }));
 
   it('should join the room', () => {
-    service.roomCallback({
-      getLiveTimeline(): object {
-        return {
-          getState(direction: string): object {
-            return {
-              members: {
-                '@id1:dsn.tm.kit.edu': {
-                  membership: 'invite'
-                }
-              }
-            };
-          }
-        };
+    service.roomCallback(fakeRoom({
+      '@id1:dsn.tm.kit.edu': {
+        membership: 'invite'
       }
-    });
+    }, 'USD'));
     expect(mockedClient.joinRoom).toHaveBeenCalled();
   });
 
-  /*it('should paginate', () => {
-    service.roomCallback({
-      getLiveTimeline(): object {
-        return {
-          getState(direction: string): object {
-            return {
-              members: {
-                '@id1:dsn.tm.kit.edu': {
-                  membership: 'join'
-                }
-              }
-            };
-          }
-        };
+  it('should paginate', () => {
+    service.roomCallback(fakeRoom({
+      '@id1:dsn.tm.kit.edu': {
+        membership: 'join'
       }
-    });
+    }, 'USD'));
     expect(timelineWindow.load).toHaveBeenCalled();
-  });*/
+  });
 });

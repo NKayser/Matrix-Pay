@@ -109,11 +109,13 @@ export class ObservableService implements ObservableInterface {
   }
 
   private async processNewRoom(room: Room): Promise<void> {
+    console.log('1');
     const groupId = room.roomId;
     const groupName = room.name;
     const userIds = [];
     const userNames = [];
 
+    console.log('1.5');
     const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('com.matrixpay.currency', ' ');
     let currency: string;
     if (currencyEvent === null) {
@@ -123,6 +125,8 @@ export class ObservableService implements ObservableInterface {
       currency = currencyEvent.getContent().currency;
       if (Utils.log) { console.log(currencyEvent.getContent().currency); }
     }
+    console.log('2');
+
 
     if (Utils.log) { console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames + ' currency: ' + currency); }
     this.groupsObservable.next({
@@ -131,8 +135,10 @@ export class ObservableService implements ObservableInterface {
     });
 
     // The things written into the local store of the client will eventually be detected by the listeners.
+    console.log('3');
     if (Utils.log) { console.log('---window---'); }
     const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
+    console.log('4');
     timelineWindow.load();
     if (Utils.log) { console.log(timelineWindow.getEvents()); }
     if (Utils.log) { console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS)); }
@@ -301,6 +307,7 @@ export class ObservableService implements ObservableInterface {
   }
 
   public async roomCallback(room): Promise<void> {
+    console.log('0');
     const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
     if (members[this.matrixClient.getUserId()].membership === 'invite') {
       await this.matrixClient.joinRoom(room.roomId);
