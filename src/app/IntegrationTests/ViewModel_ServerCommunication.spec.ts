@@ -9,48 +9,66 @@ import {GroupService} from "../ServerCommunication/GroupCommunication/group.serv
 import {SettingsService} from "../ServerCommunication/SettingsCommunication/settings.service";
 import {TransactionService} from "../ServerCommunication/GroupCommunication/transaction.service";
 import {MatrixEmergentDataService} from "../ServerCommunication/CommunicationInterface/matrix-emergent-data.service";
+import {Contact} from "../DataModel/Group/Contact";
+import {User} from "../DataModel/User/User";
+import {Currency} from "../DataModel/Utils/Currency";
+import {Language} from "../DataModel/Utils/Language";
+import {Group} from "../DataModel/Group/Group";
+import {GroupSelectionComponent} from "../ViewModel/group-selection/group-selection.component";
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MockDialog, MockDialogCancel} from "../ViewModel/_mockServices/MockDialog";
+import {CreateGroupModalComponent} from "../ViewModel/create-group-modal/create-group-modal.component";
+import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
+import {Observable, Subject} from "rxjs";
 
 
 describe('ViewModel_ServerCommunication', () => {
     let loginComponent: LoginComponent;
-    let fixture: ComponentFixture<LoginComponent>;
+    let groupComponent: GroupSelectionComponent;
+    //let createGroupComponent: CreateGroupModalComponent;
+    let loginFixture: ComponentFixture<LoginComponent>;
+    let groupFixture: ComponentFixture<GroupSelectionComponent>;
+    //let createGroupFixture: ComponentFixture<CreateGroupModalComponent>;
+
+    let matDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
 
     // Mock Matrix-js-sdk methods and Data Model Service
-    let classProviderSpy: jasmine.SpyObj<MatrixClassProviderService> = jasmine.createSpyObj('MatrixClassProviderService',
-        ['createClient', 'findClientConfig']);
-    let dataModelService: jasmine.SpyObj<DataModelService> = jasmine.createSpyObj('DataModelService', ['getUser']);
+    let classProviderSpy: jasmine.SpyObj<MatrixClassProviderService>;
+    let dataModelService: jasmine.SpyObj<DataModelService>;
 
     // Real Services
     let matrixClientService: MatrixClientService;
     let matrixEmergentDataService: MatrixEmergentDataService;
     let matrixBasicDataService: MatrixBasicDataService;
 
-    let mockedClient: jasmine.SpyObj<MatrixClient> = jasmine.createSpyObj('MatrixClient',
-        ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
-            'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on']);
+    let mockedClient: jasmine.SpyObj<MatrixClient>;
 
     beforeEach(async(() => {
-        // Create Spies for MatrixClassProviderService and DataModelService
-        //classProviderSpy = jasmine.createSpyObj('MatrixClassProviderService',
-        //    ['createClient', 'findClientConfig']);
-        //dataModelService = jasmine.createSpyObj('DataModelService', ['getUser']);
+        classProviderSpy = jasmine.createSpyObj('MatrixClassProviderService',
+            ['createClient', 'findClientConfig']);
+        dataModelService = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'navItem$']);
+        mockedClient = jasmine.createSpyObj('MatrixClient',
+            ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
+                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on']);
 
-        // Mocked Client
-        //mockedClient = jasmine.createSpyObj('MatrixClient',
-        //    ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
-        //        'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on']);
+        dataModelService.navItem$ = (new Subject()).asObservable();
         classProviderSpy.createClient.and.returnValue(Promise.resolve(mockedClient));
+        const spyDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
         // Components
         TestBed.configureTestingModule({
-            declarations: [ LoginComponent ],
+            declarations: [ LoginComponent, GroupSelectionComponent, CreateGroupModalComponent ],
             providers: [
                 { provide: MatrixClassProviderService, useValue: classProviderSpy },
+                { provide: MatDialog, useValue: MockDialog },
+                { provide: DataModelService, useValue: dataModelService },
+                { provide: MatDialogRef, useValue: spyDialogRef },
+                { provide: MAT_DIALOG_DATA, useValue: []},
                 MatrixClientService,
                 MatrixEmergentDataService,
-                MatrixBasicDataService,
-                DataModelService
-            ]
+                MatrixBasicDataService
+            ],
+            schemas: [ NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA ]
         }).compileComponents();
 
         // Set up real services
@@ -69,13 +87,18 @@ describe('ViewModel_ServerCommunication', () => {
         matrixEmergentDataService = TestBed.inject(MatrixEmergentDataService);
         matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
 
+        matDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
+
         // Components
-        fixture = TestBed.createComponent(LoginComponent);
-        loginComponent = fixture.componentInstance;
+        loginFixture = TestBed.createComponent(LoginComponent);
+        groupFixture = TestBed.createComponent(GroupSelectionComponent);
+        //createGroupFixture = TestBed.createComponent(CreateGroupModalComponent);
+        loginComponent = loginFixture.componentInstance;
+        groupComponent = groupFixture.componentInstance;
+        //createGroupComponent = createGroupFixture.componentInstance;
     }));
 
-    // Test-case T10
-    it('should login', async (done: DoneFn) => {
+    async function login(): Promise<void> {
         // Mock the Client
         classProviderSpy.findClientConfig.and.callFake(() => {
             const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
@@ -90,9 +113,70 @@ describe('ViewModel_ServerCommunication', () => {
         loginComponent.matrixUrlControl.setValue('@username:host');
         loginComponent.passwordControl.setValue('password123');
         await loginComponent.login();
+    }
+
+    // Test-case T10
+    it('should login', async (done: DoneFn) => {
+        await login();
 
         // Expected
         expect(matrixClientService.isLoggedIn()).toBe(true);
         done();
+    });
+
+    // Test-case T20
+    it('should not login with invalid credentials', async (done: DoneFn) => {
+        // Mock the Client
+        classProviderSpy.findClientConfig.and.callFake(() => {
+            const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
+            return Promise.resolve(config);
+        });
+        mockedClient.loginWithPassword.and.returnValue(Promise.reject('M_FORBIDDEN: Invalid password'));
+
+        // Login with these values
+        loginComponent.matrixUrlControl.setValue('@username:host');
+        loginComponent.passwordControl.setValue('password123');
+        await loginComponent.login();
+
+        // Expected
+        expect(matrixClientService.isLoggedIn()).toBe(false);
+        done();
+    });
+
+    // Test-case T30
+    it('check create group confirm', () => {
+        const c1 = new Contact('c1', 'Alice');
+        const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+        dataModelService.getUser.and.returnValue(stubValueUser);
+
+        const basicSpy = spyOn(matrixBasicDataService, 'groupCreate');
+        const modalSpyOpen = spyOn(groupComponent.dialog, 'open').and.callThrough();
+
+        const g1 = new Group('g1', 'name_g1', Currency.USD);
+        const g2 = new Group('g2', 'name_g2', Currency.USD);
+
+        dataModelService.getGroups.and.returnValue([g1, g2]);
+        loginFixture.detectChanges();
+        groupComponent.addGroup();
+
+        expect(modalSpyOpen).toHaveBeenCalled();
+        console.log(modalSpyOpen.calls.mostRecent());
+
+        const createModal: any = modalSpyOpen.calls.mostRecent().returnValue;
+
+        //const modalSpyAfterClose = spyOn(createModal, 'afterClosed').and.callThrough();
+
+        const data = {
+            groupName: 'name_g1',
+            currency: Currency.USD
+        };
+
+        createModal.data = data;
+        createModal.ngOnInit();
+
+        createModal.onSave();
+        expect(matDialogRef.close).toHaveBeenCalledWith(data);
+
+        expect(basicSpy).toHaveBeenCalled();
     });
 });
