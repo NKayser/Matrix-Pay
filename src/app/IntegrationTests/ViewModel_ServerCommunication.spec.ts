@@ -25,10 +25,10 @@ import {Observable, Subject} from "rxjs";
 describe('ViewModel_ServerCommunication', () => {
     let loginComponent: LoginComponent;
     let groupComponent: GroupSelectionComponent;
-    //let createGroupComponent: CreateGroupModalComponent;
+    let createGroupComponent: CreateGroupModalComponent;
     let loginFixture: ComponentFixture<LoginComponent>;
     let groupFixture: ComponentFixture<GroupSelectionComponent>;
-    //let createGroupFixture: ComponentFixture<CreateGroupModalComponent>;
+    let createGroupFixture: ComponentFixture<CreateGroupModalComponent>;
 
     let matDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
 
@@ -92,10 +92,10 @@ describe('ViewModel_ServerCommunication', () => {
         // Components
         loginFixture = TestBed.createComponent(LoginComponent);
         groupFixture = TestBed.createComponent(GroupSelectionComponent);
-        //createGroupFixture = TestBed.createComponent(CreateGroupModalComponent);
+        createGroupFixture = TestBed.createComponent(CreateGroupModalComponent);
         loginComponent = loginFixture.componentInstance;
         groupComponent = groupFixture.componentInstance;
-        //createGroupComponent = createGroupFixture.componentInstance;
+        createGroupComponent = createGroupFixture.componentInstance;
     }));
 
     async function login(): Promise<void> {
@@ -162,7 +162,7 @@ describe('ViewModel_ServerCommunication', () => {
         expect(modalSpyOpen).toHaveBeenCalled();
         console.log(modalSpyOpen.calls.mostRecent());
 
-        const createModal: any = modalSpyOpen.calls.mostRecent().returnValue;
+        const createModal = modalSpyOpen.calls.mostRecent().returnValue;
 
         //const modalSpyAfterClose = spyOn(createModal, 'afterClosed').and.callThrough();
 
@@ -171,10 +171,10 @@ describe('ViewModel_ServerCommunication', () => {
             currency: Currency.USD
         };
 
-        createModal.data = data;
-        createModal.ngOnInit();
+        createGroupComponent.data = data;
+        createGroupComponent.ngOnInit();
 
-        createModal.onSave();
+        createGroupComponent.onSave();
         expect(matDialogRef.close).toHaveBeenCalledWith(data);
 
         expect(basicSpy).toHaveBeenCalled();
