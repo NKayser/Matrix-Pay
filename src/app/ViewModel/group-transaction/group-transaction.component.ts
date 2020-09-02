@@ -12,6 +12,7 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 
 // @ts-ignore
 import {MatrixEvent} from 'matrix-js-sdk';
+import {PaymentViewComponent} from '../payment-view/payment-view.component';
 
 @Component({
   selector: 'app-group-transaction',
@@ -96,12 +97,13 @@ export class GroupTransactionComponent implements OnChanges {
   public editExpense(expense: Transaction): void{
 
     if (expense.transactionType === TransactionType.EXPENSE){
-      const dialogRef = this.dialog.open(PaymentModalComponent, {
+      this.dialog.open(PaymentViewComponent, {
         width: '350px',
         data: this.generateEditExpenseData(expense),
       });
 
-      dialogRef.afterClosed().subscribe(result => {
+      // This code is (unfinished work) that can set edit transactions to matrix
+      /*dialogRef.afterClosed().subscribe(result => {
         this.data = result;
         if (this.data !== undefined){
 
@@ -130,14 +132,14 @@ export class GroupTransactionComponent implements OnChanges {
 
         }
 
-      });
+      });*/
     }
   }
 
   // Generate input data for expense Modal from the current transaction
   private generateEditExpenseData(transaction: Transaction): PaymentDialogData {
 
-    const modalTitle = 'Edit Transaction';
+    const modalTitle = transaction.name;
     const recipients = Array<Contact>(0);
     const description = transaction.name;
     const payer = transaction.payer.contact;
@@ -149,8 +151,9 @@ export class GroupTransactionComponent implements OnChanges {
       amount.push(recipientAmount);
       isAdded.push(recipientAmount !== 0);
     }
+    const currency = this.group.currency;
 
-    return {modalTitle, description, payer, recipients, amount, isAdded};
+    return {modalTitle, description, payer, recipients, amount, isAdded, currency};
   }
 
   // Generate input data for expense Modal for a create transaction modal
@@ -167,8 +170,9 @@ export class GroupTransactionComponent implements OnChanges {
       amount.push(0);
       isAdded.push(true);
     }
+    const currency = this.group.currency;
 
-    return {modalTitle, description, payer, recipients, amount, isAdded};
+    return {modalTitle, description, payer, recipients, amount, isAdded, currency};
   }
 
   // get the amounts of a recipient, if the recipient is not in the transaction return 0

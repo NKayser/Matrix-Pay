@@ -2,6 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
 import {Contact} from '../../DataModel/Group/Contact';
+import {Currency} from '../../DataModel/Utils/Currency';
 
 export interface PaymentDialogData {
   // the titel of the dialog, this is not the title of the transaction
@@ -11,6 +12,7 @@ export interface PaymentDialogData {
   recipients: Contact[];
   amount: number[];
   isAdded: boolean[];
+  currency: Currency;
 }
 
 @Component({
@@ -96,7 +98,7 @@ export class PaymentModalComponent implements OnInit{
     }
 
     return {modalTitle: this.data.modalTitle, description: newDescription, payer: newPayer, recipients: newRecipients, amount: newAmount,
-      isAdded: this.data.isAdded};
+      isAdded: this.data.isAdded, currency: this.data.currency};
 
   }
 
