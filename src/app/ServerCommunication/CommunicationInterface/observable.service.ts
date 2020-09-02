@@ -163,12 +163,13 @@ export class ObservableService implements ObservableInterface {
 
   public accountDataCallback(event, oldEvent): void {
     // if (Utils.log) console.log('got account data change' + event.getType());
-    console.log('accountDatCallback');
+    console.log('accountDataCallback');
     console.log(event);
     switch (event.getType()) {
       case ('com.matrixpay.currency'): {
         if (Utils.log) { console.log('got currency change to ' + event.getContent().currency); }
         this.settingsCurrencyObservable.next({currency: event.getContent().currency});
+        console.log('currency sent');
         break;
       }
       case ('com.matrixpay.language'): {

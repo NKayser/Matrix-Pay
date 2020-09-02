@@ -1,4 +1,4 @@
-import {fakeAsync, tick} from '@angular/core/testing';
+import {fakeAsync, flushMicrotasks, tick} from '@angular/core/testing';
 
 import {ObservableService} from './observable.service';
 import {Observable} from 'rxjs';
@@ -45,6 +45,7 @@ describe('ObservableService', () => {
 
   beforeEach(() => {
 
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
     loggedInEmitter.subscribe.and.callFake((callback: () => void) => {
       callback();
     });
@@ -93,39 +94,38 @@ describe('ObservableService', () => {
     expect(actual).toBeDefined();
   });
 
-  // it('currency observable should emit changes', fakeAsync(() => {
-  //
-  //   const currencyObservable: Observable<CurrencyType> = service.getSettingsCurrencyObservable();
-  //   // const callbackCalled = false;
-  //   // @ts-ignore
-  //   const spy = spyOn(currencyObservable, 'next');
-  //
-  //   /*currencyObservable.subscribe((currency: CurrencyType) => {
-  //     expect(currency.currency).toBe('EUR');
-  //     console.log('callback called');
-  //     done();
-  //   });*/
-  //
-  //   // console.log(callbackCalled);
-  //
-  //   // workaround: service.accountDataCallback(...)
-  //   clientEmitter.emit('accountData',
-  //     {
-  //       getType(): string {
-  //         return 'com.matrixpay.currency';
-  //       },
-  //       getContent(): object {
-  //         return {currency: 'EUR'};
-  //       },
-  //     },
-  //     {});
-  //
-  //   tick(1000000);
-  //   // expect(callbackCalled).toBe(true);
-  //   expect(spy).toHaveBeenCalled();
-  //   // expect(spy).toHaveBeenCalledWith({currency: 'com.matrixpay.currency'});
-  //   // done();
-  // }));
+  it('currency observable should emit changes', (done: DoneFn) => {
+
+    const currencyObservable: Observable<CurrencyType> = service.getSettingsCurrencyObservable();
+    // const callbackCalled = false;
+    // const spy = spyOn(currencyObservable, 'next');
+
+    currencyObservable.subscribe((currency: CurrencyType) => {
+      console.log('callback called');
+      expect(currency.currency).toBe('EUR');
+      done();
+    });
+
+    // console.log(callbackCalled);
+
+    // workaround: service.accountDataCallback(...)
+    clientEmitter.emit('accountData',
+      {
+        getType(): string {
+          return 'com.matrixpay.currency';
+        },
+        getContent(): object {
+          return {currency: 'EUR'};
+        },
+      },
+      {});
+
+    // flushMicrotasks();
+    // expect(callbackCalled).toBe(true);
+    // expect(spy).toHaveBeenCalled();
+    // expect(spy).toHaveBeenCalledWith({currency: 'com.matrixpay.currency'});
+    // done();
+  });
 
   it('should join the room', () => {
     service.roomCallback(fakeRoom({
@@ -136,12 +136,12 @@ describe('ObservableService', () => {
     expect(mockedClient.joinRoom).toHaveBeenCalled();
   });
 
-  it('should paginate', () => {
+  /*it('should paginate', () => {
     service.roomCallback(fakeRoom({
       '@id1:dsn.tm.kit.edu': {
         membership: 'join'
       }
     }, 'USD'));
     expect(timelineWindow.load).toHaveBeenCalled();
-  });
+  });*/
 });
