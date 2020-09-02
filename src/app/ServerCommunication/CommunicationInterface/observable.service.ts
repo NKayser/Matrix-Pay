@@ -296,7 +296,9 @@ export class ObservableService implements ObservableInterface {
   private roomListener(): void {
     // Fires whenever invited to a room or joining a room
     this.matrixClient.on('Room', async room => {
-      const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
+      const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getMembers();
+      if (Utils.log) console.log(members);
+      if (Utils.log) console.log(this.matrixClient.getUserId());
       if (members[this.matrixClient.getUserId()].membership === 'invite') {
         this.matrixClient.joinRoom(room.roomId);
       }
@@ -311,7 +313,7 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('RoomMember.membership', (event, member, oldMembership) => {
       const userId = member.userId;
       const groupId = member.roomId;
-      console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
+      if (Utils.log) console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
       if (userId === this.matrixClient.getUserId()) {
         if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
           this.groupMembershipObservable.next(
