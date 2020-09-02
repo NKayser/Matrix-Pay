@@ -31,10 +31,10 @@ build:
   #  paths:
   #    - build
 
-#test:
-#  stage: test
-#  script:
-#    - ng test
+test:
+  stage: test
+  script:
+    - ng test
 
 echo:
   stage: deploy

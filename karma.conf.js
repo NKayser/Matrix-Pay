@@ -21,7 +21,7 @@ module.exports = function (config) {
       fixWebpackSourcePaths: true
     },
 
-    browsers: ['Chrome'], // 'Chrome'
+    browsers: ['ChromeHeadless'], // 'Chrome'
     singleRun: false,
     reporters: ['progress', 'kjhtml'],
     port: 9876,
