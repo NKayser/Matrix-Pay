@@ -21,12 +21,44 @@
   z-index: 1;
 }
 
-.groupButtons{
-  position: relative;
-  margin-left: 10px;
+.group_title {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+}
+
+.groupButtons {
+  clear: both;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.toolbar {
+  height: 200px;
 }
 
 .buttonDiv{
-  position: absolute;
-  right: 10px;
+  margin-top: 40px;
 }
+
+@media only screen and (min-width: 768px) {
+  .groupButtons {
+    display: inline;
+    position: relative;
+    margin-left: 10px;
+  }
+
+  .toolbar {
+    height: 50px;
+  }
+
+  .buttonDiv{
+    margin-top: auto;
+    position: absolute;
+    right: 10px;
+  }
+}
+
+
+
+
