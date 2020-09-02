@@ -94,17 +94,17 @@ describe('ObservableService', () => {
     expect(actual).toBeDefined();
   });
 
-  it('currency observable should emit changes', (done: DoneFn) => {
+  it('currency observable should emit changes', fakeAsync(() => {
 
     const currencyObservable: Observable<CurrencyType> = service.getSettingsCurrencyObservable();
     // const callbackCalled = false;
-    // const spy = spyOn(currencyObservable, 'next');
+    const spy = spyOn(currencyObservable, 'next');
 
-    currencyObservable.subscribe((currency: CurrencyType) => {
+    /*currencyObservable.subscribe((currency: CurrencyType) => {
       console.log('callback called');
       expect(currency.currency).toBe('EUR');
       done();
-    });
+    });*/
 
     // console.log(callbackCalled);
 
@@ -121,11 +121,12 @@ describe('ObservableService', () => {
       {});
 
     // flushMicrotasks();
+    tick();
+
     // expect(callbackCalled).toBe(true);
-    // expect(spy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalled();
     // expect(spy).toHaveBeenCalledWith({currency: 'com.matrixpay.currency'});
-    // done();
-  });
+  }));
 
   it('should join the room', () => {
     service.roomCallback(fakeRoom({
