@@ -9,7 +9,7 @@ image: alpine
 install_dependencies:
   stage: install_dependencies
   cache:
-    key: $CI_PROJECT_ID/$CI_COMMIT_BRANCH
+    key: ${CI_PROJECT_ID}-${CI_COMMIT_BRANCH}
     paths:
       - node_modules/
   script:
@@ -24,7 +24,7 @@ install_dependencies:
 build:
   stage: build
   cache:
-    key: $CI_PROJECT_ID/$CI_COMMIT_BRANCH
+    key: ${CI_PROJECT_ID}-${CI_COMMIT_BRANCH}
     paths:
       - node_modules/
     policy: pull
@@ -40,7 +40,7 @@ build:
 test:
   stage: test
   cache:
-    key: $CI_PROJECT_ID/$CI_COMMIT_BRANCH
+    key: ${CI_PROJECT_ID}-${CI_COMMIT_BRANCH}
     paths:
       - node_modules/
     policy: pull
