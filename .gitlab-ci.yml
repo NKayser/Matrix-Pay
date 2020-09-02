@@ -15,6 +15,9 @@ install_dependencies:
       - node_modules/
   script:
     - npm ci
+  tags:
+    - chrome
+    - nodejs
   #only:
   #  changes:
   #    - package-lock.json
@@ -28,6 +31,9 @@ build:
     policy: pull
   script:
     - ng build
+  tags:
+    - chrome
+    - nodejs
   #artifacts:
   #  paths:
   #    - build
@@ -41,12 +47,18 @@ test:
     policy: pull
   script:
     - ng test --no-watch --no-progress --browsers=ChromeHeadlessCI
+  tags:
+    - chrome
+    - nodejs
 
 echo:
   stage: deploy
   script:
     - echo "This job deploys something. It will only run when all jobs in the"
     - echo "test stage complete."
+  tags:
+    - chrome
+    - nodejs
 
 #deploy:
 #  stage: deploy
