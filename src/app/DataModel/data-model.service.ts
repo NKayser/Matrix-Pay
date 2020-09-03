@@ -5,7 +5,6 @@ import {Group} from './Group/Group';
 import {Transaction} from './Group/Transaction';
 import {BalanceCalculatorService} from '../CalculateEmergentData/balance-calculator.service';
 import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimisation.service';
-import {MatrixEmergentDataService} from '../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
@@ -35,10 +34,9 @@ export class DataModelService {
    * @param matrixEmergentData  An Instance of BalanceCalculatorService that is used in DataModelService
    */
   constructor(private balanceCalculator: BalanceCalculatorService,
-              private greedyOptimisation: GreedyOptimisationService,
-              private matrixEmergentData: MatrixEmergentDataService) {
+              private greedyOptimisation: GreedyOptimisationService) {
 
-    const contact = new Contact("", "");
+    const contact = new Contact('', '');
     const user = new User(contact, Currency.EUR, Language.ENGLISH);
     this.status = new Status();
     this._userExists = true;

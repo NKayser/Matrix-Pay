@@ -90,11 +90,16 @@ export class BasicDataUpdateService {
           }
         }
         else {
-          const newGroup = this.dataModel.getGroup(param.groupId);
-          newGroup.name = param.groupName;
-          newGroup.currency = this.currencyStringToEnum(param.currency);
-          console.log ('updateService: addGroup: group filled in: ' + param.groupId + ' , ' + param.groupName);
-
+          if (!param.isLeave) {
+            const newGroup = this.dataModel.getGroup(param.groupId);
+            newGroup.name = param.groupName;
+            newGroup.currency = this.currencyStringToEnum(param.currency);
+            console.log ('updateService: addGroup: group filled in: ' + param.groupId + ' , ' + param.groupName);
+          }
+          else {
+            this.dataModel.user.removeGroup(param.groupId);
+            console.log('updateService: addGroup: Group deleted:' + param.groupId + ' , ' + param.groupName);
+          }
         }
       }
       else {
@@ -257,6 +262,7 @@ export class BasicDataUpdateService {
     this.observables.getGroupMembershipObservable().subscribe( param => {
       /*console.log(this.dataModel.getGroups());
       console.log(param.groupId);*/
+      console.log(param);
       let group = this.dataModel.getGroup(param.groupId);
       if (group === null) {
         group = this.dataModel.user.createGroup(param.groupId, '', Currency.EUR);
