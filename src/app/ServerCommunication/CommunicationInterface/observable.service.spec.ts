@@ -1,12 +1,23 @@
 import {ObservableService} from './observable.service';
 import {Observable} from 'rxjs';
-import {CurrencyType, UserType} from './parameterTypes';
+import {CurrencyType, GroupActivityType, GroupMemberType, GroupsType, LanguageType, TransactionType} from './parameterTypes';
 import {EventEmitter} from 'events';
 
-function fakeRoom(members: object, currency: string): object {
+
+// create a fake Room with all functionality needed during testing
+function fakeRoom(members: object, currency: string, _name: string, _roomId: string): object {
   return {
+    name: _name,
+    roomId: _roomId,
     getLiveTimeline(): object {
       return {
+        getTimelineSet(): object {
+          return {
+            load(): any {
+
+            }
+          };
+        },
         getState(direction: string): object {
           return {
             members,
@@ -22,8 +33,7 @@ function fakeRoom(members: object, currency: string): object {
               }
             }
           };
-        },
-        getTimelineSet(): object { return {}; }
+        }
       };
     }
   };
@@ -31,45 +41,54 @@ function fakeRoom(members: object, currency: string): object {
 
 
 describe('ObservableService', () => {
+
+  const userId = '@id1:dsn.tm.kit.edu';
+
   let service: ObservableService;
 
+  // Mock client/clientService/LoggedInEmitter
   const mockedClient = jasmine.createSpyObj('MatrixClient',
     ['credentials', 'startClient', 'getUserId', 'getAccountDataFromServer', 'getUser', 'on', 'joinRoom']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
     ['getLoggedInEmitter', 'isPrepared', 'getClient']);
   const loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
   let clientEmitter;
-  
+
   beforeEach(() => {
     clientEmitter = new EventEmitter();
-    
+
+    // Return the callback of the loggedInEmitter, when somebody subscribes to it
     loggedInEmitter.subscribe.and.callFake((callback: () => void) => {
       callback();
     });
 
+    // Replace the returned loggedInEmitter with the mocked loggedInEmitter in the test
     clientServiceSpy.getLoggedInEmitter.and.returnValue(loggedInEmitter);
     clientServiceSpy.isPrepared.and.returnValue(true);
-    
+
     // Mock client
-    mockedClient.credentials.and.returnValue({userId: '@id1:dsn.tm.kit.edu'});
-    mockedClient.getUserId.and.returnValue('@id1:dsn.tm.kit.edu');
+    mockedClient.credentials.and.returnValue({userId});
+    mockedClient.getUserId.and.returnValue(userId);
     mockedClient.startClient.and.returnValue(Promise.resolve());
     mockedClient.getAccountDataFromServer.and.callFake((type: string) => {
       if (type === 'com.matrixpay.language') {
         return {};
       }
-      
+
       if (type === 'com.matrixpay.currency') {
         return {};
       }
-      
+
       return {};
     });
 
+    // note: This fake user may need extension, as it currently only contains the display name
     mockedClient.getUser.and.returnValue({
-      displayName: "John Smith"
+      displayName: 'John Smith'
     });
 
+    // when something listens to the mockedCient.on method redirect him to the clientEmitter.on method to be able to trigger
+    // Events that simulate .on Events from the client
     mockedClient.on.and.callFake((type: string, callback: any) => {
       clientEmitter.on(type, callback);
     });
@@ -79,26 +98,239 @@ describe('ObservableService', () => {
     service = new ObservableService(clientServiceSpy);
 
   });
-  
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
 
-  it('should get userObservable', () => {
+  /*it('should be created', () => {
+    expect(service).toBeTruthy();
+  });*/
+
+  /*it('should get userObservable', () => {
     const actual: Observable<UserType> = service.getUserObservable();
     expect(actual).toBeDefined();
-  });
+  });*/
 
-  it('should join the room', () => {
+  /*it('should join the room', () => {
     service.roomCallback(fakeRoom({
       '@id1:dsn.tm.kit.edu': {
         membership: 'invite'
       }
     }, 'USD'));
     expect(mockedClient.joinRoom).toHaveBeenCalled();
+  });*/
+
+  it('language observable should emit changes', (done: DoneFn) => {
+
+    const languageObservable: Observable<LanguageType> = service.getSettingsLanguageObservable();
+    languageObservable.subscribe((language: LanguageType) => {
+      console.log('callback called');
+      expect(language.language).toEqual('ENGLISH');
+      done();
+    });
+
+    clientEmitter.emit('accountData',
+        {
+          getType(): string {
+            return 'com.matrixpay.language';
+          },
+          getContent(): object {
+            return {language: 'ENGLISH'};
+          },
+        },
+        {});
   });
 
+  it('check invite', (done: DoneFn) => {
 
+    clientEmitter.emit('Room',
+        fakeRoom({
+          '@id1:dsn.tm.kit.edu': {
+            membership: 'invite'
+          }
+        }, 'USD', 'name1', 'room1'),
+        {});
+
+    expect(mockedClient.joinRoom).toHaveBeenCalled();
+
+    done();
+  });
+
+  it('check join', (done: DoneFn) => {
+
+    const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
+    groupObservable.subscribe((group: GroupsType) => {
+      expect(group.currency).toBe('USD');
+      expect(group.groupId).toBe('room1');
+      expect(group.groupName).toBe('name1');
+      expect(group.isLeave).toBe(false);
+      expect(group.userIds).toEqual([]);
+      expect(group.userNames).toEqual([]);
+
+      done();
+    });
+
+    const multipleTransactionObservable: Observable<TransactionType[]> = service.getMultipleNewTransactionsObservable();
+    multipleTransactionObservable.subscribe((transactions: TransactionType[]) => {
+
+      // TODO Add check for transaction
+
+      done();
+    });
+
+
+    clientEmitter.emit('Room',
+      fakeRoom({
+        '@id1:dsn.tm.kit.edu': {
+          membership: 'join'
+        }
+      }, 'USD', 'name1', 'room1'),
+      {}
+    );
+  });
+
+  it('check membership join', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+
+    const groupMemberShipObservable: Observable<GroupMemberType> = service.getGroupMembershipObservable();
+    groupMemberShipObservable.subscribe((member: GroupMemberType) => {
+
+      expect(member.groupId).toBe('room1');
+      expect(member.date).toBe(d1);
+      expect(member.isLeave).toBe(false);
+      expect(member.name).toBe('name1');
+      expect(member.userId).toBe(userId);
+
+      done();
+    });
+
+    /*const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
+    groupObservable.subscribe((group: GroupsType) => {
+      done();
+    });*/
+
+    clientEmitter.emit('RoomMember.membership',
+        {
+          getDate(): Date {
+            return d1;
+          },
+        },
+        {
+          userId,
+          name: 'name1',
+          roomId: 'room1',
+          membership: 'join'
+        },
+        'invite'
+    );
+  });
+
+  it('check membership leave', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+
+
+    const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
+    groupObservable.subscribe((group: GroupsType) => {
+
+      expect(group.groupId).toBe('room1');
+      expect(group.groupName).toBe(undefined);
+      expect(group.isLeave).toBe(true);
+      expect(group.currency).toBe(undefined);
+      expect(group.userIds).toBe(undefined);
+      expect(group.userNames).toBe(undefined);
+
+
+      done();
+    });
+
+    clientEmitter.emit('RoomMember.membership',
+        {
+          getDate(): Date {
+            return d1;
+          },
+        },
+        {
+          userId,
+          name: 'name1',
+          roomId: 'room1',
+          membership: 'leave'
+        },
+        'join'
+    );
+  });
+
+  it('check membership other join', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+
+    const groupMemberShipObservable: Observable<GroupMemberType> = service.getGroupMembershipObservable();
+    groupMemberShipObservable.subscribe((member: GroupMemberType) => {
+
+      expect(member.groupId).toBe('room1');
+      expect(member.date).toBe(d1);
+      expect(member.isLeave).toBe(false);
+      expect(member.name).toBe('name2');
+      expect(member.userId).toBe('id2');
+
+      done();
+    });
+
+    /*const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
+    groupObservable.subscribe((group: GroupsType) => {
+      done();
+    });*/
+
+    clientEmitter.emit('RoomMember.membership',
+        {
+          getDate(): Date {
+            return d1;
+          },
+        },
+        {
+          userId: 'id2',
+          name: 'name2',
+          roomId: 'room1',
+          membership: 'join'
+        },
+        'invite'
+    );
+  });
+
+  it('check membership other leave', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+
+    const groupMemberShipObservable: Observable<GroupMemberType> = service.getGroupMembershipObservable();
+    groupMemberShipObservable.subscribe((member: GroupMemberType) => {
+
+      expect(member.groupId).toBe('room1');
+      expect(member.date).toBe(d1);
+      expect(member.isLeave).toBe(true);
+      expect(member.name).toBe('name2');
+      expect(member.userId).toBe('id2');
+
+      done();
+    });
+
+    /*const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
+    groupObservable.subscribe((group: GroupsType) => {
+      done();
+    });*/
+
+    clientEmitter.emit('RoomMember.membership',
+        {
+          getDate(): Date {
+            return d1;
+          },
+        },
+        {
+          userId: 'id2',
+          name: 'name2',
+          roomId: 'room1',
+          membership: 'leave'
+        },
+        'join'
+    );
+  });
 
   it('currency observable should emit changes', (done: DoneFn) => {
 
@@ -119,5 +351,269 @@ describe('ObservableService', () => {
         },
       },
       {});
+  });
+
+  it('message payback test', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {roomId: 'room1'};
+
+    clientEmitter.emit('Room.timeline',
+        {
+          getType(): string {
+            return 'com.matrixpay.payback';
+          },
+          getContent(): object {
+            return {
+              name: 'name_t1',
+              payer: userId,
+              amounts: [9, 5, 3, 7],
+              recipients: ['id2', 'id3', 'id4', 'id5'],
+            };
+          },
+          getId(): string {
+            return 't1';
+          },
+          getDate(): Date {
+            return d1;
+          },
+          getSender(): string {
+            return userId;
+          }
+        },
+        room, {}, {}, {liveEvent: false, }
+    );
+
+    // @ts-ignore
+    const type = ObservableService.TRANSACTION_TYPE_PAYBACK;
+    // @ts-ignore
+    expect(service.transactions[room.roomId]).toEqual([
+      {transactionType: type,
+        transactionId: 't1',
+        name: 'name_t1',
+        creationDate: d1,
+        groupId: 'room1',
+        payerId: userId,
+        payerAmount: 24,
+        recipientIds: ['id2', 'id3', 'id4', 'id5'],
+        recipientAmounts: [9, 5, 3, 7],
+        senderId: userId}
+      ]);
+
+    done();
+  });
+
+  it('message expense test', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {roomId: 'room1'};
+
+    clientEmitter.emit('Room.timeline',
+        {
+          getType(): string {
+            return 'com.matrixpay.expense';
+          },
+          getContent(): object {
+            return {
+              name: 'name_t2',
+              payer: userId,
+              amounts: [9, 5, 3, 7],
+              recipients: ['id2', 'id3', 'id4', 'id5'],
+            };
+          },
+          getId(): string {
+            return 't2';
+          },
+          getDate(): Date {
+            return d1;
+          },
+          getSender(): string {
+            return userId;
+          },
+          isRelation(): boolean {
+            return false;
+          }
+        },
+        room, {}, {}, {liveEvent: false, }
+    );
+
+    // @ts-ignore
+    const type = ObservableService.TRANSACTION_TYPE_EXPENSE;
+    // @ts-ignore
+    expect(service.transactions[room.roomId]).toEqual([
+      {transactionType: type,
+        transactionId: 't2',
+        name: 'name_t2',
+        creationDate: d1,
+        groupId: 'room1',
+        payerId: userId,
+        payerAmount: 24,
+        recipientIds: ['id2', 'id3', 'id4', 'id5'],
+        recipientAmounts: [9, 5, 3, 7],
+        senderId: userId}
+    ]);
+
+    done();
+  });
+
+  it('message expense test edit', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {roomId: 'room1'};
+    // @ts-ignore
+    const type = ObservableService.TRANSACTION_TYPE_EXPENSE;
+
+    const modifiedObservable: Observable<TransactionType> = service.getModifiedTransactionObservable();
+    modifiedObservable.subscribe((transaction: TransactionType) => {
+        expect(transaction).toEqual(
+            {transactionType: type,
+                transactionId: 't2',
+                name: 'name_t2',
+                creationDate: d1,
+                groupId: 'room1',
+                payerId: userId,
+                payerAmount: 24,
+                recipientIds: ['id2', 'id3', 'id4', 'id5'],
+                recipientAmounts: [9, 5, 3, 7],
+                senderId: userId}
+        );
+        done();
+    });
+
+    clientEmitter.emit('Room.timeline',
+        {
+            getType(): string {
+                return 'com.matrixpay.expense';
+            },
+            getContent(): object {
+                return {
+                    name: 'name_t2',
+                    payer: userId,
+                    amounts: [9, 5, 3, 7],
+                    recipients: ['id2', 'id3', 'id4', 'id5'],
+                };
+            },
+            getId(): string {
+                return 't2';
+            },
+            getDate(): Date {
+                return d1;
+            },
+            getSender(): string {
+                return userId;
+            },
+            isRelation(): boolean {
+                return true;
+            }
+        },
+        room, {}, {}, {liveEvent: false, }
+    );
+  });
+
+  it('message create room test', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {roomId: 'room1'};
+
+    const activityObservable: Observable<GroupActivityType> = service.getGroupActivityObservable();
+    activityObservable.subscribe((activity: GroupActivityType) => {
+        expect(activity).toEqual(
+            {groupId: room.roomId, creatorId: userId, creationDate: d1}
+        );
+        done();
+    });
+
+    clientEmitter.emit('Room.timeline',
+        {
+            getType(): string {
+                return 'm.room.create';
+            },
+            getContent(): object {
+                return {
+                    creator: userId,
+                };
+            },
+            getDate(): Date {
+                return d1;
+            }
+        },
+        room, {}, {}, {liveEvent: false, }
+    );
+  });
+
+  it('message room member join', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {
+        roomId: 'room1',
+        getMember(key: any): object {
+            return {user: {displayName: 'displayName1'}};
+        }
+    };
+
+    const membershipObservable: Observable<GroupMemberType> = service.getGroupMembershipObservable();
+    membershipObservable.subscribe((member: GroupMemberType) => {
+        expect(member).toEqual(
+            {groupId: room.roomId, userId, date: d1, isLeave: false, name: 'displayName1'}
+        );
+        done();
+    });
+
+    clientEmitter.emit('Room.timeline',
+        {
+            getType(): string {
+                return 'm.room.member';
+            },
+            getStateKey(): string {
+                return userId;
+            },
+            getContent(): object {
+                return {
+                    membership: 'join',
+                };
+            },
+            getDate(): Date {
+                return d1;
+            }
+        }, room, {}, {}, {liveEvent: false, }
+    );
+  });
+
+  it('message room member leave', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {
+        roomId: 'room1',
+        getMember(key: any): object {
+            return {user: {displayName: 'displayName1'}};
+        }
+    };
+
+    const membershipObservable: Observable<GroupMemberType> = service.getGroupMembershipObservable();
+    membershipObservable.subscribe((member: GroupMemberType) => {
+        expect(member).toEqual(
+            {groupId: room.roomId, userId, date: d1, isLeave: true, name: 'displayName1'}
+        );
+        done();
+    });
+
+    clientEmitter.emit('Room.timeline',
+        {
+            getType(): string {
+                return 'm.room.member';
+            },
+            getStateKey(): string {
+                return userId;
+            },
+            getContent(): object {
+                return {
+                    membership: 'leave',
+                };
+            },
+            getDate(): Date {
+                return d1;
+            }
+        }, room, {}, {}, {liveEvent: false, }
+    );
   });
 });

@@ -70,7 +70,7 @@ export class ObservableService implements ObservableInterface {
 
     // start the matrix listeners
     this.accountDataListener();
-    this.roomAccountDataListener();
+    // this.roomAccountDataListener();
     this.timelineListener();
     this.roomListener();
     this.membershipListener();
@@ -109,13 +109,11 @@ export class ObservableService implements ObservableInterface {
   }
 
   private async processNewRoom(room: Room): Promise<void> {
-    console.log('1');
     const groupId = room.roomId;
     const groupName = room.name;
     const userIds = [];
     const userNames = [];
 
-    console.log('1.5');
     const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('com.matrixpay.currency', ' ');
     let currency: string;
     if (currencyEvent === null) {
@@ -125,7 +123,6 @@ export class ObservableService implements ObservableInterface {
       currency = currencyEvent.getContent().currency;
       if (Utils.log) { console.log(currencyEvent.getContent().currency); }
     }
-    console.log('2');
 
 
     if (Utils.log) { console.log('new room detected. groupName: ' + groupName + ' userIds: ' + userIds + ' userNames: ' + userNames + ' currency: ' + currency); }
@@ -135,13 +132,11 @@ export class ObservableService implements ObservableInterface {
     });
 
     // The things written into the local store of the client will eventually be detected by the listeners.
-    console.log('3');
     if (Utils.log) { console.log('---window---'); }
     const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
-    console.log('4');
     timelineWindow.load();
-    if (Utils.log) { console.log(timelineWindow.getEvents()); }
-    if (Utils.log) { console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS)); }
+    // if (Utils.log) { console.log(timelineWindow.getEvents()); }
+    // if (Utils.log) { console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS)); }
     await this.paginateBackwardsUntilTheEnd(timelineWindow);
     if (Utils.log) { console.log('found old transactions in room ' + room.roomId + ': ' + this.transactions.hasOwnProperty(room.roomId)); }
     if (this.transactions.hasOwnProperty(room.roomId)) {
@@ -188,7 +183,7 @@ export class ObservableService implements ObservableInterface {
   }
 
   // not necessary in current version
-  private roomAccountDataListener(): void {
+  /*private roomAccountDataListener(): void {
     // Fires whenever room account data changes
     this.matrixClient.on('Room.accountData', (event, room, oldEvent) => {
       // if (Utils.log) console.log('got account data change' + event.getType());
@@ -215,7 +210,7 @@ export class ObservableService implements ObservableInterface {
         }
       }
     });
-  }
+  }*/
 
   private timelineListener(): void {
     // Fires whenever the timeline in a room is updated
@@ -237,6 +232,7 @@ export class ObservableService implements ObservableInterface {
                 if (Utils.log) { console.log('got an old expense. name: ' + event.getContent().name); }
                 if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
                 this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
+                console.log(this.transactions[room.roomId]);
               } else if (event.isRelation('m.replace')) {
                 if (Utils.log) { console.log('got an old editing of an expense. name: ' + event.getContent().name); }
                 // this.oldModifiedTransactions[room.roomId].push(transaction);
@@ -308,8 +304,9 @@ export class ObservableService implements ObservableInterface {
   }
 
   public async roomCallback(room): Promise<void> {
-    console.log('0');
     const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
+    console.log('members');
+    console.log(members);
     if (members[this.matrixClient.getUserId()].membership === 'invite') {
       await this.matrixClient.joinRoom(room.roomId);
     }
@@ -371,6 +368,7 @@ export class ObservableService implements ObservableInterface {
 
   private getExpenseFromEvent(room, event): TransactionType {
     const content = event.getContent();
+    console.log('content');
     console.log(content);
     return {transactionType: ObservableService.TRANSACTION_TYPE_EXPENSE,
       transactionId: event.getId(),
@@ -392,9 +390,9 @@ export class ObservableService implements ObservableInterface {
       name: content.name,
       creationDate: event.getDate(),
       groupId: room.roomId,
-      payerId: content.payerId,
+      payerId: content.payer,
       payerAmount: this.SumUpRecipientAmounts(content.amounts), // maybe do that calculation in BasicDataUpdateService
-      recipientIds: content.recipientIds,
+      recipientIds: content.recipients,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
   }
