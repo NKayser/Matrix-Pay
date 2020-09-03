@@ -21,28 +21,37 @@ import {CreateGroupModalComponent} from "../ViewModel/create-group-modal/create-
 import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
 import {Observable, of, Subject} from "rxjs";
 import {SuccessfulResponse} from "../ServerCommunication/Response/SuccessfulResponse";
+import {AddMemberToGroupModalComponent} from "../ViewModel/add-user-to-group-modal/add-member-to-group-modal.component";
 
 
 describe('ViewModel_ServerCommunication', () => {
+    // Components
     let loginComponent: LoginComponent;
     let groupComponent: GroupSelectionComponent;
     let createGroupComponent: CreateGroupModalComponent;
+    let addMemberComponent: AddMemberToGroupModalComponent;
+
+    // Fixtures
     let loginFixture: ComponentFixture<LoginComponent>;
     let groupFixture: ComponentFixture<GroupSelectionComponent>;
     let createGroupFixture: ComponentFixture<CreateGroupModalComponent>;
+    let addMemberFixture: ComponentFixture<AddMemberToGroupModalComponent>;
 
-    let matDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
+    // Modals
+    let createGroupMatDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
+    let addMemberMatDialogRef: jasmine.SpyObj<MatDialogRef<AddMemberToGroupModalComponent>>;
 
     // Mock Matrix-js-sdk methods and Data Model Service
     let classProviderSpy: jasmine.SpyObj<MatrixClassProviderService>;
     let dataModelService: jasmine.SpyObj<DataModelService>;
 
+    // Mocked Client
+    let mockedClient: jasmine.SpyObj<MatrixClient>;
+
     // Real Services
     let matrixClientService: MatrixClientService;
     let matrixEmergentDataService: MatrixEmergentDataService;
     let matrixBasicDataService: MatrixBasicDataService;
-
-    let mockedClient: jasmine.SpyObj<MatrixClient>;
 
     beforeEach(async(() => {
         classProviderSpy = jasmine.createSpyObj('MatrixClassProviderService',
@@ -88,15 +97,20 @@ describe('ViewModel_ServerCommunication', () => {
         matrixEmergentDataService = TestBed.inject(MatrixEmergentDataService);
         matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
 
-        matDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
+        // MatDialogRefs
+        createGroupMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
+        addMemberMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<AddMemberToGroupModalComponent>>;
 
         // Components
         loginFixture = TestBed.createComponent(LoginComponent);
         groupFixture = TestBed.createComponent(GroupSelectionComponent);
         createGroupFixture = TestBed.createComponent(CreateGroupModalComponent);
+        addMemberFixture = TestBed.createComponent(AddMemberToGroupModalComponent);
+
         loginComponent = loginFixture.componentInstance;
         groupComponent = groupFixture.componentInstance;
         createGroupComponent = createGroupFixture.componentInstance;
+        addMemberComponent = addMemberFixture.componentInstance;
     }));
 
     async function login(): Promise<void> {
@@ -164,39 +178,39 @@ describe('ViewModel_ServerCommunication', () => {
 
     // Test-case T30
     it('should create group', async (done: DoneFn) => {
-        await login();
-        // @ts-ignore
-        mockedClient.createRoom.and.returnValue(Promise.resolve({room_id: 'room_id'}));
-        mockedClient.sendStateEvent.and.returnValue(Promise.resolve());
-
+        // Stub Values
         const c1 = new Contact('c1', 'Alice');
         const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
-        dataModelService.getUser.and.returnValue(stubValueUser);
-
         const data = {
             groupName: 'name_g1',
             currency: Currency.USD
         };
-        const basicSpy = spyOn(matrixBasicDataService, 'groupCreate').and.callThrough();
-        // @ts-ignore
-        const modalSpyOpen = spyOn(groupComponent.dialog, 'open').and.returnValue({afterClosed: () => of(data)});
-
         const g1 = new Group('g1', 'name_g1', Currency.USD);
         const g2 = new Group('g2', 'name_g2', Currency.USD);
 
+        // Mocks
+        // @ts-ignore
+        mockedClient.createRoom.and.returnValue(Promise.resolve({room_id: 'room_id'}));
+        mockedClient.sendStateEvent.and.returnValue(Promise.resolve());
+        dataModelService.getUser.and.returnValue(stubValueUser);
         dataModelService.getGroups.and.returnValue([g1, g2]);
+
+        // Spies
+        // @ts-ignore
+        const modalSpyOpen = spyOn(groupComponent.dialog, 'open').and.returnValue({afterClosed: () => of(data)});
+        const basicSpy = spyOn(matrixBasicDataService, 'groupCreate').and.callThrough();
+
+        // Calls
+        await login();
         loginFixture.detectChanges();
         groupComponent.addGroup();
-
-        expect(modalSpyOpen).toHaveBeenCalled();
-
-        // const createModal = modalSpyOpen.calls.mostRecent().returnValue;
-
         createGroupComponent.data = data;
         createGroupComponent.ngOnInit();
         createGroupComponent.onSave();
 
-        expect(matDialogRef.close).toHaveBeenCalledWith(data);
+        // Expectations
+        expect(modalSpyOpen).toHaveBeenCalled();
+        expect(createGroupMatDialogRef.close).toHaveBeenCalledWith(data);
         expect(basicSpy).toHaveBeenCalledWith('name_g1', Currency.USD.toString());
         const actualResponse = await basicSpy.calls.mostRecent().returnValue;
         expect(actualResponse instanceof SuccessfulResponse).toBe(true);
@@ -207,24 +221,40 @@ describe('ViewModel_ServerCommunication', () => {
 
     // Test-case T40
     it('check add group members', async (done: DoneFn) => {
-        await preparedLogin();
-
-        mockedClient.invite.and.returnValue(Promise.resolve());
-
-        const basicSpy = spyOn(matrixBasicDataService, 'groupAddMember').and.callThrough();
-
+        // Define Stub Values
         const c1 = new Contact('c1', 'Alice');
         const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
-        dataModelService.getUser.and.returnValue(stubValueUser);
-
         const g1 = new Group('g1', 'name_g1', Currency.USD);
         const g2 = new Group('g2', 'name_g2', Currency.USD);
+        const data = {
+            group: g1,
+            user: '@username:host'
+        };
 
+        // Spies
+        const basicSpy = spyOn(matrixBasicDataService, 'groupAddMember').and.callThrough();
+        // @ts-ignore
+        const modalSpyOpen = spyOn(groupComponent.dialog, 'open').and.returnValue({afterClosed: () => of(data)});
+
+        // Mocking
+        mockedClient.invite.and.returnValue(Promise.resolve());
+        dataModelService.getUser.and.returnValue(stubValueUser);
         dataModelService.getGroups.and.returnValue([g1, g2]);
+
+        // login
+        await preparedLogin();
+
+        // Add member to group
         groupFixture.detectChanges();
         groupComponent.addMemberToGroup();
-        expect(basicSpy).toHaveBeenCalled();
+        addMemberComponent.data = data;
+        addMemberComponent.ngOnInit();
+        addMemberComponent.onSave();
 
+        // Expected
+        expect(modalSpyOpen).toHaveBeenCalled();
+        expect(addMemberMatDialogRef.close).toHaveBeenCalledWith(data);
+        expect(basicSpy).toHaveBeenCalledWith(data.group.groupId, data.user);
         const actualResponse = await basicSpy.calls.mostRecent().returnValue;
         expect(actualResponse instanceof SuccessfulResponse).toBe(true);
 
