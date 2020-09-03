@@ -398,6 +398,7 @@ export class BasicDataUpdateService {
     });
   }*/
 
+
   /**
    * Adds a number of transactions to a group. Calculates balances for this group afterwards.
    * TODO: create activity. dont calculate recommendations of all transactions are PAYBACK. remove recommendations from group.
