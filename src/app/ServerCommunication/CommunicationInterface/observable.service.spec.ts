@@ -502,7 +502,7 @@ describe('ObservableService', () => {
             getSender(): string {
                 return userId;
             },
-            isRelation(): boolean {
+            isRelation(relation: string): boolean {
                 return true;
             }
         },
@@ -616,4 +616,195 @@ describe('ObservableService', () => {
         }, room, {}, {}, {liveEvent: false, }
     );
   });
+
+  it('message create room new test', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {roomId: 'room1'};
+
+    const activityObservable: Observable<GroupActivityType> = service.getGroupActivityObservable();
+    activityObservable.subscribe((activity: GroupActivityType) => {
+        expect(activity).toEqual(
+            {groupId: room.roomId, creatorId: userId, creationDate: d1}
+        );
+        done();
+    });
+
+    clientEmitter.emit('Room.timeline',
+        {
+            getType(): string {
+                return 'm.room.create';
+            },
+            getContent(): object {
+                return {
+                    creator: userId,
+                };
+            },
+            getDate(): Date {
+                return d1;
+            }
+        },
+        room, {}, {}, {liveEvent: true, }
+    );
+  });
+
+  it('message payback test', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {roomId: 'room1'};
+    // @ts-ignore
+    const type = ObservableService.TRANSACTION_TYPE_PAYBACK;
+
+    const messageObservable: Observable<TransactionType[]> = service.getMultipleNewTransactionsObservable();
+    messageObservable.subscribe((transactions: TransactionType[]) => {
+        expect(transactions).toEqual(
+            [{transactionType: type,
+                transactionId: 't1',
+                name: 'name_t1',
+                creationDate: d1,
+                groupId: 'room1',
+                payerId: userId,
+                payerAmount: 24,
+                recipientIds: ['id2', 'id3', 'id4', 'id5'],
+                recipientAmounts: [9, 5, 3, 7],
+                senderId: userId}]
+        );
+        done();
+    });
+
+    clientEmitter.emit('Room.timeline',
+        {
+            getType(): string {
+                return 'com.matrixpay.payback';
+            },
+            getContent(): object {
+                return {
+                    name: 'name_t1',
+                    payer: userId,
+                    amounts: [9, 5, 3, 7],
+                    recipients: ['id2', 'id3', 'id4', 'id5'],
+                };
+            },
+            getId(): string {
+                return 't1';
+            },
+            getDate(): Date {
+                return d1;
+            },
+            getSender(): string {
+                return userId;
+            }
+        },
+        room, {}, {}, {liveEvent: true, }
+    );
+  });
+
+  it('message expense test', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {roomId: 'room1'};
+    // @ts-ignore
+    const type = ObservableService.TRANSACTION_TYPE_EXPENSE;
+
+    const messageObservable: Observable<TransactionType[]> = service.getMultipleNewTransactionsObservable();
+    messageObservable.subscribe((transactions: TransactionType[]) => {
+        expect(transactions).toEqual(
+            [{transactionType: type,
+                transactionId: 't2',
+                name: 'name_t2',
+                creationDate: d1,
+                groupId: 'room1',
+                payerId: userId,
+                payerAmount: 24,
+                recipientIds: ['id2', 'id3', 'id4', 'id5'],
+                recipientAmounts: [9, 5, 3, 7],
+                senderId: userId}]
+        );
+        done();
+    });
+
+    clientEmitter.emit('Room.timeline',
+        {
+            getType(): string {
+                return 'com.matrixpay.expense';
+            },
+            getContent(): object {
+                return {
+                    name: 'name_t2',
+                    payer: userId,
+                    amounts: [9, 5, 3, 7],
+                    recipients: ['id2', 'id3', 'id4', 'id5'],
+                };
+            },
+            getId(): string {
+                return 't2';
+            },
+            getDate(): Date {
+                return d1;
+            },
+            getSender(): string {
+                return userId;
+            },
+            isRelation(): boolean {
+                return false;
+            }
+        },
+        room, {}, {}, {liveEvent: true, }
+    );
+  });
+
+  it('message expense test edit', (done: DoneFn) => {
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = {roomId: 'room1'};
+    // @ts-ignore
+    const type = ObservableService.TRANSACTION_TYPE_EXPENSE;
+
+    const modifiedObservable: Observable<TransactionType> = service.getModifiedTransactionObservable();
+    modifiedObservable.subscribe((transaction: TransactionType) => {
+        expect(transaction).toEqual(
+            {transactionType: type,
+                transactionId: 't2',
+                name: 'name_t2',
+                creationDate: d1,
+                groupId: 'room1',
+                payerId: userId,
+                payerAmount: 24,
+                recipientIds: ['id2', 'id3', 'id4', 'id5'],
+                recipientAmounts: [9, 5, 3, 7],
+                senderId: userId}
+        );
+        done();
+    });
+
+    clientEmitter.emit('Room.timeline',
+        {
+            getType(): string {
+                return 'com.matrixpay.expense';
+            },
+            getContent(): object {
+                return {
+                    name: 'name_t2',
+                    payer: userId,
+                    amounts: [9, 5, 3, 7],
+                    recipients: ['id2', 'id3', 'id4', 'id5'],
+                };
+            },
+            getId(): string {
+                return 't2';
+            },
+            getDate(): Date {
+                return d1;
+            },
+            getSender(): string {
+                return userId;
+            },
+            isRelation(relation: string): boolean {
+                return true;
+            }
+        },
+        room, {}, {}, {liveEvent: true, }
+    );
+  });
+
 });

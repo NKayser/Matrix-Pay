@@ -285,7 +285,7 @@ export class ObservableService implements ObservableInterface {
                 this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
               } else if (event.isRelation('m.replace')) {
                 if (Utils.log) { console.log('got editing of payback. name: ' + event.getContent().name); }
-                this.modifiedTransactionsObservable.next(this.getPaybackFromEvent(room, event));
+                this.modifiedTransactionsObservable.next(this.getExpenseFromEvent(room, event));
               }
               break;
             }
