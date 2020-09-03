@@ -26,6 +26,8 @@ export class GroupService {
   private static readonly ERRCODE_UNRECOGNIZED: string = 'M_UNRECOGNIZED';
   private static readonly ERRCODE_INVALID_PARAM: string = 'M_INVALID_PARAM';
   private static readonly CURRENCY_KEY: string = 'com.matrixpay.currency';
+  private static readonly TYPE_KEY: string = 'org.matrix.msc1840';
+  private static readonly MATRIX_PAY_TYPE: string = 'MatrixPay';
   private static readonly RECOMMENDATIONS_KEY: string = 'recommendations';
   private static readonly ACCOUNT_DATA_KEY: string = 'accountData';
   private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways
@@ -178,6 +180,10 @@ export class GroupService {
 
     // Set the group settings (currency)
     await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, 'currency').then(
+      () => response = new SuccessfulResponse(roomId),
+      (err) => response = new UnsuccessfulResponse(GroupError.SetCurrency, err));
+
+    await client.sendStateEvent(roomId, GroupService.TYPE_KEY, {'roomType': GroupService.MATRIX_PAY_TYPE}, ' ').then(
       () => response = new SuccessfulResponse(roomId),
       (err) => response = new UnsuccessfulResponse(GroupError.SetCurrency, err));
 

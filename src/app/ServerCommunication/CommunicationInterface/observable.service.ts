@@ -83,7 +83,7 @@ export class ObservableService implements ObservableInterface {
         },
         "timeline": {
           "limit": 10,
-          "types": ["com.matrixpay.currency", 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense'],
+          "types": ["com.matrixpay.currency", 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense', 'm.room.create', 'm.room.member'],
         },
         "ephemeral": {
           "not_types": ["*"],
@@ -296,14 +296,18 @@ export class ObservableService implements ObservableInterface {
   private roomListener(): void {
     // Fires whenever invited to a room or joining a room
     this.matrixClient.on('Room', async room => {
-      const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getMembers();
-      if (Utils.log) console.log(members);
+      const roomType = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('org.matrix.msc1840', ' ');
+      console.log('---roomType---');
+      console.log(room.getLiveTimeline().getState(EventTimeline.FORWARDS));
+      console.log(roomType);
+      const member = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getMember(this.matrixClient.getUserId());
+      if (Utils.log) console.log(member);
       if (Utils.log) console.log(this.matrixClient.getUserId());
-      if (members[this.matrixClient.getUserId()].membership === 'invite') {
-        this.matrixClient.joinRoom(room.roomId);
-      }
-      if (members[this.matrixClient.getUserId()].membership === 'join') {
+      if (member.membership === 'join') {
         await this.processNewRoom(room);
+      }
+      if (member.membership === 'invite') {
+        await this.matrixClient.joinRoom(room.roomId);
       }
     });
   }
