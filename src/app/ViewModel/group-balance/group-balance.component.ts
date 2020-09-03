@@ -62,17 +62,21 @@ export class GroupBalanceComponent implements OnChanges {
 
     this.userContact = this.dataModelService.getUser().contact;
     // Initializes the graph with the balances of the members
-    this.balanceData = [];
-    const groupMembers = this.group.groupmembers;
-    for (const groupMember of groupMembers){
-      this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance / 100});
-    }
-
+    this.updateBalances();
+    this.dataModelService.getBalanceEmitter().subscribe(this.updateBalances());
 
     this.recommendations = this.group.recommendations;
 
     // initialize the number of the grid list columns for the recommendations
     this.breakpoint = gridListResize(window.innerWidth, 1920, 3);
+  }
+
+  private updateBalances(): void {
+    this.balanceData = [];
+    const groupMembers = this.group.groupmembers;
+    for (const groupMember of groupMembers){
+      this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance / 100});
+    }
   }
 
   /**

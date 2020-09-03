@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {User} from './User/User';
 import {Status} from './Status/Status';
 import {Group} from './Group/Group';
@@ -10,8 +10,6 @@ import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
 import {Subject} from 'rxjs';
-import {Recommendation} from './Group/Recommendation';
-import {AtomarChange} from './Group/AtomarChange';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +20,11 @@ import {AtomarChange} from './Group/AtomarChange';
 export class DataModelService {
   private status: Status;
   private _userExists = false;
+  private balanceChangeEmitter: EventEmitter<void> = new EventEmitter<void>();
+
+  public getBalanceEmitter(): EventEmitter<void> {
+    return this.balanceChangeEmitter;
+  }
 
   get userExists(): boolean {
     return this._userExists;
@@ -177,5 +180,7 @@ export class DataModelService {
         // Do some Error stuff
       }
     }*/
+
+    this.balanceChangeEmitter.emit();
   }
 }
