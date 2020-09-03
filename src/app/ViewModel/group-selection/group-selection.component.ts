@@ -98,15 +98,10 @@ export class GroupSelectionComponent implements OnInit{
       width: '300px',
       data: {groupName: '', currency: this.dataModelService.getUser().currency}
     });
-    console.log(this.dialog);
-    console.log(typeof(this.dialog));
-    console.log(dialogRef);
-    console.log(typeof(dialogRef));
 
     dialogRef.afterClosed().subscribe(result => {
       this.createGroupData = result;
       if (this.createGroupData !== undefined){
-
         this.loadingAddGroup = true;
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupCreate(this.createGroupData.groupName,
           this.createGroupData.currency.toString()))

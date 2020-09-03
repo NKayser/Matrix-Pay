@@ -19,7 +19,8 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog
 import {MockDialog, MockDialogCancel} from "../ViewModel/_mockServices/MockDialog";
 import {CreateGroupModalComponent} from "../ViewModel/create-group-modal/create-group-modal.component";
 import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
-import {Observable, Subject} from "rxjs";
+import {Observable, of, Subject} from "rxjs";
+import {SuccessfulResponse} from "../ServerCommunication/Response/SuccessfulResponse";
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -144,13 +145,23 @@ describe('ViewModel_ServerCommunication', () => {
     });
 
     // Test-case T30
-    it('check create group confirm', () => {
+    it('check create group confirm', async (done: DoneFn) => {
+        await login();
+        // @ts-ignore
+        mockedClient.createRoom.and.returnValue(Promise.resolve({room_id: 'room_id'}));
+        mockedClient.sendStateEvent.and.returnValue(Promise.resolve());
+
         const c1 = new Contact('c1', 'Alice');
         const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
         dataModelService.getUser.and.returnValue(stubValueUser);
 
-        const basicSpy = spyOn(matrixBasicDataService, 'groupCreate');
-        const modalSpyOpen = spyOn(groupComponent.dialog, 'open').and.callThrough();
+        const data = {
+            groupName: 'name_g1',
+            currency: Currency.USD
+        };
+        const basicSpy = spyOn(matrixBasicDataService, 'groupCreate').and.callThrough();
+        // @ts-ignore
+        const modalSpyOpen = spyOn(groupComponent.dialog, 'open').and.returnValue({afterClosed: () => of(data)});
 
         const g1 = new Group('g1', 'name_g1', Currency.USD);
         const g2 = new Group('g2', 'name_g2', Currency.USD);
@@ -160,23 +171,19 @@ describe('ViewModel_ServerCommunication', () => {
         groupComponent.addGroup();
 
         expect(modalSpyOpen).toHaveBeenCalled();
-        console.log(modalSpyOpen.calls.mostRecent());
 
-        const createModal = modalSpyOpen.calls.mostRecent().returnValue;
-
-        //const modalSpyAfterClose = spyOn(createModal, 'afterClosed').and.callThrough();
-
-        const data = {
-            groupName: 'name_g1',
-            currency: Currency.USD
-        };
+        // const createModal = modalSpyOpen.calls.mostRecent().returnValue;
 
         createGroupComponent.data = data;
         createGroupComponent.ngOnInit();
-
         createGroupComponent.onSave();
-        expect(matDialogRef.close).toHaveBeenCalledWith(data);
 
-        expect(basicSpy).toHaveBeenCalled();
+        expect(matDialogRef.close).toHaveBeenCalledWith(data);
+        expect(basicSpy).toHaveBeenCalledWith('name_g1', Currency.USD.toString());
+        const actualResponse = await basicSpy.calls.mostRecent().returnValue;
+        expect(actualResponse instanceof SuccessfulResponse).toBe(true);
+        expect(actualResponse.getValue()).toBe('room_id');
+
+        done();
     });
 });
