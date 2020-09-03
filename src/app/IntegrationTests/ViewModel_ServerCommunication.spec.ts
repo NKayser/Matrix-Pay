@@ -50,7 +50,7 @@ describe('ViewModel_ServerCommunication', () => {
         dataModelService = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'navItem$']);
         mockedClient = jasmine.createSpyObj('MatrixClient',
             ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
-                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on']);
+                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on', 'removeListener']);
 
         dataModelService.navItem$ = (new Subject()).asObservable();
         classProviderSpy.createClient.and.returnValue(Promise.resolve(mockedClient));
@@ -116,6 +116,24 @@ describe('ViewModel_ServerCommunication', () => {
         await loginComponent.login();
     }
 
+    async function preparedLogin(): Promise<void> {
+        // Mock the Client
+        classProviderSpy.findClientConfig.and.callFake(() => {
+            const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
+            return Promise.resolve(config);
+        });
+        mockedClient.loginWithPassword.and.returnValue(Promise.resolve());
+        mockedClient.setAccountData.and.returnValue(null);
+        mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
+        // @ts-ignore
+        mockedClient.on.and.callFake((event: string, func: any) => {func('PREPARED', null, null);});
+
+        // Login with these values
+        loginComponent.matrixUrlControl.setValue('@username:host');
+        loginComponent.passwordControl.setValue('password123');
+        await loginComponent.login();
+    }
+
     // Test-case T10
     it('should login', async (done: DoneFn) => {
         await login();
@@ -145,7 +163,7 @@ describe('ViewModel_ServerCommunication', () => {
     });
 
     // Test-case T30
-    it('check create group confirm', async (done: DoneFn) => {
+    it('should create group', async (done: DoneFn) => {
         await login();
         // @ts-ignore
         mockedClient.createRoom.and.returnValue(Promise.resolve({room_id: 'room_id'}));
@@ -183,6 +201,32 @@ describe('ViewModel_ServerCommunication', () => {
         const actualResponse = await basicSpy.calls.mostRecent().returnValue;
         expect(actualResponse instanceof SuccessfulResponse).toBe(true);
         expect(actualResponse.getValue()).toBe('room_id');
+
+        done();
+    });
+
+    // Test-case T40
+    it('check add group members', async (done: DoneFn) => {
+        await preparedLogin();
+
+        mockedClient.invite.and.returnValue(Promise.resolve());
+
+        const basicSpy = spyOn(matrixBasicDataService, 'groupAddMember').and.callThrough();
+
+        const c1 = new Contact('c1', 'Alice');
+        const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+        dataModelService.getUser.and.returnValue(stubValueUser);
+
+        const g1 = new Group('g1', 'name_g1', Currency.USD);
+        const g2 = new Group('g2', 'name_g2', Currency.USD);
+
+        dataModelService.getGroups.and.returnValue([g1, g2]);
+        groupFixture.detectChanges();
+        groupComponent.addMemberToGroup();
+        expect(basicSpy).toHaveBeenCalled();
+
+        const actualResponse = await basicSpy.calls.mostRecent().returnValue;
+        expect(actualResponse instanceof SuccessfulResponse).toBe(true);
 
         done();
     });
