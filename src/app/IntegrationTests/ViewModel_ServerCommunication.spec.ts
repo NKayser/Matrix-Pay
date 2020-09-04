@@ -22,6 +22,7 @@ import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
 import {Observable, of, Subject} from "rxjs";
 import {SuccessfulResponse} from "../ServerCommunication/Response/SuccessfulResponse";
 import {AddMemberToGroupModalComponent} from "../ViewModel/add-user-to-group-modal/add-member-to-group-modal.component";
+import {LeaveGroupModalComponent} from "../ViewModel/leave-group-modal/leave-group-modal.component";
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -30,16 +31,19 @@ describe('ViewModel_ServerCommunication', () => {
     let groupComponent: GroupSelectionComponent;
     let createGroupComponent: CreateGroupModalComponent;
     let addMemberComponent: AddMemberToGroupModalComponent;
+    let leaveGroupComponent: LeaveGroupModalComponent;
 
     // Fixtures
     let loginFixture: ComponentFixture<LoginComponent>;
     let groupFixture: ComponentFixture<GroupSelectionComponent>;
     let createGroupFixture: ComponentFixture<CreateGroupModalComponent>;
     let addMemberFixture: ComponentFixture<AddMemberToGroupModalComponent>;
+    let leaveGroupFixture: ComponentFixture<LeaveGroupModalComponent>;
 
     // Modals
     let createGroupMatDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
     let addMemberMatDialogRef: jasmine.SpyObj<MatDialogRef<AddMemberToGroupModalComponent>>;
+    let leaveGroupMatDialogRef: jasmine.SpyObj<MatDialogRef<LeaveGroupModalComponent>>;
 
     // Mock Matrix-js-sdk methods and Data Model Service
     let classProviderSpy: jasmine.SpyObj<MatrixClassProviderService>;
@@ -67,11 +71,11 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Components
         TestBed.configureTestingModule({
-            declarations: [ LoginComponent, GroupSelectionComponent, CreateGroupModalComponent ],
+            declarations: [ LoginComponent, GroupSelectionComponent ],
             providers: [
                 { provide: MatrixClassProviderService, useValue: classProviderSpy },
-                { provide: MatDialog, useValue: MockDialog },
                 { provide: DataModelService, useValue: dataModelService },
+                { provide: MatDialog, useValue: MockDialog },
                 { provide: MatDialogRef, useValue: spyDialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: []},
                 MatrixClientService,
@@ -100,17 +104,20 @@ describe('ViewModel_ServerCommunication', () => {
         // MatDialogRefs
         createGroupMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
         addMemberMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<AddMemberToGroupModalComponent>>;
+        leaveGroupMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<LeaveGroupModalComponent>>;
 
         // Components
         loginFixture = TestBed.createComponent(LoginComponent);
         groupFixture = TestBed.createComponent(GroupSelectionComponent);
         createGroupFixture = TestBed.createComponent(CreateGroupModalComponent);
         addMemberFixture = TestBed.createComponent(AddMemberToGroupModalComponent);
+        leaveGroupFixture = TestBed.createComponent(LeaveGroupModalComponent);
 
         loginComponent = loginFixture.componentInstance;
         groupComponent = groupFixture.componentInstance;
         createGroupComponent = createGroupFixture.componentInstance;
         addMemberComponent = addMemberFixture.componentInstance;
+        leaveGroupComponent = leaveGroupFixture.componentInstance;
     }));
 
     async function login(): Promise<void> {
@@ -220,7 +227,7 @@ describe('ViewModel_ServerCommunication', () => {
     });
 
     // Test-case T40
-    it('check add group members', async (done: DoneFn) => {
+    it('should add group members', async (done: DoneFn) => {
         // Define Stub Values
         const c1 = new Contact('c1', 'Alice');
         const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
@@ -260,4 +267,52 @@ describe('ViewModel_ServerCommunication', () => {
 
         done();
     });
+
+    // Test-case T50
+    it('should leave group', async (done: DoneFn) => {
+        // Define Stub Values
+        const c1 = new Contact('c1', 'Alice');
+        const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+        const g1 = new Group('g1', 'name_g1', Currency.USD);
+        const g2 = new Group('g2', 'name_g2', Currency.USD);
+        const data = {
+            group: g1
+        };
+
+        // Spies
+        const basicSpy = spyOn(matrixBasicDataService, 'leaveGroup').and.callThrough();
+        // @ts-ignore
+        const modalSpyOpen = spyOn(groupComponent.dialog, 'open').and.returnValue({afterClosed: () => of(data)});
+
+        // Mocking
+        mockedClient.leave.and.returnValue(Promise.resolve());
+        mockedClient.getRoom.and.callFake((groupId: string) => {
+            return groupId === 'g1' ? true : undefined;
+        });
+        dataModelService.getUser.and.returnValue(stubValueUser);
+        dataModelService.getGroups.and.returnValue([g1, g2]);
+
+        // login
+        await preparedLogin();
+
+        // Add member to group
+        groupFixture.detectChanges();
+        groupComponent.leaveGroup();
+        leaveGroupComponent.data = data;
+        leaveGroupComponent.ngOnInit();
+        leaveGroupComponent.onSave();
+
+        // Expected
+        expect(modalSpyOpen).toHaveBeenCalled();
+        expect(leaveGroupMatDialogRef.close).toHaveBeenCalledWith(data);
+        expect(basicSpy).toHaveBeenCalledWith(data.group.groupId);
+        const actualResponse = await basicSpy.calls.mostRecent().returnValue;
+        console.log(actualResponse);
+        expect(actualResponse instanceof SuccessfulResponse).toBe(true);
+
+        done();
+    });
+
+    // T60: not implemented. ViewModel needs to check if balances are 0.
+
 });
