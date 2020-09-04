@@ -23,6 +23,7 @@ import {Observable, of, Subject} from "rxjs";
 import {SuccessfulResponse} from "../ServerCommunication/Response/SuccessfulResponse";
 import {AddMemberToGroupModalComponent} from "../ViewModel/add-user-to-group-modal/add-member-to-group-modal.component";
 import {LeaveGroupModalComponent} from "../ViewModel/leave-group-modal/leave-group-modal.component";
+import {SettingsComponent} from "../ViewModel/settings/settings.component";
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -32,6 +33,7 @@ describe('ViewModel_ServerCommunication', () => {
     let createGroupComponent: CreateGroupModalComponent;
     let addMemberComponent: AddMemberToGroupModalComponent;
     let leaveGroupComponent: LeaveGroupModalComponent;
+    let settingsComponent: SettingsComponent;
 
     // Fixtures
     let loginFixture: ComponentFixture<LoginComponent>;
@@ -39,6 +41,7 @@ describe('ViewModel_ServerCommunication', () => {
     let createGroupFixture: ComponentFixture<CreateGroupModalComponent>;
     let addMemberFixture: ComponentFixture<AddMemberToGroupModalComponent>;
     let leaveGroupFixture: ComponentFixture<LeaveGroupModalComponent>;
+    let settingsFixture: ComponentFixture<SettingsComponent>;
 
     // Modals
     let createGroupMatDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
@@ -71,7 +74,7 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Components
         TestBed.configureTestingModule({
-            declarations: [ LoginComponent, GroupSelectionComponent ],
+            declarations: [ LoginComponent, GroupSelectionComponent, SettingsComponent ],
             providers: [
                 { provide: MatrixClassProviderService, useValue: classProviderSpy },
                 { provide: DataModelService, useValue: dataModelService },
@@ -112,12 +115,14 @@ describe('ViewModel_ServerCommunication', () => {
         createGroupFixture = TestBed.createComponent(CreateGroupModalComponent);
         addMemberFixture = TestBed.createComponent(AddMemberToGroupModalComponent);
         leaveGroupFixture = TestBed.createComponent(LeaveGroupModalComponent);
+        settingsFixture = TestBed.createComponent(SettingsComponent);
 
         loginComponent = loginFixture.componentInstance;
         groupComponent = groupFixture.componentInstance;
         createGroupComponent = createGroupFixture.componentInstance;
         addMemberComponent = addMemberFixture.componentInstance;
         leaveGroupComponent = leaveGroupFixture.componentInstance;
+        settingsComponent = settingsFixture.componentInstance;
     }));
 
     async function login(): Promise<void> {
@@ -295,7 +300,7 @@ describe('ViewModel_ServerCommunication', () => {
         // login
         await preparedLogin();
 
-        // Add member to group
+        // Leave group
         groupFixture.detectChanges();
         groupComponent.leaveGroup();
         leaveGroupComponent.data = data;
@@ -315,4 +320,34 @@ describe('ViewModel_ServerCommunication', () => {
 
     // T60: not implemented. ViewModel needs to check if balances are 0.
 
+    it('should change currency', async (done: DoneFn) => {
+        // Define Stub Values
+        const stubValueUser = new User(null, Currency.USD, Language.GERMAN);
+
+        // Spies
+        const basicSpy = spyOn(matrixBasicDataService, 'userChangeDefaultCurrency').and.callThrough();
+
+        // Mocking
+        dataModelService.getUser.and.returnValue(stubValueUser);
+
+        // Before test
+        settingsFixture.detectChanges();
+        expect(settingsComponent.selectedCurrency).toBe(stubValueUser.currency);
+
+        // login
+        await preparedLogin();
+
+        // Add member to group
+        settingsComponent.selectedCurrency = Currency.EUR;
+        settingsFixture.detectChanges();
+        settingsComponent.applySettings();
+
+        // Expected
+        expect(basicSpy).toHaveBeenCalledWith('EUR');
+        const actualResponse = await basicSpy.calls.mostRecent().returnValue;
+        console.log(actualResponse);
+        expect(actualResponse instanceof SuccessfulResponse).toBe(true);
+
+        done();
+    });
 });
