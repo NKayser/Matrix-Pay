@@ -3,6 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { PaymentModalComponent } from './payment-modal.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Contact} from '../../DataModel/Group/Contact';
+import {Currency} from '../../DataModel/Utils/Currency';
 
 describe('PaymentModalComponent', () => {
   let component: PaymentModalComponent;
@@ -47,7 +48,8 @@ describe('PaymentModalComponent', () => {
       payer: c1,
       recipients: [c1, c2, c3],
       amount: amountArray,
-      isAdded: [true, true, true]
+      isAdded: [true, true, true],
+      currency: Currency.EUR
     };
 
     component.data = data;
@@ -70,7 +72,8 @@ describe('PaymentModalComponent', () => {
       payer: c1,
       recipients: [c1, c2, c3],
       amount: amountArray,
-      isAdded: [true, true, true]
+      isAdded: [true, true, true],
+      currency: Currency.EUR
     };
 
     component.data = data;
@@ -93,7 +96,8 @@ describe('PaymentModalComponent', () => {
       payer: c1,
       recipients: [c1, c2, c3],
       amount: amountArray,
-      isAdded: [true, true, true]
+      isAdded: [true, true, true],
+      currency: Currency.EUR
     };
 
     component.data = data;

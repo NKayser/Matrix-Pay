@@ -327,6 +327,7 @@ export class ObservableService implements ObservableInterface {
       if (Utils.log) console.log(member);
       if (Utils.log) console.log(this.matrixClient.getUserId());
       if (member.membership === 'join') {
+        console.log('triggered');
         await this.processNewRoom(room);
       }
       if (member.membership === 'invite') {
