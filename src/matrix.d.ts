@@ -32,6 +32,7 @@ declare class MatrixClient extends EventEmitter {
   getRooms(): Room[];
   leave(roomId: string): Promise<any>;
   scrollback(room: Room, limit: number): Promise<any>;
+  loginWithPassword(account: string, password: string): Promise<any>;
 }
 
 declare class MatrixEvent {

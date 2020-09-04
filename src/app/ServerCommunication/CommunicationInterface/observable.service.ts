@@ -75,6 +75,7 @@ export class ObservableService implements ObservableInterface {
     this.roomListener();
     this.membershipListener();
     this.timelineResetListener();
+    this.roomStateListener();
 
     const filter = Filter.fromJson(this.matrixClient.credentials.userId, 'edu.kit.tm.dsn.psess2020.matrixpay-v1', {
       room: {
@@ -269,7 +270,6 @@ export class ObservableService implements ObservableInterface {
           // Process the events retrieved by /sync
           switch (event.getType()) {
             case ('com.matrixpay.payback'): {
-              console.log('live event');
               this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
               break;
             }
@@ -319,8 +319,19 @@ export class ObservableService implements ObservableInterface {
   private roomListener(): void {
     // Fires whenever invited to a room or joining a room
     this.matrixClient.on('Room', async room => {
-        console.log('triggered');
-      await this.roomCallback(room);
+      const roomType = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('org.matrix.msc1840', ' ');
+      console.log('---roomType---');
+      console.log(room.getLiveTimeline().getState(EventTimeline.FORWARDS));
+      console.log(roomType);
+      const member = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getMember(this.matrixClient.getUserId());
+      if (Utils.log) console.log(member);
+      if (Utils.log) console.log(this.matrixClient.getUserId());
+      if (member.membership === 'join') {
+        await this.processNewRoom(room);
+      }
+      if (member.membership === 'invite') {
+        await this.matrixClient.joinRoom(room.roomId);
+      }
     });
   }
 
@@ -363,6 +374,12 @@ export class ObservableService implements ObservableInterface {
   private timelineResetListener(): void {
     this.matrixClient.on('Room.timelineReset', (room, timelineSet, resetAllTimelines) => {
       console.log('LiveTimeline in room ' + room.roomId + ' has been reset. Events may have been missed.');
+    });
+  }
+
+  private roomStateListener(): void {
+    this.matrixClient.on('RoomState.events', (event, state, prevEvent) => {
+      console.log(event.getType());
     });
   }
 

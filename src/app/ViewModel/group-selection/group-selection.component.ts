@@ -3,7 +3,7 @@ import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {Observable} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
 import {CreateGroupModalComponent, GroupCreateDialogData} from '../create-group-modal/create-group-modal.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {LeaveGroupDialogData, LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
 import {AddMemberToGroupDialogData, AddMemberToGroupModalComponent} from '../add-user-to-group-modal/add-member-to-group-modal.component';
 import {DataModelService} from '../../DataModel/data-model.service';
@@ -102,7 +102,6 @@ export class GroupSelectionComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.createGroupData = result;
       if (this.createGroupData !== undefined){
-
         this.loadingAddGroup = true;
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupCreate(this.createGroupData.groupName,
           this.createGroupData.currency.toString()))

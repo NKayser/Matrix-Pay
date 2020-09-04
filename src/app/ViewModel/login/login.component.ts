@@ -30,7 +30,7 @@ export class LoginComponent implements OnInit, OnDestroy{
   private subscription: Subscription;
 
   // gets the input values of the user and checks if they obey all requirements
-  public matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[a-z0-9.-]+:[a-z0-9.-]+')]);
+  public matrixUrlControl = new FormControl('', [Validators.required, Validators.pattern('@[_a-z0-9.-]+:[a-z0-9.-]+')]);
   public passwordControl = new FormControl('', [Validators.required]);
 
   constructor(private clientService: MatrixClientService,

@@ -26,10 +26,4 @@ export class UnsuccessfulResponse extends ServerResponse {
   public wasSuccessful(): boolean {
     return false;
   }
-
-  promise(): Promise<ServerResponse> {
-    // Always resolve promises.
-    // Promises are only "rejected" if an error is thrown.
-    return Promise.resolve(this);
-  }
 }
