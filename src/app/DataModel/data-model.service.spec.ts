@@ -40,7 +40,7 @@ describe('DataModelService', () => {
   });
 
   it('check init user', () => {
-    dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     expect(dataModelService.user.contact.name).toEqual('Alice');
   });
 
@@ -52,7 +52,7 @@ describe('DataModelService', () => {
 
 
   it('check groups', () => {
-    const u1 = dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    const u1 = dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     const g1 = u1.createGroup('g1', 'name_g1', Currency.EUR);
     const g2 = u1.createGroup('g2', 'name_g2', Currency.USD);
     expect(dataModelService.getGroups().length).toBe(2);
@@ -62,7 +62,7 @@ describe('DataModelService', () => {
   });
 
   it('check transactions', () => {
-    const u1 = dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    const u1 = dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     const g1 = u1.createGroup('g1', 'name_g1', Currency.EUR);
 
     const c1 = new Contact('c1', 'Alice');
@@ -86,7 +86,7 @@ describe('DataModelService', () => {
   });
 
   it('check balance calculation', () => {
-    const u1 = dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    const u1 = dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     const g1 = u1.createGroup('g1', 'name_g1', Currency.EUR);
 
     const c1 = new Contact('c1', 'Alice');
@@ -109,13 +109,13 @@ describe('DataModelService', () => {
   });
 
   it('check status', () => {
-    dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     expect(dataModelService.getStatus()).not.toEqual(null);
   });
 
   it('check user exists', () => {
     expect(dataModelService.userExists).toEqual(false);
-    dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     expect(dataModelService.userExists).toEqual(true);
   });
 

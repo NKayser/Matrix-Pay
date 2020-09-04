@@ -49,7 +49,7 @@ export class MatrixClientService implements ClientInterface {
     const configState: string = config['m.homeserver']['state'];
     if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
       return new UnsuccessfulResponse(ClientError.Autodiscovery,
-        config['m.homeserver']['error']).promise();
+        config['m.homeserver']['error']);
     }
     this.serverAddress = config['m.homeserver']['base_url'];
 
@@ -63,35 +63,41 @@ export class MatrixClientService implements ClientInterface {
 
     // Create a Client
     this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, store);
-
-    // Declared to be defined later. This is important for waiting on the "then" block.
-    let response: ServerResponse;
+    this.matrixClient.clearStores();
 
     // Login and get Access Token
-    this.accessToken = await this.matrixClient.loginWithPassword(account, password).then(
-      () => {
-        this.loggedIn = true;
-        response = new SuccessfulResponse();
-      },
-      (reason: string) => {
-        this.loggedIn = false;
-        console.log(reason);
-        response = new UnsuccessfulResponse(ClientError.InvalidPassword, reason);
-      });
-
-    // Only continue if getting access token was successful.
-    if (await response instanceof UnsuccessfulResponse) return response;
+    try {
+      this.accessToken = await this.matrixClient.loginWithPassword(account, password);
+      this.loggedIn = true;
+    } catch(error) {
+      this.loggedIn = false;
+      const errorMsg: string = error['data']['errcode'] + ': ' + error['data']['error'];
+      console.log(errorMsg);
+      return new UnsuccessfulResponse(ClientError.InvalidPassword, errorMsg);
+    }
 
     // Set settings to default values if non existent
     // First: get current settings, catch if not yet set
-    const currencyEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.CURRENCY_KEY).catch((err) => console.log('caught ' + err)); // content of the matrix event
-    const languageEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.LANGUAGE_KEY).catch((err) => console.log('caught ' + err));
+    let currencyEventContent;
+    let languageEventContent;
+
+    try {
+      currencyEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.CURRENCY_KEY);
+    } catch(error) {
+      console.log('caught ' + error.message + ' while getting currency setting');
+    }
+
+    try {
+      languageEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.LANGUAGE_KEY);
+    } catch(error) {
+      console.log('caught ' + error.message + ' while getting language setting');
+    }
 
     console.log(currencyEventContent);
 
     // Secondly: Set default settings on AccountData if previously not set.
     if (currencyEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
-      {'currency': MatrixClientService.DEFAULT_CURRENCY}); // TODO: find a way to avoid Magic number here
+      {'currency': MatrixClientService.DEFAULT_CURRENCY});
     if (languageEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
       {'language': MatrixClientService.DEFAULT_LANGUAGE});
 
@@ -107,14 +113,12 @@ export class MatrixClientService implements ClientInterface {
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.on('sync', listener);
 
-    const resp = await response;
-
     // Emit on the loggedInEmitter if logged in
-    if (resp instanceof SuccessfulResponse) {
+    if (this.isLoggedIn()) {
       this.loggedInEmitter.emit();
     }
 
-    return resp;
+    return new SuccessfulResponse();
   }
 
   public getLoggedInEmitter(): EventEmitter<void> {

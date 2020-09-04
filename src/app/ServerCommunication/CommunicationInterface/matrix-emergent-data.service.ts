@@ -21,7 +21,7 @@ export class MatrixEmergentDataService implements EmergentDataInterface {
   }
 
   public async setBalances(groupId: string, balances: number[], contactsIds: string[], lastTransactionId: string): Promise<ServerResponse> {
-    const client: MatrixClient = await this.clientService.getClient();
+    const client: MatrixClient = this.clientService.getClient();
 
     // Create the balances content object
     const content: object = {
@@ -37,7 +37,7 @@ export class MatrixEmergentDataService implements EmergentDataInterface {
 
   public async setRecommendations(groupId: string, amounts: number[], payerIds: string[], recipientIds: string[],
                                   lastTransactionId: string): Promise<ServerResponse> {
-    const client: MatrixClient = await this.clientService.getClient();
+    const client: MatrixClient = this.clientService.getClient();
 
     // Create the recommendations content object
     const content: object = {

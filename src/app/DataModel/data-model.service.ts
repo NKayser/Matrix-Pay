@@ -1,17 +1,14 @@
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {User} from './User/User';
 import {Status} from './Status/Status';
 import {Group} from './Group/Group';
 import {Transaction} from './Group/Transaction';
 import {BalanceCalculatorService} from '../CalculateEmergentData/balance-calculator.service';
 import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimisation.service';
-import {MatrixEmergentDataService} from '../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
 import {Subject} from 'rxjs';
-import {Recommendation} from './Group/Recommendation';
-import {AtomarChange} from './Group/AtomarChange';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +19,11 @@ import {AtomarChange} from './Group/AtomarChange';
 export class DataModelService {
   private status: Status;
   private _userExists = false;
+  private balanceChangeEmitter: EventEmitter<void> = new EventEmitter<void>();
+
+  public getBalanceEmitter(): EventEmitter<void> {
+    return this.balanceChangeEmitter;
+  }
 
   get userExists(): boolean {
     return this._userExists;
@@ -37,9 +39,12 @@ export class DataModelService {
    * @param matrixEmergentData  An Instance of BalanceCalculatorService that is used in DataModelService
    */
   constructor(private balanceCalculator: BalanceCalculatorService,
-              private greedyOptimisation: GreedyOptimisationService,
-              private matrixEmergentData: MatrixEmergentDataService) {
+              private greedyOptimisation: GreedyOptimisationService) {
 
+    const contact = new Contact('', '');
+    const user = new User(contact, Currency.EUR, Language.ENGLISH);
+    this.status = new Status();
+    this._userExists = true;
   }
 
   // Notifies the ViewModel when the dataModel has loaded
@@ -59,13 +64,13 @@ export class DataModelService {
    * though any currency can be manually selected as well.
    * @param language  Language of the user. This parameter sets the language displayed in the view.
    */
-  public initializeUserThisSession(userContactId: string, userName: string, currency: Currency, language: Language): User{
+  public fillInUserData(userContactId: string, userName: string, currency: Currency, language: Language): User{
     const contact = new Contact(userContactId, userName);
-    const user = new User(contact, currency, language);
-    this.status = new Status();
-    this._userExists = true;
+    this.user.contact = contact;
+    this.user.currency = currency;
+    this.user.language = language;
     this.notifyViewModelWhenReady();
-    return user;
+    return this.user;
   }
 
   /**
@@ -177,5 +182,7 @@ export class DataModelService {
         // Do some Error stuff
       }
     }*/
+
+    this.balanceChangeEmitter.emit();
   }
 }
