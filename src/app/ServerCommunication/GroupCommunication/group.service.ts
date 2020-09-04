@@ -31,6 +31,9 @@ export class GroupService {
   private static readonly RECOMMENDATIONS_KEY: string = 'recommendations';
   private static readonly ACCOUNT_DATA_KEY: string = 'accountData';
   private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways
+  private static readonly ROOM_TYPE_KEY: string = 'org.matrix.msc1840';
+  public static readonly ROOM_TYPE_CONTENT_KEY: string = 'room_type';
+  public static readonly ROOM_TYPE_CONTENT_VALUE: string = 'MatrixPay';
 
   // This service needs the transaction Service to forward method calls and the EmergentDataService to confirm Paybacks
   constructor(transactionService: TransactionService,
@@ -174,7 +177,14 @@ export class GroupService {
 
     // Set the group settings (currency)
     try {
-      await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, 'currency');
+      await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, '');
+    } catch(err) {
+      return new UnsuccessfulResponse(GroupError.SetCurrency, err);
+    }
+
+    // Set the group type (matrix-pay room)
+    try {
+      await client.sendStateEvent(roomId, GroupService.ROOM_TYPE_KEY, {[GroupService.ROOM_TYPE_CONTENT_KEY]: GroupService.ROOM_TYPE_CONTENT_VALUE}, '');
     } catch(err) {
       return new UnsuccessfulResponse(GroupError.SetCurrency, err);
     }
