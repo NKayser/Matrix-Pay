@@ -25,8 +25,4 @@ export class SuccessfulResponse<T> extends ServerResponse {
   wasSuccessful(): boolean {
     return true;
   }
-
-  promise(): Promise<ServerResponse> {
-    return Promise.resolve(this);
-  }
 }

@@ -43,15 +43,13 @@ export class GroupService {
     // get Client. Method should only be called when client is prepared.
     if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
     const client: MatrixClient = this.matrixClientService.getClient();
-    let response: ServerResponse;
 
     // Actually send the invite and throw Errors if they were caused by invalid input that should not be have been
     // possible because of checks in the ViewModel.
-    await client.invite(groupId, userId).then(() => {
-      response = new SuccessfulResponse();
-    },
-      (err) => {
-      switch (err['data']['errcode']) {
+    try {
+      await client.invite(groupId, userId);
+    } catch(error) {
+      switch (error['data']['errcode']) {
         case GroupService.ERRCODE_UNKNOWN:
         case GroupService.ERRCODE_UNRECOGNIZED:
           throw new Error('GroupId invalid');
@@ -63,9 +61,9 @@ export class GroupService {
           throw new Error('unknown error');
           break;
       }
-    });
+    }
 
-    return await response;
+    return new SuccessfulResponse();
   }
 
   public async confirmRecommendation(groupId: string, recommendationId: number): Promise<ServerResponse> {
@@ -133,7 +131,7 @@ export class GroupService {
    * @param topic
    */
   public async createGroup(name: string, currency: string, alias?: string, topic?: string): Promise<ServerResponse> {
-    const client: MatrixClient = await this.matrixClientService.getClient();
+    const client: MatrixClient = this.matrixClientService.getClient();
 
     // Alias is optional
     if (alias != undefined && (alias.includes(' ') || alias.includes(':'))) {
@@ -148,40 +146,38 @@ export class GroupService {
       'topic': topic
     }
 
-    let response: ServerResponse;
+    let room: object;
 
     // Create Room
-    const room = await client.createRoom(options).catch(
-      (err) => {
-        let errCode: number = GroupError.Unknown;
-        const errMessage: string = err['data']['error'];
+    try {
+      room = await client.createRoom(options);
+    } catch(error) {
+      let errCode: number = GroupError.Unknown;
+      const errMessage: string = error['data']['error'];
 
-        switch (err['data']['errcode']) {
-          case GroupService.ERRCODE_UNKNOWN:
-            errCode = GroupError.InvalidName;
-            break;
-          case GroupService.ERRCODE_INUSE:
-            errCode = GroupError.InUse;
-            break;
-          default:
-            break;
-        }
-        response = new UnsuccessfulResponse(errCode, errMessage);
+      switch (error['data']['errcode']) {
+        case GroupService.ERRCODE_UNKNOWN:
+          errCode = GroupError.InvalidName;
+          break;
+        case GroupService.ERRCODE_INUSE:
+          errCode = GroupError.InUse;
+          break;
+        default:
+          break;
       }
-    );
-
-    if (room === undefined) {
-      return response;
+      return new UnsuccessfulResponse(errCode, errMessage);
     }
 
     const roomId: string = room['room_id'];
 
     // Set the group settings (currency)
-    await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, 'currency').then(
-      () => response = new SuccessfulResponse(roomId),
-      (err) => response = new UnsuccessfulResponse(GroupError.SetCurrency, err));
+    try {
+      await client.sendStateEvent(roomId, GroupService.CURRENCY_KEY, {'currency': currency}, 'currency');
+    } catch(err) {
+      return new UnsuccessfulResponse(GroupError.SetCurrency, err);
+    }
 
-    return await response;
+    return new SuccessfulResponse(roomId);
   }
 
   public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
@@ -191,7 +187,7 @@ export class GroupService {
   public async fetchHistory(groupId: string): Promise<ServerResponse> {
     // Get Client (if prepared)
     if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
-    const client: MatrixClient = await this.matrixClientService.getClient();
+    const client: MatrixClient = this.matrixClientService.getClient();
 
     // Get room, to call scrollback method on this room.
     // This will cause Matrix to send older Events on the EventEmitters of the MatrixClient.
@@ -203,32 +199,31 @@ export class GroupService {
   public async leaveGroup(groupId: string): Promise<ServerResponse> {
     // Get MatrixClient if prepared
     if (!this.matrixClientService.isPrepared()) throw new Error('Client is not prepared');
-    const client: MatrixClient = await this.matrixClientService.getClient();
+    const client: MatrixClient = this.matrixClientService.getClient();
 
     // Get room
     const room = client.getRoom(groupId);
-    if (room === undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound).promise();
-
-    let response: ServerResponse;
+    if (room === undefined) return new UnsuccessfulResponse(GroupError.RoomNotFound);
 
     // Leave Group
-    await client.leave(groupId).then(
-      () => response = new SuccessfulResponse(),
-      (err) => {
-        let errCode: number = GroupError.Unknown;
-        const errMessage: string = err['data']['error'];
+    try {
+      await client.leave(groupId);
+    } catch(err) {
+      let errCode: number = GroupError.Unknown;
+      const errMessage: string = err['data']['error'];
 
-        // Throw error if group does not exist
-        switch (err['data']['errcode']) {
-          case GroupService.ERRCODE_UNKNOWN:
-            errCode = GroupError.RoomNotFound;
-            break;
-          default:
-            break;
-        }
-        response = new UnsuccessfulResponse(errCode, errMessage);//.promise();
-    });
-    return await response;
+      // Throw error if group does not exist
+      switch (err['data']['errcode']) {
+        case GroupService.ERRCODE_UNKNOWN:
+          errCode = GroupError.RoomNotFound;
+          break;
+        default:
+          break;
+      }
+      return new UnsuccessfulResponse(errCode, errMessage);
+    }
+
+    return new SuccessfulResponse();
   }
 
   // Not in use yet.

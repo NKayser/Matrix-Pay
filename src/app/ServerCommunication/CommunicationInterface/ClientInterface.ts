@@ -5,7 +5,7 @@ import {EventEmitter} from "@angular/core";
 export interface ClientInterface {
   login(account: string, password: string): Promise<ServerResponse>;
   logout(): Promise<ServerResponse>;
-  getClient(): Promise<MatrixClient>;
+  getClient(): MatrixClient;
   isPrepared(): boolean;
   isLoggedIn(): boolean;
 
