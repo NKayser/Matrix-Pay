@@ -18,10 +18,6 @@ import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWind
 import {Utils} from '../Response/Utils';
 import {MatrixClientService} from './matrix-client.service';
 import {ClientInterface} from './ClientInterface';
-import {DiscoveredClientConfig} from "../../../matrix";
-import {UnsuccessfulResponse} from "../Response/UnsuccessfulResponse";
-import {ClientError} from "../Response/ErrorTypes";
-import {ServerResponse} from "../Response/ServerResponse";
 
 @Injectable({
   providedIn: 'root'
@@ -29,11 +25,9 @@ import {ServerResponse} from "../Response/ServerResponse";
 export class ObservableService implements ObservableInterface {
   private static TRANSACTION_TYPE_PAYBACK = 'PAYBACK';
   private static TRANSACTION_TYPE_EXPENSE = 'EXPENSE';
-  private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
 
   private matrixClient: MatrixClient;
 
-  private serverAddress: string;
   private clientService: MatrixClientService;
   private userObservable: Subject<UserType>;
   private groupsObservable: Subject<GroupsType>;
@@ -73,7 +67,6 @@ export class ObservableService implements ObservableInterface {
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
     this.matrixClient = this.clientService.getClient();
-    /*await this.makeDetectorClient();*/
 
     // start the matrix listeners
     this.accountDataListener();
@@ -89,9 +82,9 @@ export class ObservableService implements ObservableInterface {
         state: {
           types: ['m.room.*', 'org.matrix.msc1840'],
         },
-        "timeline": {
-          "limit": 10,
-          "types": ["com.matrixpay.currency", 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense', 'm.room.create', 'm.room.member', 'org.matrix.msc1840'],
+        timeline: {
+          limit: 10,
+          types: ['com.matrixpay.currency', 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense'],
         },
         ephemeral: {
           not_types: ['*'],
@@ -347,7 +340,7 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('RoomMember.membership', (event, member, oldMembership) => {
       const userId = member.userId;
       const groupId = member.roomId;
-      if (Utils.log) console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
+      console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
       if (userId === this.matrixClient.getUserId()) {
         if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
           this.groupMembershipObservable.next(
@@ -430,27 +423,6 @@ export class ObservableService implements ObservableInterface {
     }
     return sum;
   }
-
-  /*private async makeDetectorClient(): Promise<ServerResponse> {
-    const account = this.matrixClient.credentials.userId;
-
-    // Discover Homeserver Address and throw Errors if not successful
-    const seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
-    if (seperatedAccount.length != 2 || seperatedAccount[1] == '' || seperatedAccount[1] == undefined) {
-      throw new Error('wrong user id format');
-    }
-    const domain = seperatedAccount[1];
-
-    // Discover base url and save it
-    const config: DiscoveredClientConfig = await this.matrixClassProviderService.findClientConfig(domain);
-    const configState: string = config['m.homeserver']['state'];
-    if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
-      return new UnsuccessfulResponse(ClientError.Autodiscovery,
-        config['m.homeserver']['error']).promise();
-    }
-    this.serverAddress = config['m.homeserver']['base_url'];
-    console.log(this.serverAddress);
-  }*/
 
   public getUserObservable(): Observable<UserType> {
     return this.userObservable;
