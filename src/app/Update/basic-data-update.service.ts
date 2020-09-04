@@ -86,7 +86,7 @@ export class BasicDataUpdateService {
           }
           else {
             this.dataModel.user.removeGroup(param.groupId);
-            console.log('updateService: addGroup: Group deleted:' + param.groupId + ' , ' + param.groupName);
+            console.log('updateService: addGroup: Group deleted: ' + param.groupId + ' , ' + param.groupName);
           }
         }
         else {
@@ -98,7 +98,7 @@ export class BasicDataUpdateService {
           }
           else {
             this.dataModel.user.removeGroup(param.groupId);
-            console.log('updateService: addGroup: Group deleted:' + param.groupId + ' , ' + param.groupName);
+            console.log('updateService: addGroup: Group deleted: ' + param.groupId + ' , ' + param.groupName);
           }
         }
       }

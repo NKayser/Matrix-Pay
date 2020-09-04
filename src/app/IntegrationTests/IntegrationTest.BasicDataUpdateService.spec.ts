@@ -13,6 +13,11 @@ import {
 import {ObservableService} from '../ServerCommunication/CommunicationInterface/observable.service';
 import {Currency} from '../DataModel/Utils/Currency';
 import {Language} from "../DataModel/Utils/Language";
+import {ActivityType} from "../DataModel/Group/ActivityType";
+import {AtomarChange} from "../DataModel/Group/AtomarChange";
+import {Contact} from "../DataModel/Group/Contact";
+import {Groupmember} from "../DataModel/Group/Groupmember";
+import {TransactionType} from "../DataModel/Group/TransactionType";
 
 
 /**
@@ -92,10 +97,97 @@ describe('BasicDataUpdateService and DataModel', () => {
 
   it( 'should create a group', () => {
     // Precondition
-    expect(dataModel.getGroup('id002')).toEqual(null);
+    expect(dataModel.getGroup('id003')).toEqual(null);
     // Actual
-    mockedObservableService.getGroupsObservable().next({})
+    mockedObservableService.getGroupsObservable().next({groupId: 'id003', groupName: 'Urlaub', currency: 'USD', userIds: [],
+      userNames: [], isLeave: false});
+    expect(dataModel.getGroup('id003')).not.toEqual(null);
+    expect(dataModel.getGroup('id003').name).toEqual('Urlaub');
+    expect(dataModel.getGroup('id003').currency).toEqual(Currency.USD);
+    expect(dataModel.getGroup('id003').transactions).toEqual([]);
+    expect(dataModel.getGroup('id003').groupmembers).toEqual([]);
   });
 
+  it( 'should delete a group', () => {
+    expect(dataModel.getGroup('id004')).toEqual(null);
+    mockedObservableService.getGroupsObservable().next({groupId: 'id004', groupName: 'Urlaub', currency: 'USD', userIds: [],
+      userNames: [], isLeave: false});
+    expect(dataModel.getGroup('id004')).not.toEqual(null);
+    mockedObservableService.getGroupsObservable().next({groupId: 'id004', groupName: 'Urlaub', currency: 'USD', userIds: [],
+      userNames: [], isLeave: true});
+    expect(dataModel.getGroup('id004')).toEqual(null);
+  });
+
+  it( 'should create a groupmember and related activity', () => {
+    mockedObservableService.getGroupsObservable().next({groupId: 'id005', groupName: 'Urlaub', currency: 'USD', userIds: [],
+      userNames: [], isLeave: false});
+    expect(dataModel.getGroup('id005').getGroupmember('memId001')).toEqual(null);
+    mockedObservableService.getGroupMembershipObservable().next({groupId: 'id005', userId: 'memId001', name: 'Markus',
+      isLeave: false, date: new Date(123456789000)});
+    expect(dataModel.getGroup('id005').getGroupmember('memId001')).not.toEqual(null);
+    expect(dataModel.getGroup('id005').getGroupmember('memId001').group).toEqual(dataModel.getGroup('id005'));
+    expect(dataModel.getGroup('id005').getGroupmember('memId001').contact.contactId).toEqual('memId001');
+    expect(dataModel.getGroup('id005').getGroupmember('memId001').contact.name).toEqual('Markus');
+    expect(dataModel.getGroup('id005').activities[0].actor).toEqual
+    (dataModel.getGroup('id005').getGroupmember('memId001').contact);
+    expect(dataModel.getGroup('id005').activities[0].subject).toEqual(dataModel.getGroup('id005'));
+    expect(dataModel.getGroup('id005').activities[0].activityType).toEqual(ActivityType.NEWCONTACTINGROUP);
+    expect(dataModel.getGroup('id005').activities[0].creationDate).toEqual(new Date(123456789000));
+  });
+
+  it( 'should create an empty group for a groupmember', () => {
+    expect(dataModel.getGroup('id006')).toEqual(null);
+    mockedObservableService.getGroupMembershipObservable().next({groupId: 'id006', userId: 'memId001', name: 'Markus',
+      isLeave: false, date: new Date(123456789000)});
+    expect(dataModel.getGroup('id006').getGroupmember('memId001')).not.toEqual(null);
+  });
+
+  it( 'should fill in a group', () => {
+    // Setup
+    expect(dataModel.getGroup('id006')).toEqual(null);
+    mockedObservableService.getGroupMembershipObservable().next({groupId: 'id006', userId: 'memId001', name: 'Markus',
+      isLeave: false, date: new Date(123456789000)});
+    // Precondition
+    expect(dataModel.getGroup('id006').getGroupmember('memId001')).not.toEqual(null);
+    expect(dataModel.getGroup('id006').name).toEqual('');
+    expect(dataModel.getGroup('id006').currency).toEqual(Currency.EUR);
+    // Actual
+    mockedObservableService.getGroupsObservable().next({groupId: 'id006', groupName: 'Urlaub', currency: 'USD', userIds: [],
+      userNames: [], isLeave: false});
+    expect(dataModel.getGroup('id006').name).toEqual('Urlaub');
+    expect(dataModel.getGroup('id006').currency).toEqual(Currency.USD);
+  });
+
+  it( 'should create a transaction and related activity', () => {
+    // Setup
+    mockedObservableService.getGroupsObservable().next({groupId: 'id007', groupName: 'Urlaub', currency: 'USD', userIds: [],
+      userNames: [], isLeave: false});
+    mockedObservableService.getGroupMembershipObservable().next({groupId: 'id007', userId: 'memId001', name: 'Markus',
+      isLeave: false, date: new Date(123456789000)});
+    mockedObservableService.getGroupMembershipObservable().next({groupId: 'id007', userId: 'memId002', name: 'Marion',
+      isLeave: false, date: new Date(1000)});
+    mockedObservableService.getGroupMembershipObservable().next({groupId: 'id007', userId: 'memId003', name: 'Nico',
+      isLeave: false, date: new Date(444)});
+    // Precondition
+    expect(dataModel.getGroup('id007').getTransaction('transId001')).toEqual(null);
+    // Actual
+    const transaction = {transactionType: 'EXPENSE', transactionId: 'transId001', name: 'Essen', creationDate: new Date(555),
+    groupId: 'id007', payerId: 'memId001', payerAmount: 500, recipientIds: ['memId002'], recipientAmounts: [500], senderId: 'memId003'}
+    mockedObservableService.getMultipleNewTransactionsObservable().next([transaction]);
+    expect(dataModel.getGroup('id007').getTransaction('transId001')).not.toEqual(null);
+    expect(dataModel.getGroup('id007').getTransaction('transId001').name).toEqual('Essen');
+    expect(dataModel.getGroup('id007').getTransaction('transId001').payer).
+      toEqual(new AtomarChange(new Contact('memId001', 'Markus'), 500));
+    expect(dataModel.getGroup('id007').getTransaction('transId001').recipients).
+      toEqual([new AtomarChange(new Contact('memId002', 'Marion'), 500)]);
+    expect(dataModel.getGroup('id007').getTransaction('transId001').sender).
+      toEqual(new Groupmember(new Contact('memId003', 'Nico'), dataModel.getGroup('id007')));
+    expect(dataModel.getGroup('id007').getTransaction('transId001').transactionType).toEqual(TransactionType.EXPENSE);
+    const activities = dataModel.getGroup('id007').activities;
+    expect(activities[activities.length - 1].subject).toEqual(dataModel.getGroup('id007').getTransaction('transId001'));
+    expect(activities[activities.length - 1].actor).toEqual(dataModel.getGroup('id007').getGroupmember('memId003').contact);
+    expect(activities[activities.length - 1].activityType).toEqual(ActivityType.NEWEXPENSE);
+    expect(activities[activities.length - 1].creationDate).toEqual(new Date(555));
+  });
 
 });
