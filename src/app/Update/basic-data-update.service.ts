@@ -176,7 +176,12 @@ export class BasicDataUpdateService {
         group = this.dataModel.user.createGroup(param.groupId, '', Currency.EUR);
         console.log('updateService: addGroupActivity: added empty group: ' + param.groupId + ' , ' + group.name);
       }
-      const activity = new Activity(ActivityType.GROUPCREATION, group, group.getGroupmember(param.creatorId).contact, param.creationDate);
+      let creator = group.getGroupmember(param.creatorId);
+      if (creator === null) {
+        creator = new Groupmember(new Contact(param.creatorId, ''), group);
+        group.addGroupmember(creator);
+      }
+      const activity = new Activity(ActivityType.GROUPCREATION, group, creator.contact, param.creationDate);
       group.addActivity(activity);
       console.log('updateService: addGroupActivity: ' + param.groupId + ' , ' + group.name);
     });
