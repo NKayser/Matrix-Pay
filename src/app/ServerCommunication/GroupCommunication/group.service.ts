@@ -26,6 +26,8 @@ export class GroupService {
   private static readonly ERRCODE_UNRECOGNIZED: string = 'M_UNRECOGNIZED';
   private static readonly ERRCODE_INVALID_PARAM: string = 'M_INVALID_PARAM';
   private static readonly CURRENCY_KEY: string = 'com.matrixpay.currency';
+  private static readonly TYPE_KEY: string = 'org.matrix.msc1840';
+  private static readonly MATRIX_PAY_TYPE: string = 'MatrixPay';
   private static readonly RECOMMENDATIONS_KEY: string = 'recommendations';
   private static readonly ACCOUNT_DATA_KEY: string = 'accountData';
   private static readonly SCROLLBACK_LIMIT: number = 30; // this is the default for scrollback anyways

@@ -63,6 +63,7 @@ export class MatrixClientService implements ClientInterface {
 
     // Create a Client
     this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, store);
+    this.matrixClient.clearStores();
 
     // Login and get Access Token
     try {

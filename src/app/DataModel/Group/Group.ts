@@ -11,8 +11,8 @@ import {AtomarChange} from './AtomarChange';
  */
 export class Group {
   private readonly _groupId: string;
-  private readonly _name: string;
-  private readonly _currency: Currency;
+  private _name: string;
+  private _currency: Currency;
   private _groupmembers: Groupmember[];
   private _transactions: Transaction[];
   private _recommendations: Recommendation[];
@@ -50,10 +50,26 @@ export class Group {
   }
 
   /**
+   * Sets the name of the group.
+   * @param value  The new name.
+   */
+  public set name(value: string) {
+    this._name = value;
+  }
+
+  /**
    * Returns the currency of the group.
    */
   public get currency(): Currency {
     return this._currency;
+  }
+
+  /**
+   * Sets the currency
+   * @param value  The new currency.
+   */
+  public set currency(value: Currency) {
+    this._currency = value;
   }
 
   /**

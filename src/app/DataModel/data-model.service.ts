@@ -5,7 +5,6 @@ import {Group} from './Group/Group';
 import {Transaction} from './Group/Transaction';
 import {BalanceCalculatorService} from '../CalculateEmergentData/balance-calculator.service';
 import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimisation.service';
-import {MatrixEmergentDataService} from '../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
@@ -40,9 +39,12 @@ export class DataModelService {
    * @param matrixEmergentData  An Instance of BalanceCalculatorService that is used in DataModelService
    */
   constructor(private balanceCalculator: BalanceCalculatorService,
-              private greedyOptimisation: GreedyOptimisationService,
-              private matrixEmergentData: MatrixEmergentDataService) {
+              private greedyOptimisation: GreedyOptimisationService) {
 
+    const contact = new Contact('', '');
+    const user = new User(contact, Currency.EUR, Language.ENGLISH);
+    this.status = new Status();
+    this._userExists = true;
   }
 
   // Notifies the ViewModel when the dataModel has loaded
@@ -62,13 +64,13 @@ export class DataModelService {
    * though any currency can be manually selected as well.
    * @param language  Language of the user. This parameter sets the language displayed in the view.
    */
-  public initializeUserThisSession(userContactId: string, userName: string, currency: Currency, language: Language): User{
+  public fillInUserData(userContactId: string, userName: string, currency: Currency, language: Language): User{
     const contact = new Contact(userContactId, userName);
-    const user = new User(contact, currency, language);
-    this.status = new Status();
-    this._userExists = true;
+    this.user.contact = contact;
+    this.user.currency = currency;
+    this.user.language = language;
     this.notifyViewModelWhenReady();
-    return user;
+    return this.user;
   }
 
   /**

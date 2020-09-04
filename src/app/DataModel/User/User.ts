@@ -10,7 +10,7 @@ import {Groupmember} from '../Group/Groupmember';
  */
 export class User {
   private static _singleUser: User = null;
-  private readonly _contact: Contact;
+  private _contact: Contact;
   private _currency: Currency;
   private _language: Language;
   private _groups: Group[];
@@ -42,6 +42,14 @@ export class User {
    */
   get contact(): Contact {
     return this._contact;
+  }
+
+  /**
+   * Sets the user's contact.
+   * @param value  New contact.
+   */
+  set contact(value: Contact) {
+    this._contact = value;
   }
 
   /**
