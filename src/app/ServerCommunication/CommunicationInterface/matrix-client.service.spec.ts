@@ -113,7 +113,7 @@ describe('MatrixClientServiceService', () => {
     // Setup
     classProviderSpy.findClientConfig.and.returnValue(
       {'m.homeserver': {'state': 'SUCCESS', 'base_url': 'https://matrix.dsn.scc.kit.edu'}});
-    mockedClient.loginWithPassword.and.returnValue(Promise.reject('M_FORBIDDEN: Invalid password'));
+    mockedClient.loginWithPassword.and.returnValue(Promise.reject({data: {errcode: 'M_FORBIDDEN', error: 'Invalid password'}}));
     const invalidPasswordExamples: string[] = ['', 'invalid'];
 
     // Log in with wrong format

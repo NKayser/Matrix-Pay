@@ -1,0 +1,20 @@
+<h1>{{data.modalTitle}}</h1>
+<div mat-dialog-content>
+    <!--Payer form-->
+    <mat-label class="header">Payer</mat-label>
+    <mat-card class="bottom_margin">
+        <mat-label>{{data.payer.name}}</mat-label>
+    </mat-card>
+    <!--Amount form-->
+    <mat-label class="header">Recipients</mat-label>
+    <mat-list>
+        <mat-list-item *ngFor="let recipient of data.recipients; let i = index" class="bottom_margin">
+            <mat-card>
+                <mat-label class="name_amount">{{recipient.name}}</mat-label>
+                <mat-label>{{data.amount[i]/100}}{{currencyMap[data.currency.valueOf()]}}</mat-label>
+            </mat-card>
+        </mat-list-item>
+    </mat-list>
+    <!--Cancel and Save buttons-->
+    <button mat-raised-button (click)="onCancel()">Close</button>
+</div>
