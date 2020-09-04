@@ -269,6 +269,7 @@ export class ObservableService implements ObservableInterface {
           // Process the events retrieved by /sync
           switch (event.getType()) {
             case ('com.matrixpay.payback'): {
+              console.log('live event');
               this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
               break;
             }
@@ -318,6 +319,7 @@ export class ObservableService implements ObservableInterface {
   private roomListener(): void {
     // Fires whenever invited to a room or joining a room
     this.matrixClient.on('Room', async room => {
+        console.log('triggered');
       await this.roomCallback(room);
     });
   }
