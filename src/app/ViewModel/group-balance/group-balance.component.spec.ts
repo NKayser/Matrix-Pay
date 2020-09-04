@@ -13,6 +13,7 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
+import {EventEmitter} from '@angular/core';
 
 describe('GroupBalanceComponent', () => {
   let component: GroupBalanceComponent;
@@ -23,7 +24,7 @@ describe('GroupBalanceComponent', () => {
 
   beforeEach(async(() => {
 
-    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups']);
+    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'getBalanceEmitter']);
     const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['createTransaction']);
 
     TestBed.configureTestingModule({
@@ -38,6 +39,11 @@ describe('GroupBalanceComponent', () => {
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
+    dataModelService.getBalanceEmitter.and.returnValue({
+      subscribe(): any {
+
+      }
+    } as EventEmitter<void>);
 
     fixture = TestBed.createComponent(GroupBalanceComponent);
     component = fixture.componentInstance;

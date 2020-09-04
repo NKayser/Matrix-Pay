@@ -13,6 +13,7 @@ import {Currency} from '../../DataModel/Utils/Currency';
 import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
+import {EventEmitter} from '@angular/core';
 
 describe('GroupSelectionComponentCancel', () => {
   let component: GroupSelectionComponent;
@@ -23,7 +24,7 @@ describe('GroupSelectionComponentCancel', () => {
 
   beforeEach(async(() => {
 
-    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups']);
+    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'getBalanceEmitter']);
     const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['groupAddMember', 'leaveGroup', 'groupCreate']);
 
     TestBed.configureTestingModule({
@@ -39,6 +40,11 @@ describe('GroupSelectionComponentCancel', () => {
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
+    dataModelService.getBalanceEmitter.and.returnValue({
+      subscribe(): any {
+
+      }
+    } as EventEmitter<void>);
 
     fixture = TestBed.createComponent(GroupSelectionComponent);
     component = fixture.componentInstance;
@@ -114,7 +120,7 @@ describe('GroupSelectionComponentConfirm', () => {
 
   beforeEach(async(() => {
 
-    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups']);
+    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'getBalanceEmitter']);
     const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['groupAddMember', 'leaveGroup', 'groupCreate']);
 
     TestBed.configureTestingModule({
@@ -126,10 +132,13 @@ describe('GroupSelectionComponentConfirm', () => {
       ]
     }).compileComponents();
 
-
-
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
+    dataModelService.getBalanceEmitter.and.returnValue({
+      subscribe(): any {
+
+      }
+    } as EventEmitter<void>);
 
     fixture = TestBed.createComponent(GroupSelectionComponent);
     component = fixture.componentInstance;
