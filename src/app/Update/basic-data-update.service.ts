@@ -86,7 +86,7 @@ export class BasicDataUpdateService {
           }
           else {
             this.dataModel.user.removeGroup(param.groupId);
-            console.log('updateService: addGroup: Group deleted:' + param.groupId + ' , ' + param.groupName);
+            console.log('updateService: addGroup: Group deleted: ' + param.groupId + ' , ' + param.groupName);
           }
         }
         else {
@@ -98,7 +98,7 @@ export class BasicDataUpdateService {
           }
           else {
             this.dataModel.user.removeGroup(param.groupId);
-            console.log('updateService: addGroup: Group deleted:' + param.groupId + ' , ' + param.groupName);
+            console.log('updateService: addGroup: Group deleted: ' + param.groupId + ' , ' + param.groupName);
           }
         }
       }
@@ -397,6 +397,7 @@ export class BasicDataUpdateService {
       // TODO: Edit Balances after editing a transaction.
     });
   }*/
+
 
   /**
    * Adds a number of transactions to a group. Calculates balances for this group afterwards.
