@@ -108,6 +108,17 @@ describe('BasicDataUpdateService and DataModel', () => {
     expect(dataModel.getGroup('id003').groupmembers).toEqual([]);
   });
 
+  it( 'should create a group activity', () => {
+    // Precondition
+    expect(dataModel.getGroup('id003')).toEqual(null);
+    // Actual
+    mockedObservableService.getGroupActivityObservable().next({groupId: 'id000', creatorId: 'memId000', creationDate: new Date(12345)});
+    expect(dataModel.getGroup('id000').activities[0].actor).toEqual(dataModel.getGroup('id000').getGroupmember('memId000').contact);
+    expect(dataModel.getGroup('id000').activities[0].creationDate).toEqual(new Date(12345));
+    expect(dataModel.getGroup('id000').activities[0].activityType).toEqual(ActivityType.GROUPCREATION);
+    expect(dataModel.getGroup('id000').activities[0].subject).toEqual(dataModel.getGroup('id000'));
+  });
+
   it( 'should delete a group', () => {
     expect(dataModel.getGroup('id004')).toEqual(null);
     mockedObservableService.getGroupsObservable().next({groupId: 'id004', groupName: 'Urlaub', currency: 'USD', userIds: [],
@@ -121,7 +132,9 @@ describe('BasicDataUpdateService and DataModel', () => {
   it( 'should create a groupmember and related activity', () => {
     mockedObservableService.getGroupsObservable().next({groupId: 'id005', groupName: 'Urlaub', currency: 'USD', userIds: [],
       userNames: [], isLeave: false});
+    // Precondition
     expect(dataModel.getGroup('id005').getGroupmember('memId001')).toEqual(null);
+    // Actual
     mockedObservableService.getGroupMembershipObservable().next({groupId: 'id005', userId: 'memId001', name: 'Markus',
       isLeave: false, date: new Date(123456789000)});
     expect(dataModel.getGroup('id005').getGroupmember('memId001')).not.toEqual(null);
@@ -133,6 +146,16 @@ describe('BasicDataUpdateService and DataModel', () => {
     expect(dataModel.getGroup('id005').activities[0].subject).toEqual(dataModel.getGroup('id005'));
     expect(dataModel.getGroup('id005').activities[0].activityType).toEqual(ActivityType.NEWCONTACTINGROUP);
     expect(dataModel.getGroup('id005').activities[0].creationDate).toEqual(new Date(123456789000));
+  });
+
+  it( 'should delete a groupmember', () => {
+    mockedObservableService.getGroupMembershipObservable().next({groupId: 'id005', userId: 'memId001', name: 'Markus',
+      isLeave: false, date: new Date(123456789000)});
+    // Precondition
+    expect(dataModel.getGroup('id005').getGroupmember('memId001')).not.toEqual(null);
+    mockedObservableService.getGroupMembershipObservable().next({groupId: 'id005', userId: 'memId001', name: 'Markus',
+      isLeave: true, date: new Date(123456789000)});
+    expect(dataModel.getGroup('id005').getGroupmember('memId001')).toEqual(null);
   });
 
   it( 'should create an empty group for a groupmember', () => {
