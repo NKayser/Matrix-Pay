@@ -29,11 +29,14 @@ import {ServerResponse} from "../Response/ServerResponse";
 export class ObservableService implements ObservableInterface {
   private static TRANSACTION_TYPE_PAYBACK = 'PAYBACK';
   private static TRANSACTION_TYPE_EXPENSE = 'EXPENSE';
+  private static FILTER = 'edu.kit.tm.dsn.psess2020.matrixpay-v';
+  private static ROOM_TYPE_FILTER = 'edu.kit.tm.dsn.psess2020.matrixpay-roomType';
+
+
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
-
   private matrixClient: MatrixClient;
-
-  private serverAddress: string;
+  private roomTypeMatrixClient: MatrixClient;
+  private filterCount = 1;
   private clientService: MatrixClientService;
   private userObservable: Subject<UserType>;
   private groupsObservable: Subject<GroupsType>;
@@ -45,8 +48,8 @@ export class ObservableService implements ObservableInterface {
   private modifiedTransactionsObservable: Subject<TransactionType>;
   private multipleNewTransactionsObservable: Subject<TransactionType[]>;
   private newTransactionObservable: Subject<TransactionType>;
-  private groupActivityObservable: Subject<GroupActivityType>;
 
+  private groupActivityObservable: Subject<GroupActivityType>;
   private transactions = {};
 
 
@@ -73,7 +76,7 @@ export class ObservableService implements ObservableInterface {
   private async setUp(): Promise<void> {
     // get the client (logged in, but before /sync)
     this.matrixClient = this.clientService.getClient();
-    /*await this.makeDetectorClient();*/
+    this.roomTypeMatrixClient = this.clientService.getRoomTypeClient();
 
     // start the matrix listeners
     this.accountDataListener();
@@ -83,15 +86,17 @@ export class ObservableService implements ObservableInterface {
     this.membershipListener();
     this.timelineResetListener();
     this.roomStateListener();
+    this.roomTypeListener();
 
-    const filter = Filter.fromJson(this.matrixClient.credentials.userId, 'edu.kit.tm.dsn.psess2020.matrixpay-v1', {
+    const filter = Filter.fromJson(this.matrixClient.credentials.userId, ObservableService.FILTER + this.filterCount, {
       room: {
+        rooms: [],
         state: {
           types: ['m.room.*', 'org.matrix.msc1840'],
         },
-        "timeline": {
-          "limit": 10,
-          "types": ["com.matrixpay.currency", 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense', 'm.room.create', 'm.room.member', 'org.matrix.msc1840'],
+        timeline: {
+          limit: 10,
+          types: ['com.matrixpay.currency', 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense', 'm.room.create', 'm.room.member', 'org.matrix.msc1840'],
         },
         ephemeral: {
           not_types: ['*'],
@@ -102,9 +107,14 @@ export class ObservableService implements ObservableInterface {
       },
     });
 
-    if (Utils.log) { console.log(filter); }
+    const roomTypeFilter = Filter.fromJson(this.roomTypeMatrixClient.credentials.userId, ObservableService.ROOM_TYPE_FILTER, {
+      timeline: {
+        types: ['org.matrix.msc1840'],
+      }
+    });
 
     await this.matrixClient.startClient({includeArchivedRooms: false, filter});
+    await this.roomTypeMatrixClient.startClient({includeArchivedRooms: false, roomTypeFilter});
 
     // Get data about the user
     const userId = this.matrixClient.getUserId();
@@ -390,6 +400,17 @@ export class ObservableService implements ObservableInterface {
     });
   }
 
+  private roomTypeListener(): void {
+    this.roomTypeMatrixClient.on('Room.timeline', (event, room, toStartOfTimeline, removed, data) => {
+      this.matrixClient.stopClient();
+      console.log('client stopped');
+      const oldFilter: Filter = this.matrixClient.getFilter(this.roomTypeMatrixClient.credentials.userId,
+        ObservableService.FILTER + this.filterCount);
+      const oldFilterDefinition = oldFilter.getDefinition();
+      console.log(oldFilterDefinition);
+    });
+  }
+
   // other functions
 
   private getExpenseFromEvent(room, event): TransactionType {
@@ -430,27 +451,6 @@ export class ObservableService implements ObservableInterface {
     }
     return sum;
   }
-
-  /*private async makeDetectorClient(): Promise<ServerResponse> {
-    const account = this.matrixClient.credentials.userId;
-
-    // Discover Homeserver Address and throw Errors if not successful
-    const seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
-    if (seperatedAccount.length != 2 || seperatedAccount[1] == '' || seperatedAccount[1] == undefined) {
-      throw new Error('wrong user id format');
-    }
-    const domain = seperatedAccount[1];
-
-    // Discover base url and save it
-    const config: DiscoveredClientConfig = await this.matrixClassProviderService.findClientConfig(domain);
-    const configState: string = config['m.homeserver']['state'];
-    if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
-      return new UnsuccessfulResponse(ClientError.Autodiscovery,
-        config['m.homeserver']['error']).promise();
-    }
-    this.serverAddress = config['m.homeserver']['base_url'];
-    console.log(this.serverAddress);
-  }*/
 
   public getUserObservable(): Observable<UserType> {
     return this.userObservable;
