@@ -153,6 +153,7 @@ describe('BasicDataUpdateService and DataModel', () => {
       isLeave: false, date: new Date(123456789000)});
     // Precondition
     expect(dataModel.getGroup('id005').getGroupmember('memId001')).not.toEqual(null);
+    // Actual
     mockedObservableService.getGroupMembershipObservable().next({groupId: 'id005', userId: 'memId001', name: 'Markus',
       isLeave: true, date: new Date(123456789000)});
     expect(dataModel.getGroup('id005').getGroupmember('memId001')).toEqual(null);
