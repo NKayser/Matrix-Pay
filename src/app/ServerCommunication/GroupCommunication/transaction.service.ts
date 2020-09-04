@@ -43,15 +43,20 @@ export class TransactionService {
       'amounts': amounts
     };
 
-    return this.sendTransaction(groupId, messageType, content, recipientIds, payerId);
+    return this.sendTransaction(groupId, messageType, content);
   }
 
   // Not in use yet.
-  public async modifyTransaction(groupId: string, transactionId: string, description?: string, payerId?: string, recipientIds?: string[], amounts?: number[]): Promise<ServerResponse> {
+  public async modifyTransaction(groupId: string, transactionId: string, description?: string, payerId?: string,
+                                 recipientIds?: string[], amounts?: number[]): Promise<ServerResponse> {
     // Check if referenced Transaction exists. Should already be validated in ViewModel
-    const client = await this.matrixClientService.getClient();
-    const oldContent = await client.fetchRoomEvent(groupId, transactionId)
-      .catch((reason: string) => {return new UnsuccessfulResponse(GroupError.NoOriginal, reason).promise()});
+    const client = this.matrixClientService.getClient();
+    let oldContent: object;
+    try {
+      oldContent = await client.fetchRoomEvent(groupId, transactionId);
+    } catch(err) {
+      return new UnsuccessfulResponse(GroupError.NoOriginal, err);
+    }
 
     console.log(oldContent);
 
@@ -66,9 +71,6 @@ export class TransactionService {
     if (newPayerId == undefined) newPayerId = oldContent['content']['payer'];
     if (newRecipientIds == undefined) newRecipientIds = oldContent['content']['recipients'];
     if (newAmounts == undefined) newAmounts = oldContent['content']['amounts'];
-
-    // Relict, because method not used yet. Actually, the message type should not change.
-    const newMessageType = newRecipientIds.length == 1 ? TransactionService.MESSAGE_TYPE_PAYBACK : TransactionService.MESSAGE_TYPE_EXPENSE;
 
     const newContent = {
       'new_content': {
@@ -85,38 +87,21 @@ export class TransactionService {
 
     console.log(newContent);
 
-    return this.sendTransaction(groupId, newMessageType, newContent, newRecipientIds, newPayerId);
+    return this.sendTransaction(groupId, oldContent['type'], newContent);
   }
 
-  private async sendTransaction(groupId: string, messageType: string, content: object, recipientIds: string[],
-                                payerId: string): Promise<ServerResponse> {
-    const client = await this.matrixClientService.getClient();
-
-    // Input Validation (check if users exist in room). Should already be done in ViewModel.
-    const validIds = await this.areGroupMembers(groupId, recipientIds.concat(payerId))
-      .catch(() => {return new UnsuccessfulResponse(GroupError.InvalidUsers).promise()});
-    if (!validIds) return new UnsuccessfulResponse(GroupError.InvalidUsers).promise();
-
-    let response: ServerResponse;
+  private async sendTransaction(groupId: string, messageType: string, content: object): Promise<ServerResponse> {
+    const client = this.matrixClientService.getClient();
 
     // Actually send the event
-    const event = await client.sendEvent(groupId, messageType, content, '').then(
-        (val: MatrixEvent) => {response = new SuccessfulResponse(val['event_id'])},
-        (reason: string) => {response = new UnsuccessfulResponse(GroupError.SendEvent, reason)});
+    let eventId: string;
+    try {
+      const event: MatrixEvent = await client.sendEvent(groupId, messageType, content, '');
+      eventId = event['event_id'];
+    } catch(err) {
+      return new UnsuccessfulResponse(GroupError.SendEvent, err);
+    }
 
-    // Return the new event_id
-    return await response;
-  }
-
-  // This method was originally used to double check if the userIds are valid.
-  // However, this caused errors when members had not accepted the invitation yet.
-  private async areGroupMembers(roomId: string, userIds: string[]): Promise<boolean> {
-    /*
-    const client = await this.matrixClientService.getClient();
-    const joined = await client.getJoinedRoomMembers(roomId);
-    const members = Object.keys(joined['joined']);
-    return userIds.every(val => members.includes(val));
-     */
-    return true;
+    return new SuccessfulResponse(eventId);
   }
 }
