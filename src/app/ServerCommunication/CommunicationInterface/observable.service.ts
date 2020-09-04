@@ -122,7 +122,7 @@ export class ObservableService implements ObservableInterface {
     const userIds = [];
     const userNames = [];
 
-    const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('com.matrixpay.currency', ' ');
+    const currencyEvent = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('com.matrixpay.currency', '');
     let currency: string;
     if (currencyEvent === null) {
       // no such event type or no valid events with this event type and state key
@@ -326,7 +326,7 @@ export class ObservableService implements ObservableInterface {
   private roomListener(): void {
     // Fires whenever invited to a room or joining a room
     this.matrixClient.on('Room', async room => {
-      const roomType = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('org.matrix.msc1840', ' ');
+      const roomType = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('org.matrix.msc1840', '');
       console.log('---roomType---');
       console.log(room.getLiveTimeline().getState(EventTimeline.FORWARDS));
       console.log(roomType);
