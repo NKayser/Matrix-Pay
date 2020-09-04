@@ -164,7 +164,7 @@ describe('ViewModel_ServerCommunication', () => {
             const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
             return Promise.resolve(config);
         });
-        mockedClient.loginWithPassword.and.returnValue(Promise.reject('M_FORBIDDEN: Invalid password'));
+        mockedClient.loginWithPassword.and.returnValue(Promise.reject({data: {errcode: 'M_FORBIDDEN', error: 'Invalid password'}}));
 
         // Login with these values
         loginComponent.matrixUrlControl.setValue('@username:host');
