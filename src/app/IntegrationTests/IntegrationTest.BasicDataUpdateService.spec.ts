@@ -212,6 +212,7 @@ describe('BasicDataUpdateService and DataModel', () => {
     expect(activities[activities.length - 1].actor).toEqual(dataModel.getGroup('id007').getGroupmember('memId003').contact);
     expect(activities[activities.length - 1].activityType).toEqual(ActivityType.NEWEXPENSE);
     expect(activities[activities.length - 1].creationDate).toEqual(new Date(555));
+    expect(mockedBalanceCalculatorService.calculateBalances).toHaveBeenCalled();
   });
 
   it( 'should create empty group and empty groupmembers for transaction', () => {
