@@ -24,6 +24,9 @@ import {SuccessfulResponse} from "../ServerCommunication/Response/SuccessfulResp
 import {AddMemberToGroupModalComponent} from "../ViewModel/add-user-to-group-modal/add-member-to-group-modal.component";
 import {LeaveGroupModalComponent} from "../ViewModel/leave-group-modal/leave-group-modal.component";
 import {SettingsComponent} from "../ViewModel/settings/settings.component";
+import {NavigationMenuComponent} from "../ViewModel/navigation-menu/navigation-menu.component";
+import {DialogProviderService} from "../ViewModel/dialog-provider.service";
+import {BreakpointObserver} from "@angular/cdk/layout";
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -66,7 +69,8 @@ describe('ViewModel_ServerCommunication', () => {
         dataModelService = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'navItem$']);
         mockedClient = jasmine.createSpyObj('MatrixClient',
             ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
-                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on', 'removeListener']);
+                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on',
+                'removeListener', 'logout']);
 
         dataModelService.navItem$ = (new Subject()).asObservable();
         classProviderSpy.createClient.and.returnValue(Promise.resolve(mockedClient));
@@ -347,6 +351,27 @@ describe('ViewModel_ServerCommunication', () => {
         const actualResponse = await basicSpy.calls.mostRecent().returnValue;
         console.log(actualResponse);
         expect(actualResponse instanceof SuccessfulResponse).toBe(true);
+
+        done();
+    });
+
+    it('should logout', async (done: DoneFn) => {
+        mockedClient.logout.and.returnValue(Promise.resolve());
+        const dialogProvider = new DialogProviderService();
+        const providerSpy = spyOn(dialogProvider, 'openErrorModal').and.callThrough();
+        const clientSpy = spyOn(matrixClientService, 'logout').and.callThrough();
+        const breakPointObserver = jasmine.createSpyObj('BreakPointObserver', ['observe']);
+        breakPointObserver.observe.and.returnValue({pipe: () => {}});
+        const comp = new NavigationMenuComponent(breakPointObserver, matrixClientService, null, dialogProvider);
+
+        await login();
+        comp.logout();
+
+        expect(clientSpy).toHaveBeenCalled();
+        const response = await clientSpy.calls.mostRecent().returnValue;
+        expect(response instanceof SuccessfulResponse).toBe(true);
+        expect(matrixClientService.isLoggedIn()).toBe(false);
+        expect(providerSpy).not.toHaveBeenCalled();
 
         done();
     });

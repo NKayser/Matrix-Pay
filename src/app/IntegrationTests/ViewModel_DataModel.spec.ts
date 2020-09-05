@@ -97,7 +97,6 @@ describe('ViewModel_DataModel', () => {
         await loginComponent.login();
     }
 
-    // Test-case T10
     it('should login', async (done: DoneFn) => {
         await login();
 
