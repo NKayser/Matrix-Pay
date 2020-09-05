@@ -20,6 +20,7 @@ import {
 import {AtomarChange} from '../DataModel/Group/AtomarChange';
 import {Activity} from '../DataModel/Group/Activity';
 import {ActivityType} from '../DataModel/Group/ActivityType';
+import {getTimeByID} from "../SystemTests/Time";
 
 @Injectable({
   providedIn: 'root'
@@ -69,6 +70,10 @@ export class BasicDataUpdateService {
             // if (Utils.log) {console.log('New group detected:' + param.groupId);}
             this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
             console.log ('updateService: addGroup: group created: ' + param.groupId + ' , ' + param.groupName);
+            const startTime = getTimeByID(param.groupId);
+            if (startTime < 0) {
+              console.log('updateService: addGroup: time taken for group: ' + param.groupName + ': ' + (Date.now() - startTime));
+            }
             const newGroup = this.dataModel.getGroup(param.groupId);
             for (let i = 0; i < param.userIds.length; i++) {
               if (newGroup.getGroupmember(param.userIds[i]) === null) {
@@ -261,7 +266,7 @@ export class BasicDataUpdateService {
 
   /**
    * Adds a groupmember to a group if isLeave is false. Removes a groupmember from a group if isLeave is true.
-   * TODO: create an activity. both times.
+   * TODO: create an activity. both time.
    */
   private async addGroupMember(): Promise<void> {
     this.observables.getGroupMembershipObservable().subscribe( param => {
@@ -290,9 +295,9 @@ export class BasicDataUpdateService {
           }
         }
       } else { // isleave
-        group.removeGroupmember(param.userId);
+        group.getGroupmember(param.userId).active = false;
         // TODO: MEMBERLEFTGROUPACTIVITY
-        console.log('updateService: addGroupMember: removed member: ' + param.userId + ' , ' + param.name);
+        console.log('updateService: addGroupMember: set member to inactive: ' + param.userId + ' , ' + param.name);
       }
     });
   }
