@@ -11,13 +11,11 @@ import {SettingsComponent} from "../ViewModel/settings/settings.component";
 import {GroupBalanceComponent} from "../ViewModel/group-balance/group-balance.component";
 import {HomeComponent} from "../ViewModel/home/home.component";
 import {Currency} from "../DataModel/Utils/Currency";
-import {Group} from "../DataModel/Group/Group";
 import {Recommendation} from "../DataModel/Group/Recommendation";
 import {Groupmember} from "../DataModel/Group/Groupmember";
 import {Contact} from "../DataModel/Group/Contact";
-import {User} from "../DataModel/User/User";
-import {Language} from "../DataModel/Utils/Language";
 import {AtomarChange} from "../DataModel/Group/AtomarChange";
+import {Language} from "../DataModel/Utils/Language";
 
 
 describe('ViewModel_DataModel', () => {
@@ -201,5 +199,14 @@ describe('ViewModel_DataModel', () => {
         expect(homeComponent.getTotalBalance(Currency.EUR)).toBe(13);
         expect(homeFixture.nativeElement.querySelectorAll('.balance_number')[0].textContent).toBe('0.15');
         expect(homeFixture.nativeElement.querySelectorAll('.balance_number')[1].textContent).toBe('0.13');
+    });
+
+    // Settings Component
+    it ('should display settings (default currency)', () => {
+        dataModelService.initializeUserFirstTime('c1', 'Alice');
+        dataModelService.getUser().currency = Currency.USD;
+        settingsFixture.detectChanges();
+        expect(settingsComponent.selectedCurrency).toBe(Currency.USD);
+        expect(settingsFixture.nativeElement.querySelector('mat-option').textContent).toBe('€');
     });
 });
