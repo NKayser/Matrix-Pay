@@ -59,10 +59,12 @@ describe('ViewModel_ServerCommunication', () => {
         dataModelService = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'navItem$']);
         mockedClient = jasmine.createSpyObj('MatrixClient',
             ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
-                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on', 'removeListener']);
+                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on', 'removeListener', 'clearStores']);
 
         dataModelService.navItem$ = (new Subject()).asObservable();
         classProviderSpy.createClient.and.returnValue(Promise.resolve(mockedClient));
+        // @ts-ignore
+        mockedClient.clearStores.and.returnValue(null);
         const spyDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
         // Components
@@ -164,7 +166,7 @@ describe('ViewModel_ServerCommunication', () => {
             const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
             return Promise.resolve(config);
         });
-        mockedClient.loginWithPassword.and.returnValue(Promise.reject('M_FORBIDDEN: Invalid password'));
+        mockedClient.loginWithPassword.and.returnValue(Promise.reject({data: {errcode: 'M_FORBIDDEN', error: 'Invalid password'}}));
 
         // Login with these values
         loginComponent.matrixUrlControl.setValue('@username:host');

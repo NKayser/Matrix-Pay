@@ -13,7 +13,7 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
-import {EventEmitter} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, EventEmitter} from '@angular/core';
 
 describe('GroupBalanceComponent', () => {
   let component: GroupBalanceComponent;
@@ -33,7 +33,8 @@ describe('GroupBalanceComponent', () => {
         { provide: MatDialog, useValue: MockDialogCancel },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 
@@ -143,7 +144,8 @@ describe('GroupBalanceComponent', () => {
         { provide: MatDialog, useValue: MockDialog },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
       .compileComponents();
 

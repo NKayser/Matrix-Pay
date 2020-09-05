@@ -24,6 +24,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('ErrorModalComponent', () => {
   let component: ErrorModalComponent;
@@ -39,7 +40,8 @@ describe('ErrorModalComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: spyDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: [] },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 

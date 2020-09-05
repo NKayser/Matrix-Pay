@@ -13,7 +13,7 @@ import {Currency} from '../../DataModel/Utils/Currency';
 import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
-import {EventEmitter} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, EventEmitter} from '@angular/core';
 
 describe('GroupSelectionComponentCancel', () => {
   let component: GroupSelectionComponent;
@@ -33,7 +33,8 @@ describe('GroupSelectionComponentCancel', () => {
         { provide: MatDialog, useValue: MockDialogCancel },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     }).compileComponents();
 
 
@@ -130,7 +131,8 @@ describe('GroupSelectionComponentConfirm1', () => {
         { provide: MatDialog, useValue: MockDialog },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     }).compileComponents();
 
 

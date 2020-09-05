@@ -11,7 +11,7 @@ import {EventEmitter} from "@angular/core";
 describe('MatrixClientServiceService', () => {
   let service: MatrixClientService;
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['loginWithPassword', 'setAccountData', 'getAccountDataFromServer', 'on', 'logout']);
+    ['loginWithPassword', 'setAccountData', 'getAccountDataFromServer', 'on', 'logout', 'clearStores']);
   const classProviderSpy = jasmine.createSpyObj('MatrixClassProviderService',
     ['createClient', 'findClientConfig']);
 
@@ -29,6 +29,8 @@ describe('MatrixClientServiceService', () => {
     //service = TestBed.inject(MatrixClientService);
     service = new MatrixClientService(classProviderSpy);
     classProviderSpy.createClient.and.returnValue(mockedClient);
+    // @ts-ignore
+    mockedClient.clearStores.and.returnValue(null);
     //jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
   });
 

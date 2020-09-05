@@ -4,6 +4,7 @@ import { PaymentModalComponent } from './payment-modal.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Contact} from '../../DataModel/Group/Contact';
 import {Currency} from '../../DataModel/Utils/Currency';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('PaymentModalComponent', () => {
   let component: PaymentModalComponent;
@@ -20,7 +21,8 @@ describe('PaymentModalComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: spyDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: [] },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 

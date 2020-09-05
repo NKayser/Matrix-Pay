@@ -3,6 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { PaymentViewComponent } from './payment-view.component';
 import {PaymentModalComponent} from '../payment-modal/payment-modal.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('PaymentViewComponent', () => {
   let component: PaymentViewComponent;
@@ -19,7 +20,8 @@ describe('PaymentViewComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: spyDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: [] },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
         .compileComponents();
 
