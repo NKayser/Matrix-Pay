@@ -173,16 +173,14 @@ describe('ViewModel_DataModel', () => {
         expect(nativeElement.querySelector('.approve_group').textContent).toBe('name_g1');
         expect(nativeElement.querySelector('.approve_amount').textContent).toBe('1€');
     });
-/*
-    it('calculate total Balances', () => {
-        const c1 = new Contact('c1', 'Alice');
-        const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
-        dataModelService.getUser.and.returnValue(stubValueUser);
 
-        const g1 = new Group('g1', 'name_g1', Currency.USD);
-        const g2 = new Group('g2', 'name_g2', Currency.USD);
-        const g3 = new Group('g3', 'name_g3', Currency.EUR);
-        const g4 = new Group('g4', 'name_g4', Currency.EUR);
+    it('show total Balances on home view', () => {
+        const c1 = dataModelService.initializeUserFirstTime('c1', 'Alice').contact;
+
+        const g1 = dataModelService.getUser().createGroup('g1', 'name_g1', Currency.USD);
+        const g2 = dataModelService.getUser().createGroup('g2', 'name_g2', Currency.USD);
+        const g3 = dataModelService.getUser().createGroup('g3', 'name_g3', Currency.EUR);
+        const g4 = dataModelService.getUser().createGroup('g4', 'name_g4', Currency.EUR);
 
         const mg1 = new Groupmember(c1, g1);
         mg1.balance = 5;
@@ -197,13 +195,11 @@ describe('ViewModel_DataModel', () => {
         mg4.balance = 6;
         g4.addGroupmember(mg4);
 
-        const stubValueGroups = [g1, g2, g3, g4];
+        homeFixture.detectChanges();
 
-        dataModelService.getGroups.and.returnValue(stubValueGroups);
-
-        fixture.detectChanges();
-
-        expect(component.getTotalBalance(Currency.USD)).toBe(15);
-        expect(component.getTotalBalance(Currency.EUR)).toBe(13);
-    });*/
+        expect(homeComponent.getTotalBalance(Currency.USD)).toBe(15);
+        expect(homeComponent.getTotalBalance(Currency.EUR)).toBe(13);
+        expect(homeFixture.nativeElement.querySelectorAll('.balance_number')[0].textContent).toBe('0.15');
+        expect(homeFixture.nativeElement.querySelectorAll('.balance_number')[1].textContent).toBe('0.13');
+    });
 });
