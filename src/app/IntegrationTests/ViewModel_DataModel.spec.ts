@@ -17,6 +17,7 @@ import {Groupmember} from "../DataModel/Group/Groupmember";
 import {Contact} from "../DataModel/Group/Contact";
 import {User} from "../DataModel/User/User";
 import {Language} from "../DataModel/Utils/Language";
+import {AtomarChange} from "../DataModel/Group/AtomarChange";
 
 
 describe('ViewModel_DataModel', () => {
@@ -90,8 +91,7 @@ describe('ViewModel_DataModel', () => {
 
     // Group Balance Component
     it('should display recommendations and balances', () => {
-        dataModelService.initializeUserFirstTime('c1', 'Alice');
-        const userContact = dataModelService.getUser().contact;
+        const userContact = dataModelService.initializeUserFirstTime('c1', 'Alice').contact;
 
         const g1 = dataModelService.getUser().createGroup('id_1', 'group_1', Currency.USD);
         const g2 = dataModelService.getUser().createGroup('id_2', 'group_2', Currency.USD);
@@ -152,5 +152,58 @@ describe('ViewModel_DataModel', () => {
         expect(matLabel.textContent).toEqual('name_g2');
     });
 
-    //
+    // Home Component
+    it('show recommendations on home view', () => {
+        const c1 = dataModelService.initializeUserFirstTime('c1', 'Alice').contact;
+        const c2 = new Contact('c2', 'Bob');
+        const g1 = dataModelService.getUser().createGroup('g1', 'name_g1', Currency.EUR);
+        const gm1 = new Groupmember(c1, g1);
+        const gm2 = new Groupmember(c2, g1);
+        g1.addGroupmember(gm1);
+        g1.addGroupmember(gm2);
+        const r1 = new Recommendation(g1, new AtomarChange(c1, 100), new AtomarChange(c2, -100));
+        g1.setRecommendations([r1]);
+
+        homeFixture.detectChanges();
+
+        expect(homeComponent.recommendations).toEqual([r1]);
+
+        const nativeElement: HTMLElement = homeFixture.nativeElement;
+        expect(nativeElement.querySelector('.approve_person').textContent).toBe('Alice');
+        expect(nativeElement.querySelector('.approve_group').textContent).toBe('name_g1');
+        expect(nativeElement.querySelector('.approve_amount').textContent).toBe('1€');
+    });
+/*
+    it('calculate total Balances', () => {
+        const c1 = new Contact('c1', 'Alice');
+        const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+        dataModelService.getUser.and.returnValue(stubValueUser);
+
+        const g1 = new Group('g1', 'name_g1', Currency.USD);
+        const g2 = new Group('g2', 'name_g2', Currency.USD);
+        const g3 = new Group('g3', 'name_g3', Currency.EUR);
+        const g4 = new Group('g4', 'name_g4', Currency.EUR);
+
+        const mg1 = new Groupmember(c1, g1);
+        mg1.balance = 5;
+        g1.addGroupmember(mg1);
+        const mg2 = new Groupmember(c1, g2);
+        mg2.balance = 10;
+        g2.addGroupmember(mg2);
+        const mg3 = new Groupmember(c1, g3);
+        mg3.balance = 7;
+        g3.addGroupmember(mg3);
+        const mg4 = new Groupmember(c1, g4);
+        mg4.balance = 6;
+        g4.addGroupmember(mg4);
+
+        const stubValueGroups = [g1, g2, g3, g4];
+
+        dataModelService.getGroups.and.returnValue(stubValueGroups);
+
+        fixture.detectChanges();
+
+        expect(component.getTotalBalance(Currency.USD)).toBe(15);
+        expect(component.getTotalBalance(Currency.EUR)).toBe(13);
+    });*/
 });
