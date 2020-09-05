@@ -111,7 +111,8 @@ describe('GroupSelectionComponentCancel', () => {
   });
 });
 
-describe('GroupSelectionComponentConfirm', () => {
+// do not name this GroupSelectionComponentConfirm, for some reason the test fails!
+describe('GroupSelectionComponentConfirm1', () => {
   let component: GroupSelectionComponent;
   let fixture: ComponentFixture<GroupSelectionComponent>;
 
@@ -131,6 +132,8 @@ describe('GroupSelectionComponentConfirm', () => {
         { provide: DataModelService, useValue: spyData}
       ]
     }).compileComponents();
+
+
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
@@ -185,4 +188,71 @@ describe('GroupSelectionComponentConfirm', () => {
     component.addGroup();
     expect(matrixBasicDataService.groupCreate).toHaveBeenCalled();
   });
+
 });
+
+
+
+/*describe('GroupSelectionComponentConfirm', () => {
+let component: GroupSelectionComponent;
+let fixture: ComponentFixture<GroupSelectionComponent>;
+
+let dataModelService: jasmine.SpyObj<DataModelService>;
+let matrixBasicDataService: jasmine.SpyObj<MatrixBasicDataService>;
+
+beforeEach(async(() => {
+
+  const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'getBalanceEmitter']);
+  const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['groupAddMember', 'leaveGroup', 'groupCreate']);
+
+  TestBed.configureTestingModule({
+    declarations: [GroupSelectionComponent, GroupTransactionComponent, HistoryComponent, GroupBalanceComponent],
+    providers: [
+      { provide: MatDialog, useValue: MockDialogCancel },
+      { provide: MatrixBasicDataService, useValue: spyMatrix},
+      { provide: DataModelService, useValue: spyData}
+    ]
+  }).compileComponents();
+
+
+
+  dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
+  matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
+  dataModelService.getBalanceEmitter.and.returnValue({
+    subscribe(): any {
+
+    }
+  } as EventEmitter<void>);
+
+  fixture = TestBed.createComponent(GroupSelectionComponent);
+  component = fixture.componentInstance;
+}));
+
+/*it('check add member to group confirm', () => {
+  const c1 = new Contact('c1', 'Alice');
+  const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+  dataModelService.getUser.and.returnValue(stubValueUser);
+
+  const g1 = new Group('g1', 'name_g1', Currency.USD);
+  const g2 = new Group('g2', 'name_g2', Currency.USD);
+
+  dataModelService.getGroups.and.returnValue([g1, g2]);
+  fixture.detectChanges();
+  component.addMemberToGroup();
+  expect(matrixBasicDataService.groupAddMember).toHaveBeenCalled();
+});
+
+it('check leave group confirm', () => {
+  const c1 = new Contact('c1', 'Alice');
+  const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+  dataModelService.getUser.and.returnValue(stubValueUser);
+
+  const g1 = new Group('g1', 'name_g1', Currency.USD);
+  const g2 = new Group('g2', 'name_g2', Currency.USD);
+
+  dataModelService.getGroups.and.returnValue([g1, g2]);
+  fixture.detectChanges();
+  component.leaveGroup();
+  expect(matrixBasicDataService.leaveGroup).toHaveBeenCalled();
+});
+});*/
