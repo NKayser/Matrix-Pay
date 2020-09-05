@@ -15,6 +15,8 @@ import {Group} from "../DataModel/Group/Group";
 import {Recommendation} from "../DataModel/Group/Recommendation";
 import {Groupmember} from "../DataModel/Group/Groupmember";
 import {Contact} from "../DataModel/Group/Contact";
+import {User} from "../DataModel/User/User";
+import {Language} from "../DataModel/Utils/Language";
 
 
 describe('ViewModel_DataModel', () => {
@@ -128,4 +130,27 @@ describe('ViewModel_DataModel', () => {
         expect(groupBalanceComponent.getCustomColor(userContact.name)).toBe('red');
         expect(groupBalanceComponent.getCustomColor(c3.name)).toBe('green');
     });
+
+    // Group selection Component
+    it('should list all groups', () => {
+        dataModelService.initializeUserFirstTime('c1', 'Alice');
+        const user = dataModelService.getUser();
+
+        const g1 = user.createGroup('g1', 'name_g1', Currency.USD);
+        const g2 = user.createGroup('g2', 'name_g2', Currency.USD);
+        groupSelectionFixture.detectChanges();
+
+        const nativeElement: HTMLElement = groupSelectionFixture.nativeElement;
+        const matLabel = nativeElement.querySelector('mat-label');
+        expect(matLabel.textContent).toEqual('name_g1');
+
+        expect(groupSelectionComponent.currentGroup.groupId).toEqual('g1');
+        expect(groupSelectionComponent.groups.length).toEqual(2);
+        groupSelectionComponent.selectGroup(1);
+        groupSelectionFixture.detectChanges();
+        expect(groupSelectionComponent.currentGroup.groupId).toEqual('g2');
+        expect(matLabel.textContent).toEqual('name_g2');
+    });
+
+    //
 });
