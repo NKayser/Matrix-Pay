@@ -152,7 +152,6 @@ export class ObservableService implements ObservableInterface {
     });
 
     // The things written into the local store of the client will eventually be detected by the listeners.
-    if (Utils.log) { console.log('---window---'); }
     const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
     timelineWindow.load();
     // if (Utils.log) { console.log(timelineWindow.getEvents()); }
@@ -403,10 +402,10 @@ export class ObservableService implements ObservableInterface {
   private roomTypeListener(): void {
     this.roomTypeMatrixClient.on('RoomState.events', async (event, room, toStartOfTimeline, removed, data) => {
       if (event.getType() === 'org.matrix.msc1840') {
+        console.log('---stop client---');
         this.matrixClient.stopClient();
         console.log(room.roomId);
         console.log(event);
-        console.log('client stopped');
         console.log(ObservableService.FILTER_ID + this.filterCount);
         // const oldFilter: Filter = this.matrixClient.getFilter(this.roomTypeMatrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount);
         // const oldFilterDefinition = oldFilter.getDefinition();
@@ -414,6 +413,7 @@ export class ObservableService implements ObservableInterface {
         this.filterCount++;
         const filter = Filter.fromJson(this.matrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount,
           this.filterDefinition);
+        console.log('---start client---');
         await this.matrixClient.startClient({includeArchivedRooms: false, filter});
       }
     });
@@ -431,7 +431,6 @@ export class ObservableService implements ObservableInterface {
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payer,
-      payerAmount: this.SumUpRecipientAmounts(content.amounts),
       recipientIds: content.recipients,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
@@ -446,7 +445,6 @@ export class ObservableService implements ObservableInterface {
       creationDate: event.getDate(),
       groupId: room.roomId,
       payerId: content.payer,
-      payerAmount: this.SumUpRecipientAmounts(content.amounts), // maybe do that calculation in BasicDataUpdateService
       recipientIds: content.recipients,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};

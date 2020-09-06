@@ -56,7 +56,6 @@ export interface TransactionType{
   creationDate: Date;
   groupId: string;
   payerId: string;
-  payerAmount: number;
   recipientIds: string[];
   recipientAmounts: number[];
   senderId: string;
