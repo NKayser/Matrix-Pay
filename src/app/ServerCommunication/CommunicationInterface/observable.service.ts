@@ -29,14 +29,30 @@ import {ServerResponse} from "../Response/ServerResponse";
 export class ObservableService implements ObservableInterface {
   private static TRANSACTION_TYPE_PAYBACK = 'PAYBACK';
   private static TRANSACTION_TYPE_EXPENSE = 'EXPENSE';
-  private static FILTER = 'edu.kit.tm.dsn.psess2020.matrixpay-v';
-  private static ROOM_TYPE_FILTER = 'edu.kit.tm.dsn.psess2020.matrixpay-roomType';
-
-
+  private static FILTER_ID = 'edu.kit.tm.dsn.psess2020.matrixpay-v';
+  private static ROOM_TYPE_FILTER_ID = 'edu.kit.tm.dsn.psess2020.matrixpay-roomType';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
   private matrixClient: MatrixClient;
   private roomTypeMatrixClient: MatrixClient;
   private filterCount = 1;
+  private filterDefinition = {
+    room: {
+      rooms: [],
+      state: {
+        types: ['m.room.*', 'org.matrix.msc1840'],
+      },
+      timeline: {
+        limit: 10,
+        types: ['com.matrixpay.currency', 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense', 'm.room.create', 'm.room.member', 'org.matrix.msc1840'],
+      },
+      ephemeral: {
+        not_types: ['*'],
+      }
+    },
+    presence: {
+      not_types: ['*'],
+    },
+  };
   private clientService: MatrixClientService;
   private userObservable: Subject<UserType>;
   private groupsObservable: Subject<GroupsType>;
@@ -88,28 +104,14 @@ export class ObservableService implements ObservableInterface {
     this.roomStateListener();
     this.roomTypeListener();
 
-    const filter = Filter.fromJson(this.matrixClient.credentials.userId, ObservableService.FILTER + this.filterCount, {
-      room: {
-        rooms: [],
-        state: {
-          types: ['m.room.*', 'org.matrix.msc1840'],
-        },
-        timeline: {
-          limit: 10,
-          types: ['com.matrixpay.currency', 'com.matrixpay.language', 'com.matrixpay.payback', 'com.matrixpay.expense', 'm.room.create', 'm.room.member', 'org.matrix.msc1840'],
-        },
-        ephemeral: {
-          not_types: ['*'],
-        }
-      },
-      presence: {
-        not_types: ['*'],
-      },
-    });
+    const filter = Filter.fromJson(this.matrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount,
+      this.filterDefinition);
 
-    const roomTypeFilter = Filter.fromJson(this.roomTypeMatrixClient.credentials.userId, ObservableService.ROOM_TYPE_FILTER, {
-      timeline: {
-        types: ['org.matrix.msc1840'],
+    const roomTypeFilter = Filter.fromJson(this.roomTypeMatrixClient.credentials.userId, ObservableService.ROOM_TYPE_FILTER_ID, {
+      room: {
+        state: {
+          types: ['org.matrix.msc1840'],
+        },
       }
     });
 
@@ -176,8 +178,6 @@ export class ObservableService implements ObservableInterface {
 
   public accountDataCallback(event, oldEvent): void {
     // if (Utils.log) console.log('got account data change' + event.getType());
-    console.log('accountDataCallback');
-    console.log(event);
     switch (event.getType()) {
       case ('com.matrixpay.currency'): {
         if (Utils.log) { console.log('got currency change to ' + event.getContent().currency); }
@@ -401,13 +401,21 @@ export class ObservableService implements ObservableInterface {
   }
 
   private roomTypeListener(): void {
-    this.roomTypeMatrixClient.on('Room.timeline', (event, room, toStartOfTimeline, removed, data) => {
-      this.matrixClient.stopClient();
-      console.log('client stopped');
-      const oldFilter: Filter = this.matrixClient.getFilter(this.roomTypeMatrixClient.credentials.userId,
-        ObservableService.FILTER + this.filterCount);
-      const oldFilterDefinition = oldFilter.getDefinition();
-      console.log(oldFilterDefinition);
+    this.roomTypeMatrixClient.on('RoomState.events', async (event, room, toStartOfTimeline, removed, data) => {
+      if (event.getType() === 'org.matrix.msc1840') {
+        this.matrixClient.stopClient();
+        console.log(room.roomId);
+        console.log(event);
+        console.log('client stopped');
+        console.log(ObservableService.FILTER_ID + this.filterCount);
+        // const oldFilter: Filter = this.matrixClient.getFilter(this.roomTypeMatrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount);
+        // const oldFilterDefinition = oldFilter.getDefinition();
+        this.filterDefinition.room.rooms.push(room.roomId);
+        this.filterCount++;
+        const filter = Filter.fromJson(this.matrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount,
+          this.filterDefinition);
+        await this.matrixClient.startClient({includeArchivedRooms: false, filter});
+      }
     });
   }
 

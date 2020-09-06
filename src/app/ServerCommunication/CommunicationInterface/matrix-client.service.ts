@@ -70,7 +70,7 @@ export class MatrixClientService implements ClientInterface {
     // Login and get Access Token
     try {
       this.accessToken = await this.matrixClient.loginWithPassword(account, password);
-      await this.roomTypeMatrixClient.loginWithToken(this.accessToken);
+      await this.roomTypeMatrixClient.loginWithPassword(account, password);
       this.loggedIn = true;
     } catch(error) {
       this.loggedIn = false;
