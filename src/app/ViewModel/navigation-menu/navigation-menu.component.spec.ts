@@ -4,6 +4,7 @@ import { NavigationMenuComponent } from './navigation-menu.component';
 import {MatDialog} from '@angular/material/dialog';
 import {MockDialogCancel} from '../_mockServices/MockDialog';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('NavigationMenuComponent', () => {
   let component: NavigationMenuComponent;
@@ -20,7 +21,8 @@ describe('NavigationMenuComponent', () => {
       providers: [
         { provide: MatDialog, useValue: MockDialogCancel },
         { provide: MatrixClientService, useValue: spyClient},
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     }).compileComponents();
 
     matrixClientService = TestBed.inject(MatrixClientService) as jasmine.SpyObj<MatrixClientService>;

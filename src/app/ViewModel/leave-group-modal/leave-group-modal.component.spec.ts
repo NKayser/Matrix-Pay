@@ -5,6 +5,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Contact} from '../../DataModel/Group/Contact';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('LeaveGroupModalComponent', () => {
   let component: LeaveGroupModalComponent;
@@ -20,7 +21,8 @@ describe('LeaveGroupModalComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: spyDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: [] },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 

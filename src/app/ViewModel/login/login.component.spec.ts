@@ -6,6 +6,7 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 import {MatrixEmergentDataService} from '../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {SuccessfulResponse} from '../../ServerCommunication/Response/SuccessfulResponse';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -30,7 +31,8 @@ describe('LoginComponent', () => {
         { provide: MatrixBasicDataService, useValue: spyBasicMatrix },
         { provide: MatrixEmergentDataService, useValue: spyEmergent },
         { provide: DataModelService, useValue: spyData },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 

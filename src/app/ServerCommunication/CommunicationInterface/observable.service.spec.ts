@@ -2,25 +2,25 @@ import {ObservableService} from './observable.service';
 import {Observable} from 'rxjs';
 import {CurrencyType, GroupActivityType, GroupMemberType, GroupsType, LanguageType, TransactionType} from './parameterTypes';
 import {EventEmitter} from 'events';
+// @ts-ignore
+import {TimelineWindow} from 'matrix-js-sdk';
 
 
 // create a fake Room with all functionality needed during testing
-function fakeRoom(members: object, currency: string, _name: string, _roomId: string): object {
+function fakeRoom(member: object, currency: string, _name: string, _roomId: string): object {
   return {
     name: _name,
     roomId: _roomId,
     getLiveTimeline(): object {
       return {
         getTimelineSet(): object {
-          return {
-            load(): any {
-
-            }
-          };
+          return {};
         },
         getState(direction: string): object {
           return {
-            members,
+            getMember(): any {
+                return member;
+            },
             getStateEvents(eventType: string, stateKey: string): object {
               if (eventType === 'com.matrixpay.currency') {
                 return {
@@ -95,27 +95,21 @@ describe('ObservableService', () => {
     mockedClient.joinRoom.and.returnValue({});
 
     clientServiceSpy.getClient.and.returnValue(mockedClient);
+
+    console.log('service');
+    // @ts-ignore
+    ObservableService.prototype.paginateBackwardsUntilTheEnd = (window: TimelineWindow): Promise<void> => {
+        console.log('wir habens bis hier geschafft :D');
+        return Promise.resolve();
+    };
     service = new ObservableService(clientServiceSpy);
+    console.log(service);
+
+    TimelineWindow.prototype.load = () => {
+        console.log('wir haben dich ersetzt');
+    };
 
   });
-
-  /*it('should be created', () => {
-    expect(service).toBeTruthy();
-  });*/
-
-  /*it('should get userObservable', () => {
-    const actual: Observable<UserType> = service.getUserObservable();
-    expect(actual).toBeDefined();
-  });*/
-
-  /*it('should join the room', () => {
-    service.roomCallback(fakeRoom({
-      '@id1:dsn.tm.kit.edu': {
-        membership: 'invite'
-      }
-    }, 'USD'));
-    expect(mockedClient.joinRoom).toHaveBeenCalled();
-  });*/
 
   it('language observable should emit changes', (done: DoneFn) => {
 
@@ -138,52 +132,15 @@ describe('ObservableService', () => {
         {});
   });
 
-  it('check invite', (done: DoneFn) => {
+  it('check invite', () => {
 
     clientEmitter.emit('Room',
         fakeRoom({
-          '@id1:dsn.tm.kit.edu': {
             membership: 'invite'
-          }
         }, 'USD', 'name1', 'room1'),
         {});
 
     expect(mockedClient.joinRoom).toHaveBeenCalled();
-
-    done();
-  });
-
-  it('check join', (done: DoneFn) => {
-
-    const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
-    groupObservable.subscribe((group: GroupsType) => {
-      expect(group.currency).toBe('USD');
-      expect(group.groupId).toBe('room1');
-      expect(group.groupName).toBe('name1');
-      expect(group.isLeave).toBe(false);
-      expect(group.userIds).toEqual([]);
-      expect(group.userNames).toEqual([]);
-
-      done();
-    });
-
-    const multipleTransactionObservable: Observable<TransactionType[]> = service.getMultipleNewTransactionsObservable();
-    multipleTransactionObservable.subscribe((transactions: TransactionType[]) => {
-
-      // TODO Add check for transaction
-
-      done();
-    });
-
-
-    clientEmitter.emit('Room',
-      fakeRoom({
-        '@id1:dsn.tm.kit.edu': {
-          membership: 'join'
-        }
-      }, 'USD', 'name1', 'room1'),
-      {}
-    );
   });
 
   it('check membership join', (done: DoneFn) => {
@@ -201,11 +158,6 @@ describe('ObservableService', () => {
 
       done();
     });
-
-    /*const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
-    groupObservable.subscribe((group: GroupsType) => {
-      done();
-    });*/
 
     clientEmitter.emit('RoomMember.membership',
         {
@@ -274,11 +226,6 @@ describe('ObservableService', () => {
       done();
     });
 
-    /*const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
-    groupObservable.subscribe((group: GroupsType) => {
-      done();
-    });*/
-
     clientEmitter.emit('RoomMember.membership',
         {
           getDate(): Date {
@@ -310,11 +257,6 @@ describe('ObservableService', () => {
 
       done();
     });
-
-    /*const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
-    groupObservable.subscribe((group: GroupsType) => {
-      done();
-    });*/
 
     clientEmitter.emit('RoomMember.membership',
         {
@@ -353,109 +295,6 @@ describe('ObservableService', () => {
       {});
   });
 
-  it('message payback test', (done: DoneFn) => {
-
-    const d1 = new Date('December 17, 1995 03:24:00');
-    const room = {roomId: 'room1'};
-
-    clientEmitter.emit('Room.timeline',
-        {
-          getType(): string {
-            return 'com.matrixpay.payback';
-          },
-          getContent(): object {
-            return {
-              name: 'name_t1',
-              payer: userId,
-              amounts: [9, 5, 3, 7],
-              recipients: ['id2', 'id3', 'id4', 'id5'],
-            };
-          },
-          getId(): string {
-            return 't1';
-          },
-          getDate(): Date {
-            return d1;
-          },
-          getSender(): string {
-            return userId;
-          }
-        },
-        room, {}, {}, {liveEvent: false, }
-    );
-
-    // @ts-ignore
-    const type = ObservableService.TRANSACTION_TYPE_PAYBACK;
-    // @ts-ignore
-    expect(service.transactions[room.roomId]).toEqual([
-      {transactionType: type,
-        transactionId: 't1',
-        name: 'name_t1',
-        creationDate: d1,
-        groupId: 'room1',
-        payerId: userId,
-        payerAmount: 24,
-        recipientIds: ['id2', 'id3', 'id4', 'id5'],
-        recipientAmounts: [9, 5, 3, 7],
-        senderId: userId}
-      ]);
-
-    done();
-  });
-
-  it('message expense test', (done: DoneFn) => {
-
-    const d1 = new Date('December 17, 1995 03:24:00');
-    const room = {roomId: 'room1'};
-
-    clientEmitter.emit('Room.timeline',
-        {
-          getType(): string {
-            return 'com.matrixpay.expense';
-          },
-          getContent(): object {
-            return {
-              name: 'name_t2',
-              payer: userId,
-              amounts: [9, 5, 3, 7],
-              recipients: ['id2', 'id3', 'id4', 'id5'],
-            };
-          },
-          getId(): string {
-            return 't2';
-          },
-          getDate(): Date {
-            return d1;
-          },
-          getSender(): string {
-            return userId;
-          },
-          isRelation(): boolean {
-            return false;
-          }
-        },
-        room, {}, {}, {liveEvent: false, }
-    );
-
-    // @ts-ignore
-    const type = ObservableService.TRANSACTION_TYPE_EXPENSE;
-    // @ts-ignore
-    expect(service.transactions[room.roomId]).toEqual([
-      {transactionType: type,
-        transactionId: 't2',
-        name: 'name_t2',
-        creationDate: d1,
-        groupId: 'room1',
-        payerId: userId,
-        payerAmount: 24,
-        recipientIds: ['id2', 'id3', 'id4', 'id5'],
-        recipientAmounts: [9, 5, 3, 7],
-        senderId: userId}
-    ]);
-
-    done();
-  });
-
   it('message expense test edit', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
@@ -477,6 +316,7 @@ describe('ObservableService', () => {
                 recipientAmounts: [9, 5, 3, 7],
                 senderId: userId}
         );
+
         done();
     });
 
@@ -804,6 +644,174 @@ describe('ObservableService', () => {
             }
         },
         room, {}, {}, {liveEvent: true, }
+    );
+  });
+
+  it('check join', (done: DoneFn) => {
+    const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
+    groupObservable.subscribe((group: GroupsType) => {
+        expect(group.currency).toBe('USD');
+        expect(group.groupId).toBe('room1');
+        expect(group.groupName).toBe('name1');
+        expect(group.isLeave).toBe(false);
+        expect(group.userIds).toEqual([]);
+        expect(group.userNames).toEqual([]);
+
+        done();
+    });
+
+
+    clientEmitter.emit('Room',
+        fakeRoom({
+            membership: 'join'
+        }, 'USD', 'name1', 'room1'),
+        {}
+      );
+  });
+
+  it('message payback test room', (done: DoneFn) => {
+
+      console.log('i got called here');
+
+      const d1 = new Date('December 17, 1995 03:24:00');
+      const room = fakeRoom({
+          membership: 'join'
+      }, 'USD', 'name1', 'room1');
+      // @ts-ignore
+      const type = ObservableService.TRANSACTION_TYPE_PAYBACK;
+
+      // @ts-ignore
+      ObservableService.prototype.paginateBackwardsUntilTheEnd = (window: TimelineWindow): Promise<void> => {
+          console.log('called1');
+          clientEmitter.emit('Room.timeline',
+              {
+                  getType(): string {
+                      return 'com.matrixpay.payback';
+                  },
+                  getContent(): object {
+                      return {
+                          name: 'name_t1',
+                          payer: userId,
+                          amounts: [9, 5, 3, 7],
+                          recipients: ['id2', 'id3', 'id4', 'id5'],
+                      };
+                  },
+                  getId(): string {
+                      return 't1';
+                  },
+                  getDate(): Date {
+                      return d1;
+                  },
+                  getSender(): string {
+                      return userId;
+                  }
+              },
+              room, {}, {}, {liveEvent: false, }
+          );
+          return Promise.resolve();
+      };
+      clientEmitter.removeAllListeners();
+      service = new ObservableService(clientServiceSpy);
+
+
+      const transactionsObservable: Observable<TransactionType[]> = service.getMultipleNewTransactionsObservable();
+      transactionsObservable.subscribe((transactions: TransactionType[]) => {
+          console.log('testing now');
+          console.log(transactions);
+          expect(transactions).toEqual([
+              {transactionType: type,
+                  transactionId: 't1',
+                  name: 'name_t1',
+                  creationDate: d1,
+                  groupId: 'room1',
+                  payerId: userId,
+                  payerAmount: 24,
+                  recipientIds: ['id2', 'id3', 'id4', 'id5'],
+                  recipientAmounts: [9, 5, 3, 7],
+                  senderId: userId}
+          ]);
+
+          done();
+      });
+
+
+      clientEmitter.emit('Room',
+        room,
+        {}
+    );
+  });
+
+  it('message expense test room', (done: DoneFn) => {
+
+    console.log('i got called here');
+
+    const d1 = new Date('December 17, 1995 03:24:00');
+    const room = fakeRoom({
+        membership: 'join'
+    }, 'USD', 'name1', 'room1');
+    // @ts-ignore
+    const type = ObservableService.TRANSACTION_TYPE_EXPENSE;
+
+    // @ts-ignore
+    ObservableService.prototype.paginateBackwardsUntilTheEnd = (window: TimelineWindow): Promise<void> => {
+        console.log('called1');
+        clientEmitter.emit('Room.timeline',
+            {
+                getType(): string {
+                    return 'com.matrixpay.expense';
+                },
+                getContent(): object {
+                    return {
+                        name: 'name_t2',
+                        payer: userId,
+                        amounts: [9, 5, 3, 7],
+                        recipients: ['id2', 'id3', 'id4', 'id5'],
+                    };
+                },
+                getId(): string {
+                    return 't2';
+                },
+                getDate(): Date {
+                    return d1;
+                },
+                getSender(): string {
+                    return userId;
+                },
+                isRelation(): boolean {
+                    return false;
+                }
+            },
+            room, {}, {}, {liveEvent: false, }
+        );
+        return Promise.resolve();
+    };
+    clientEmitter.removeAllListeners();
+    service = new ObservableService(clientServiceSpy);
+
+
+    const transactionsObservable: Observable<TransactionType[]> = service.getMultipleNewTransactionsObservable();
+    transactionsObservable.subscribe((transactions: TransactionType[]) => {
+        console.log('testing now');
+        console.log(transactions);
+        expect(transactions).toEqual([
+            {transactionType: type,
+                transactionId: 't2',
+                name: 'name_t2',
+                creationDate: d1,
+                groupId: 'room1',
+                payerId: userId,
+                payerAmount: 24,
+                recipientIds: ['id2', 'id3', 'id4', 'id5'],
+                recipientAmounts: [9, 5, 3, 7],
+                senderId: userId}
+        ]);
+
+        done();
+    });
+
+    clientEmitter.emit('Room',
+        room,
+        {}
     );
   });
 

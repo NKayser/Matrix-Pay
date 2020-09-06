@@ -3,6 +3,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { PaymentModalComponent } from './payment-modal.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Contact} from '../../DataModel/Group/Contact';
+import {Currency} from '../../DataModel/Utils/Currency';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('PaymentModalComponent', () => {
   let component: PaymentModalComponent;
@@ -19,7 +21,8 @@ describe('PaymentModalComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: spyDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: [] },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 
@@ -47,7 +50,8 @@ describe('PaymentModalComponent', () => {
       payer: c1,
       recipients: [c1, c2, c3],
       amount: amountArray,
-      isAdded: [true, true, true]
+      isAdded: [true, true, true],
+      currency: Currency.EUR
     };
 
     component.data = data;
@@ -70,7 +74,8 @@ describe('PaymentModalComponent', () => {
       payer: c1,
       recipients: [c1, c2, c3],
       amount: amountArray,
-      isAdded: [true, true, true]
+      isAdded: [true, true, true],
+      currency: Currency.EUR
     };
 
     component.data = data;
@@ -93,7 +98,8 @@ describe('PaymentModalComponent', () => {
       payer: c1,
       recipients: [c1, c2, c3],
       amount: amountArray,
-      isAdded: [true, true, true]
+      isAdded: [true, true, true],
+      currency: Currency.EUR
     };
 
     component.data = data;

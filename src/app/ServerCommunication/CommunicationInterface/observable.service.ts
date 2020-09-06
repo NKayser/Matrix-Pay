@@ -18,10 +18,6 @@ import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWind
 import {Utils} from '../Response/Utils';
 import {MatrixClientService} from './matrix-client.service';
 import {ClientInterface} from './ClientInterface';
-import {DiscoveredClientConfig} from "../../../matrix";
-import {UnsuccessfulResponse} from "../Response/UnsuccessfulResponse";
-import {ClientError} from "../Response/ErrorTypes";
-import {ServerResponse} from "../Response/ServerResponse";
 
 @Injectable({
   providedIn: 'root'
@@ -67,6 +63,7 @@ export class ObservableService implements ObservableInterface {
   private groupActivityObservable: Subject<GroupActivityType>;
   private transactions = {};
 
+  private initializedPayRooms = new Set<string>();
 
   constructor(clientService: MatrixClientService) {
     this.clientService = clientService;
@@ -161,6 +158,7 @@ export class ObservableService implements ObservableInterface {
     await this.paginateBackwardsUntilTheEnd(timelineWindow);
     if (Utils.log) { console.log('found old transactions in room ' + room.roomId + ': ' + this.transactions.hasOwnProperty(room.roomId)); }
     if (this.transactions.hasOwnProperty(room.roomId)) {
+      this.initializedPayRooms.add(room.roomId);
       this.multipleNewTransactionsObservable.next(this.transactions[room.roomId]);
       if (Utils.log) { console.log('Anzahl Transaktionen: ' + this.transactions[room.roomId].length); }
     }
@@ -241,16 +239,28 @@ export class ObservableService implements ObservableInterface {
           switch (event.getType()) {
             case ('com.matrixpay.payback'): {
               console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
-              if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
-              this.transactions[room.roomId].push(this.getPaybackFromEvent(room, event));
+
+              if (this.initializedPayRooms.has(room.roomId)){
+                this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
+              } else {
+                if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
+                this.transactions[room.roomId].push(this.getPaybackFromEvent(room, event));
+              }
+
               break;
             }
             case ('com.matrixpay.expense'): {
               if (!event.isRelation()) {
                 // If the event has been replaced, getContent() returns the content of the replacing event.
                 if (Utils.log) { console.log('got an old expense. name: ' + event.getContent().name); }
-                if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
-                this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
+
+                if (this.initializedPayRooms.has(room.roomId)){
+                  this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
+                } else {
+                  if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
+                  this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
+                }
+
                 console.log(this.transactions[room.roomId]);
               } else if (event.isRelation('m.replace')) {
                 if (Utils.log) { console.log('got an old editing of an expense. name: ' + event.getContent().name); }
@@ -345,6 +355,7 @@ export class ObservableService implements ObservableInterface {
       if (Utils.log) console.log(member);
       if (Utils.log) console.log(this.matrixClient.getUserId());
       if (member.membership === 'join') {
+        console.log('triggered');
         await this.processNewRoom(room);
       }
       if (member.membership === 'invite') {
@@ -358,7 +369,7 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('RoomMember.membership', (event, member, oldMembership) => {
       const userId = member.userId;
       const groupId = member.roomId;
-      if (Utils.log) console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
+      console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
       if (userId === this.matrixClient.getUserId()) {
         if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
           this.groupMembershipObservable.next(

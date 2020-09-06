@@ -114,7 +114,7 @@ describe('DataModelService', () => {
   });
 
   it('check user exists', () => {
-    expect(dataModelService.userExists).toEqual(false);
+    expect(dataModelService.userExists).toEqual(true);
     dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     expect(dataModelService.userExists).toEqual(true);
   });
