@@ -64,7 +64,6 @@ export class ObservableService implements ObservableInterface {
   private modifiedTransactionsObservable: Subject<TransactionType>;
   private multipleNewTransactionsObservable: Subject<TransactionType[]>;
   private newTransactionObservable: Subject<TransactionType>;
-
   private groupActivityObservable: Subject<GroupActivityType>;
   private transactions = {};
 
@@ -150,8 +149,11 @@ export class ObservableService implements ObservableInterface {
       groupId, groupName, currency, userIds,
       userNames, isLeave: false
     });
+    await this.paginateBackwards(room);
+  }
 
-    // The things written into the local store of the client will eventually be detected by the listeners.
+  private async paginateBackwards(room: Room): Promise<void> {
+    // The things written into the timelines will eventually be detected by the listeners.
     const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
     timelineWindow.load();
     // if (Utils.log) { console.log(timelineWindow.getEvents()); }
@@ -388,8 +390,9 @@ export class ObservableService implements ObservableInterface {
   // When a 'limited' sync (for example, after a network outage) is recieved,
   // the live timeline is reset to be empty before the recent events are added to the new timeline.
   private timelineResetListener(): void {
-    this.matrixClient.on('Room.timelineReset', (room, timelineSet, resetAllTimelines) => {
+    this.matrixClient.on('Room.timelineReset', async (room, timelineSet, resetAllTimelines) => {
       console.log('LiveTimeline in room ' + room.roomId + ' has been reset. Events may have been missed.');
+      await this.paginateBackwards(room);
     });
   }
 
