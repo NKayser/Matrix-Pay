@@ -450,14 +450,6 @@ export class ObservableService implements ObservableInterface {
       senderId: event.getSender()};
   }
 
-  private SumUpRecipientAmounts(recipientAmounts: number[]): number {
-    let sum = 0;
-    for (let i = 0; i < recipientAmounts.length; i++) {
-      sum += recipientAmounts[i];
-    }
-    return sum;
-  }
-
   public getUserObservable(): Observable<UserType> {
     return this.userObservable;
   }
