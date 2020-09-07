@@ -6,7 +6,7 @@
       <mat-card>
         <div class="label_div">
           <div *ngIf="activity.activityType===activityTypes.NEWPAYBACK">
-            <mat-label>{{activity.actor.name}} paid back in {{activity.subject.name}}</mat-label>
+            <mat-label>{{activity.subject.name}}</mat-label>
           </div>
           <div *ngIf="activity.activityType===activityTypes.NEWCONTACTINGROUP">
             <mat-label>{{activity.actor.name}} has been added to {{activity.subject.name}}</mat-label>

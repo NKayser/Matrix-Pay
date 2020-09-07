@@ -166,13 +166,21 @@ export class GroupTransactionComponent implements OnChanges {
     const modalTitle = 'Create Transaction';
     const recipients = Array<Contact>(0);
     const description = '';
-    const payer = this.group.groupmembers[0].contact;
+    let payer = this.group.groupmembers[0].contact;
+    for (const currentPayer of this.group.groupmembers){
+      if (currentPayer.active){
+        payer = currentPayer.contact;
+        break;
+      }
+    }
     const amount = Array<number>(0);
     const isAdded = Array<boolean>(0);
     for (const recipient of this.group.groupmembers){
-      recipients.push(recipient.contact);
-      amount.push(0);
-      isAdded.push(true);
+      if (recipient.active){
+        recipients.push(recipient.contact);
+        amount.push(0);
+        isAdded.push(true);
+      }
     }
     const currency = this.group.currency;
 
