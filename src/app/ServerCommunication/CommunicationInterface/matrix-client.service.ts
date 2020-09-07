@@ -16,6 +16,7 @@ import {MatrixClassProviderService} from './matrix-class-provider.service';
 })
 export class MatrixClientService implements ClientInterface {
   private matrixClient: MatrixClient;
+  private roomTypeMatrixClient: MatrixClient;
   private serverAddress: string;
   private accessToken: string;
   private loggedIn: boolean = false;
@@ -64,10 +65,12 @@ export class MatrixClientService implements ClientInterface {
     // Create a Client
     this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, store);
     this.matrixClient.clearStores();
+    this.roomTypeMatrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
 
     // Login and get Access Token
     try {
       this.accessToken = await this.matrixClient.loginWithPassword(account, password);
+      await this.roomTypeMatrixClient.loginWithPassword(account, password);
       this.loggedIn = true;
     } catch(error) {
       this.loggedIn = false;
@@ -144,6 +147,16 @@ export class MatrixClientService implements ClientInterface {
     }
 
     return this.matrixClient;
+  }
+
+  public getRoomTypeClient(): MatrixClient {
+    if (this.loggedIn == false) {
+      throw new Error('can only get Client if logged in');
+    } else if (this.matrixClient == undefined) {
+      throw new Error('unknown error')
+    }
+
+    return this.roomTypeMatrixClient;
   }
 
   public isLoggedIn(): boolean {

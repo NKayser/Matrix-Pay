@@ -26,6 +26,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('CreateGroupModalComponent', () => {
   let component: CreateGroupModalComponent;
@@ -41,7 +42,8 @@ describe('CreateGroupModalComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: spyDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: [] },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 

@@ -6,9 +6,8 @@ export interface ClientInterface {
   login(account: string, password: string): Promise<ServerResponse>;
   logout(): Promise<ServerResponse>;
   getClient(): MatrixClient;
+  getRoomTypeClient(): MatrixClient;
   isPrepared(): boolean;
   isLoggedIn(): boolean;
-
-  // returns an EventEmitter that emits if logged in
-  getLoggedInEmitter(): EventEmitter<void>
+  getLoggedInEmitter(): EventEmitter<void>; // returns an EventEmitter that emits if logged in
 }

@@ -22,6 +22,8 @@ import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
 import {Observable, of, Subject} from "rxjs";
 import {SuccessfulResponse} from "../ServerCommunication/Response/SuccessfulResponse";
 import {AddMemberToGroupModalComponent} from "../ViewModel/add-user-to-group-modal/add-member-to-group-modal.component";
+import {LeaveGroupModalComponent} from "../ViewModel/leave-group-modal/leave-group-modal.component";
+import {SettingsComponent} from "../ViewModel/settings/settings.component";
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -30,16 +32,21 @@ describe('ViewModel_ServerCommunication', () => {
     let groupComponent: GroupSelectionComponent;
     let createGroupComponent: CreateGroupModalComponent;
     let addMemberComponent: AddMemberToGroupModalComponent;
+    let leaveGroupComponent: LeaveGroupModalComponent;
+    let settingsComponent: SettingsComponent;
 
     // Fixtures
     let loginFixture: ComponentFixture<LoginComponent>;
     let groupFixture: ComponentFixture<GroupSelectionComponent>;
     let createGroupFixture: ComponentFixture<CreateGroupModalComponent>;
     let addMemberFixture: ComponentFixture<AddMemberToGroupModalComponent>;
+    let leaveGroupFixture: ComponentFixture<LeaveGroupModalComponent>;
+    let settingsFixture: ComponentFixture<SettingsComponent>;
 
     // Modals
     let createGroupMatDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
     let addMemberMatDialogRef: jasmine.SpyObj<MatDialogRef<AddMemberToGroupModalComponent>>;
+    let leaveGroupMatDialogRef: jasmine.SpyObj<MatDialogRef<LeaveGroupModalComponent>>;
 
     // Mock Matrix-js-sdk methods and Data Model Service
     let classProviderSpy: jasmine.SpyObj<MatrixClassProviderService>;
@@ -59,19 +66,21 @@ describe('ViewModel_ServerCommunication', () => {
         dataModelService = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'navItem$']);
         mockedClient = jasmine.createSpyObj('MatrixClient',
             ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
-                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on', 'removeListener']);
+                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on', 'removeListener', 'clearStores']);
 
         dataModelService.navItem$ = (new Subject()).asObservable();
         classProviderSpy.createClient.and.returnValue(Promise.resolve(mockedClient));
+        // @ts-ignore
+        mockedClient.clearStores.and.returnValue(null);
         const spyDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
         // Components
         TestBed.configureTestingModule({
-            declarations: [ LoginComponent, GroupSelectionComponent, CreateGroupModalComponent ],
+            declarations: [ LoginComponent, GroupSelectionComponent, SettingsComponent ],
             providers: [
                 { provide: MatrixClassProviderService, useValue: classProviderSpy },
-                { provide: MatDialog, useValue: MockDialog },
                 { provide: DataModelService, useValue: dataModelService },
+                { provide: MatDialog, useValue: MockDialog },
                 { provide: MatDialogRef, useValue: spyDialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: []},
                 MatrixClientService,
@@ -100,17 +109,22 @@ describe('ViewModel_ServerCommunication', () => {
         // MatDialogRefs
         createGroupMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
         addMemberMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<AddMemberToGroupModalComponent>>;
+        leaveGroupMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<LeaveGroupModalComponent>>;
 
         // Components
         loginFixture = TestBed.createComponent(LoginComponent);
         groupFixture = TestBed.createComponent(GroupSelectionComponent);
         createGroupFixture = TestBed.createComponent(CreateGroupModalComponent);
         addMemberFixture = TestBed.createComponent(AddMemberToGroupModalComponent);
+        leaveGroupFixture = TestBed.createComponent(LeaveGroupModalComponent);
+        settingsFixture = TestBed.createComponent(SettingsComponent);
 
         loginComponent = loginFixture.componentInstance;
         groupComponent = groupFixture.componentInstance;
         createGroupComponent = createGroupFixture.componentInstance;
         addMemberComponent = addMemberFixture.componentInstance;
+        leaveGroupComponent = leaveGroupFixture.componentInstance;
+        settingsComponent = settingsFixture.componentInstance;
     }));
 
     async function login(): Promise<void> {
@@ -220,7 +234,7 @@ describe('ViewModel_ServerCommunication', () => {
     });
 
     // Test-case T40
-    it('check add group members', async (done: DoneFn) => {
+    it('should add group members', async (done: DoneFn) => {
         // Define Stub Values
         const c1 = new Contact('c1', 'Alice');
         const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
@@ -256,6 +270,84 @@ describe('ViewModel_ServerCommunication', () => {
         expect(addMemberMatDialogRef.close).toHaveBeenCalledWith(data);
         expect(basicSpy).toHaveBeenCalledWith(data.group.groupId, data.user);
         const actualResponse = await basicSpy.calls.mostRecent().returnValue;
+        expect(actualResponse instanceof SuccessfulResponse).toBe(true);
+
+        done();
+    });
+
+    // Test-case T50
+    it('should leave group', async (done: DoneFn) => {
+        // Define Stub Values
+        const c1 = new Contact('c1', 'Alice');
+        const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+        const g1 = new Group('g1', 'name_g1', Currency.USD);
+        const g2 = new Group('g2', 'name_g2', Currency.USD);
+        const data = {
+            group: g1
+        };
+
+        // Spies
+        const basicSpy = spyOn(matrixBasicDataService, 'leaveGroup').and.callThrough();
+        // @ts-ignore
+        const modalSpyOpen = spyOn(groupComponent.dialog, 'open').and.returnValue({afterClosed: () => of(data)});
+
+        // Mocking
+        mockedClient.leave.and.returnValue(Promise.resolve());
+        mockedClient.getRoom.and.callFake((groupId: string) => {
+            return groupId === 'g1' ? true : undefined;
+        });
+        dataModelService.getUser.and.returnValue(stubValueUser);
+        dataModelService.getGroups.and.returnValue([g1, g2]);
+
+        // login
+        await preparedLogin();
+
+        // Leave group
+        groupFixture.detectChanges();
+        groupComponent.leaveGroup();
+        leaveGroupComponent.data = data;
+        leaveGroupComponent.ngOnInit();
+        leaveGroupComponent.onSave();
+
+        // Expected
+        expect(modalSpyOpen).toHaveBeenCalled();
+        expect(leaveGroupMatDialogRef.close).toHaveBeenCalledWith(data);
+        expect(basicSpy).toHaveBeenCalledWith(data.group.groupId);
+        const actualResponse = await basicSpy.calls.mostRecent().returnValue;
+        console.log(actualResponse);
+        expect(actualResponse instanceof SuccessfulResponse).toBe(true);
+
+        done();
+    });
+
+    // T60: not implemented. ViewModel needs to check if balances are 0.
+
+    it('should change currency', async (done: DoneFn) => {
+        // Define Stub Values
+        const stubValueUser = new User(null, Currency.USD, Language.GERMAN);
+
+        // Spies
+        const basicSpy = spyOn(matrixBasicDataService, 'userChangeDefaultCurrency').and.callThrough();
+
+        // Mocking
+        dataModelService.getUser.and.returnValue(stubValueUser);
+
+        // Before test
+        settingsFixture.detectChanges();
+        expect(settingsComponent.selectedCurrency).toBe(stubValueUser.currency);
+
+        // login
+        await preparedLogin();
+
+        // Add member to group
+        settingsComponent.selectedCurrency = Currency.EUR;
+        settingsFixture.detectChanges();
+        settingsComponent.applySettings();
+
+        // Expected
+        expect(basicSpy).toHaveBeenCalledWith('EUR');
+        const actualResponse = await basicSpy.calls.mostRecent().returnValue;
+        console.log(actualResponse);
         expect(actualResponse instanceof SuccessfulResponse).toBe(true);
 
         done();

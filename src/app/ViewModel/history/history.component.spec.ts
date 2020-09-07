@@ -4,6 +4,7 @@ import { HistoryComponent } from './history.component';
 import {Group} from '../../DataModel/Group/Group';
 import {Currency} from '../../DataModel/Utils/Currency';
 import {Activity} from '../../DataModel/Group/Activity';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('HistoryComponent', () => {
   let component: HistoryComponent;
@@ -11,7 +12,8 @@ describe('HistoryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HistoryComponent ]
+      declarations: [ HistoryComponent ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 
