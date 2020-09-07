@@ -32,7 +32,6 @@ export class NavigationMenuComponent {
    * Send output if the user logged out
    */
   public logout(): void{
-
     this.loadingLogout = true;
     promiseTimeout(TIMEOUT, this.matrixClientService.logout())
       .then((data) => {
