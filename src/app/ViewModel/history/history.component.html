@@ -24,7 +24,8 @@
             <mat-label>{{activity.actor.name}} created {{activity.subject.name}} in {{activity.subject.group.name}}</mat-label>
           </div>
         </div>
-        <mat-label class="date">{{activity.creationDate.getDay()}}.{{activity.creationDate.getMonth()}}.{{activity.creationDate.getFullYear()}}</mat-label>
+        <mat-label class="date">{{activity.creationDate.toDateString()}}</mat-label>
+        <!--<mat-label class="date">{{activity.creationDate.getDay()}}.{{activity.creationDate.getMonth()}}.{{activity.creationDate.getFullYear()}}</mat-label>-->
       </mat-card>
 
     </mat-list-item>
