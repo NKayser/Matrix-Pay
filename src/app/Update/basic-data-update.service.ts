@@ -10,29 +10,24 @@ import {Utils} from '../ServerCommunication/Response/Utils';
 import {Transaction} from '../DataModel/Group/Transaction';
 import {TransactionType} from '../DataModel/Group/TransactionType';
 import {
-  CurrencyType,
-  GroupActivityType,
-  GroupMemberType,
-  GroupsType,
-  LanguageType,
   TransactionType as TransactionTypeInterface
 } from '../ServerCommunication/CommunicationInterface/parameterTypes';
 import {AtomarChange} from '../DataModel/Group/AtomarChange';
 import {Activity} from '../DataModel/Group/Activity';
 import {ActivityType} from '../DataModel/Group/ActivityType';
-import {getTimeByID} from "../SystemTests/Time";
+import {getTimeByID} from '../SystemTests/Time';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BasicDataUpdateService {
   private observables: ObservableInterface;
-  private transactionBuffer: TransactionTypeInterface[][] = [];
+  /*private transactionBuffer: TransactionTypeInterface[][] = [];
   private activityBuffer: GroupActivityType[] = [];
   private membershipBuffer: GroupMemberType[] = [];
   private groupBuffer: GroupsType[] = [];
   private languageBuffer: LanguageType[] = [];
-  private currencyBuffer: CurrencyType[] = [];
+  private currencyBuffer: CurrencyType[] = []; */
 
   constructor(observables: ObservableService, private dataModel: DataModelService) {
     if (Utils.log) { console.log('This is BasicDataUpdateService'); }
@@ -70,8 +65,8 @@ export class BasicDataUpdateService {
             // if (Utils.log) {console.log('New group detected:' + param.groupId);}
             this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
             console.log ('updateService: addGroup: group created: ' + param.groupId + ' , ' + param.groupName);
-            const startTime = getTimeByID(param.groupId);
-            if (startTime < 0) {
+            const startTime = getTimeByID(param.groupName + ' GROUPCREATIONTIMESTAMP');
+            if (startTime > 0) {
               console.log('updateService: addGroup: time taken for group: ' + param.groupName + ': ' + (Date.now() - startTime));
             }
             const newGroup = this.dataModel.getGroup(param.groupId);
@@ -375,9 +370,16 @@ export class BasicDataUpdateService {
     const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
       param.name, param.creationDate, group, payer, recipients, senderMember);
     group.addTransaction(newTransaction);
-    const activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, senderMember.contact, param.creationDate);
+    let activity: Activity;
+    if (newTransaction.transactionType === TransactionType.EXPENSE){
+      activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, senderMember.contact, param.creationDate);
+      console.log('updateService: updateSingleTransaction: crated expense: ' + param.transactionId + ' + ' + param.name);
+    }
+    if (newTransaction.transactionType === TransactionType.PAYBACK){
+      activity = new Activity(ActivityType.NEWPAYBACK, newTransaction, senderMember.contact, param.creationDate);
+      console.log('updateService: updateSingleTransaction: crated payback: ' + param.transactionId + ' + ' + param.name);
+    }
     group.addActivity(activity);
-    console.log('updateService: updateSingleTransaction: crated transaction: ' + param.transactionId + ' + ' + param.name);
     return newTransaction;
   }
 
