@@ -380,6 +380,13 @@ export class BasicDataUpdateService {
       console.log('updateService: updateSingleTransaction: crated payback: ' + param.transactionId + ' + ' + param.name);
     }
     group.addActivity(activity);
+    // TimeStamp
+    const timeStamp = getTimeByID(param.groupId + param.name);
+    if (timeStamp > 0) {
+      console.log('updateService: updateSingleTransaction: Time Taken for Transaction ' + param.transactionId + ' + ' + param.name + ': '
+        + (Date.now() - timeStamp));
+    }
+    // TimeStamp
     return newTransaction;
   }
 
