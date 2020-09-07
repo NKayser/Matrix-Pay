@@ -50,7 +50,7 @@ describe('ObservableService', () => {
   const mockedClient = jasmine.createSpyObj('MatrixClient',
     ['credentials', 'startClient', 'getUserId', 'getAccountDataFromServer', 'getUser', 'on', 'joinRoom']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
-    ['getLoggedInEmitter', 'isPrepared', 'getClient']);
+    ['getLoggedInEmitter', 'isPrepared', 'getClient', 'getRoomTypeClient']);
   const loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
   let clientEmitter;
 
@@ -311,7 +311,6 @@ describe('ObservableService', () => {
                 creationDate: d1,
                 groupId: 'room1',
                 payerId: userId,
-                payerAmount: 24,
                 recipientIds: ['id2', 'id3', 'id4', 'id5'],
                 recipientAmounts: [9, 5, 3, 7],
                 senderId: userId}
@@ -504,7 +503,6 @@ describe('ObservableService', () => {
                 creationDate: d1,
                 groupId: 'room1',
                 payerId: userId,
-                payerAmount: 24,
                 recipientIds: ['id2', 'id3', 'id4', 'id5'],
                 recipientAmounts: [9, 5, 3, 7],
                 senderId: userId}]
@@ -555,7 +553,6 @@ describe('ObservableService', () => {
                 creationDate: d1,
                 groupId: 'room1',
                 payerId: userId,
-                payerAmount: 24,
                 recipientIds: ['id2', 'id3', 'id4', 'id5'],
                 recipientAmounts: [9, 5, 3, 7],
                 senderId: userId}]
@@ -609,7 +606,6 @@ describe('ObservableService', () => {
                 creationDate: d1,
                 groupId: 'room1',
                 payerId: userId,
-                payerAmount: 24,
                 recipientIds: ['id2', 'id3', 'id4', 'id5'],
                 recipientAmounts: [9, 5, 3, 7],
                 senderId: userId}
@@ -725,7 +721,6 @@ describe('ObservableService', () => {
                   creationDate: d1,
                   groupId: 'room1',
                   payerId: userId,
-                  payerAmount: 24,
                   recipientIds: ['id2', 'id3', 'id4', 'id5'],
                   recipientAmounts: [9, 5, 3, 7],
                   senderId: userId}
@@ -800,7 +795,6 @@ describe('ObservableService', () => {
                 creationDate: d1,
                 groupId: 'room1',
                 payerId: userId,
-                payerAmount: 24,
                 recipientIds: ['id2', 'id3', 'id4', 'id5'],
                 recipientAmounts: [9, 5, 3, 7],
                 senderId: userId}
