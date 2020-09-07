@@ -5,9 +5,11 @@ import {Group} from './Group';
  * Groupmember in a group. A Groupmember is a contact with a specific balance inside a specific group.
  */
 export class Groupmember {
+
   private readonly _contact: Contact;
   private readonly _group: Group;
   private _balance: number;
+  private _active: boolean;
 
   /**
    * Constructor for groupmember. In addition to setting the values given by the arguments, balance is initialized as zero.
@@ -18,6 +20,22 @@ export class Groupmember {
     this._contact = contact;
     this._group = group;
     this._balance = 0;
+    this._active = true;
+  }
+
+  /**
+   * Sets wether the groupmember is active.
+   * @param value  True if groupmember is active (in the group). False if groupmember is no longer active.
+   */
+  set active(value: boolean) {
+    this._active = value;
+  }
+
+  /**
+   * Returns wether the groupmember is active.
+   */
+  get active(): boolean {
+    return this._active;
   }
 
   /**

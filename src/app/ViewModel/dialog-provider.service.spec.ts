@@ -8,6 +8,7 @@ import {Currency} from '../DataModel/Utils/Currency';
 import {Transaction} from '../DataModel/Group/Transaction';
 import {TransactionType} from '../DataModel/Group/TransactionType';
 import {Mock} from 'protractor/built/driverProviders';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('DialogProviderService', () => {
 
@@ -21,7 +22,8 @@ describe('DialogProviderService', () => {
       providers: [
         DialogProviderService,
         { provide: MatDialog, useValue: dialog }
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     });
 
     dialogProviderService = TestBed.inject(DialogProviderService);

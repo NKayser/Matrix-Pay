@@ -11,6 +11,7 @@ import {Group} from '../../DataModel/Group/Group';
 import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {DialogProviderService} from '../dialog-provider.service';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {Time, times} from '../../SystemTests/Time';
 
 @Component({
   selector: 'app-group-selection',
@@ -103,6 +104,8 @@ export class GroupSelectionComponent implements OnInit{
       this.createGroupData = result;
       if (this.createGroupData !== undefined){
         this.loadingAddGroup = true;
+        times.push(new Time(Date.now(), this.createGroupData.groupName + ' GROUPCREATIONTIMESTAMP'));
+        console.log('GroupSelectionCompunent: logged time with id: ' + this.currentGroup.groupId);
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupCreate(this.createGroupData.groupName,
           this.createGroupData.currency.toString()))
           .then((data) => {

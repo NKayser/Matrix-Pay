@@ -69,11 +69,13 @@ describe('ViewModel_ServerCommunication', () => {
         dataModelService = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'navItem$']);
         mockedClient = jasmine.createSpyObj('MatrixClient',
             ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
-                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on',
+                'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on', 'removeListener', 'clearStores',
                 'removeListener', 'logout']);
 
         dataModelService.navItem$ = (new Subject()).asObservable();
         classProviderSpy.createClient.and.returnValue(Promise.resolve(mockedClient));
+        // @ts-ignore
+        mockedClient.clearStores.and.returnValue(null);
         const spyDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
         // Components

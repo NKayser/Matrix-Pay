@@ -26,6 +26,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {PaymentModalComponent} from '../payment-modal/payment-modal.component';
 import {Currency} from '../../DataModel/Utils/Currency';
 import {Group} from '../../DataModel/Group/Group';
+import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
 
 describe('AddUserToGroupModalComponent', () => {
   let component: AddMemberToGroupModalComponent;
@@ -40,7 +41,8 @@ describe('AddUserToGroupModalComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: spyDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: [] },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 

@@ -13,6 +13,7 @@ import {Language} from '../../DataModel/Utils/Language';
 import {Contact} from '../../DataModel/Group/Contact';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('HomeComponentCancel', () => {
   let component: HomeComponent;
@@ -32,7 +33,8 @@ describe('HomeComponentCancel', () => {
         { provide: MatDialog, useValue: MockDialogCancel },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 
@@ -133,7 +135,8 @@ describe('HomeComponentConfirm', () => {
         { provide: MatDialog, useValue: MockDialog },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
       .compileComponents();
 
