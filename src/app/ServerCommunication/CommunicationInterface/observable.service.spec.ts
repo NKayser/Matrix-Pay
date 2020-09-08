@@ -295,7 +295,7 @@ describe('ObservableService', () => {
       {});
   });
 
-  it('obs: check if modified transaction gets emmitted when not live', (done: DoneFn) => {
+  it('obs: check if modified transaction gets emitted when not live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {roomId: 'room1'};

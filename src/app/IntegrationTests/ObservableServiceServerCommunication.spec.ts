@@ -127,7 +127,7 @@ describe('Integration ObservableService ServerCommunication', () => {
 
     });
 
-    it('integration send & receive currency ', (done: DoneFn) => {
+    it('integration send and receive currency', (done: DoneFn) => {
 
         const currencyObservable: Observable<CurrencyType> = observableService.getSettingsCurrencyObservable();
         currencyObservable.subscribe((currency: CurrencyType) => {
@@ -152,7 +152,7 @@ describe('Integration ObservableService ServerCommunication', () => {
         basicDataService.userChangeDefaultCurrency(matrixCurrencyMap[Currency.EUR]);
     });
 
-    it('integration send & receive language ', (done: DoneFn) => {
+    it('integration send and receive language', (done: DoneFn) => {
 
         const languageObservable: Observable<LanguageType> = observableService.getSettingsLanguageObservable();
         languageObservable.subscribe((language: LanguageType) => {
@@ -212,7 +212,7 @@ describe('Integration ObservableService ServerCommunication', () => {
         basicDataService.groupCreate('name_1', matrixCurrencyMap[Currency.EUR]);
     });
 
-    it('integration send and receive message', (done: DoneFn) => {
+    it('integration send and receive expense', (done: DoneFn) => {
 
         const d1 = new Date('December 17, 1995 03:24:00');
         const room = {roomId: 'room1'};
@@ -263,7 +263,7 @@ describe('Integration ObservableService ServerCommunication', () => {
         basicDataService.createTransaction('room1', 'name_t2', userId, ['id2', 'id3', 'id4', 'id5'], [9, 5, 3, 7], false);
     });
 
-    it('message payback test 1', (done: DoneFn) => {
+    it('integration send and receive payback', (done: DoneFn) => {
 
         const d1 = new Date('December 17, 1995 03:24:00');
         const room = {roomId: 'room1'};
