@@ -1,4 +1,4 @@
-import {BasicDataUpdateService} from '../Update/basic-data-update.service';
+import {BasicDataUpdateService} from './basic-data-update.service';
 import {DataModelService} from '../DataModel/data-model.service';
 import {Subject} from 'rxjs';
 import {
@@ -190,15 +190,15 @@ describe('BasicDataUpdateService and DataModel', () => {
     mockedObservableService.getGroupsObservable().next({groupId: 'id007', groupName: 'Urlaub', currency: 'USD', userIds: [],
       userNames: [], isLeave: false});
     mockedObservableService.getGroupMembershipObservable().next({groupId: 'id007', userId: 'memId001', name: 'Markus',
-      isLeave: false, date: new Date(123456789000)});
+      isLeave: false, date: new Date(100)});
     mockedObservableService.getGroupMembershipObservable().next({groupId: 'id007', userId: 'memId002', name: 'Marion',
-      isLeave: false, date: new Date(1000)});
+      isLeave: false, date: new Date(200)});
     mockedObservableService.getGroupMembershipObservable().next({groupId: 'id007', userId: 'memId003', name: 'Nico',
-      isLeave: false, date: new Date(444)});
+      isLeave: false, date: new Date(300)});
     // Precondition
     expect(dataModel.getGroup('id007').getTransaction('transId001')).toEqual(null);
     // Actual
-    const transaction = {transactionType: 'EXPENSE', transactionId: 'transId001', name: 'Essen', creationDate: new Date(555),
+    const transaction = {transactionType: 'EXPENSE', transactionId: 'transId001', name: 'Essen', creationDate: new Date(400),
       groupId: 'id007', payerId: 'memId001', payerAmount: 500, recipientIds: ['memId002'], recipientAmounts: [500], senderId: 'memId003'};
     mockedObservableService.getMultipleNewTransactionsObservable().next([transaction]);
     expect(dataModel.getGroup('id007').getTransaction('transId001')).not.toEqual(null);
@@ -214,7 +214,7 @@ describe('BasicDataUpdateService and DataModel', () => {
     expect(activities[activities.length - 1].subject).toEqual(dataModel.getGroup('id007').getTransaction('transId001'));
     expect(activities[activities.length - 1].actor).toEqual(dataModel.getGroup('id007').getGroupmember('memId003').contact);
     expect(activities[activities.length - 1].activityType).toEqual(ActivityType.NEWEXPENSE);
-    expect(activities[activities.length - 1].creationDate).toEqual(new Date(555));
+    expect(activities[activities.length - 1].creationDate).toEqual(new Date(400));
     expect(mockedBalanceCalculatorService.calculateBalances).toHaveBeenCalled();
   });
 

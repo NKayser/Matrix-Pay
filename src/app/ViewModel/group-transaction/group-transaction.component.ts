@@ -13,7 +13,7 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 // @ts-ignore
 import {MatrixEvent} from 'matrix-js-sdk';
 import {PaymentViewComponent} from '../payment-view/payment-view.component';
-import {Time, times} from '../../SystemTests/Time';
+import {Time} from '../../SystemTests/Time';
 
 @Component({
   selector: 'app-group-transaction',
@@ -75,7 +75,7 @@ export class GroupTransactionComponent implements OnChanges {
 
         this.loadingCreateExpense = true;
         // Timestamp
-        times.push(new Time(Date.now(), this.group.groupId + this.data.description));
+        Time.transactionTimes.push(new Time(Date.now(), this.group.groupId + this.data.description));
         // Timestamp
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.group.groupId, this.data.description,
           this.data.payer.contactId, recipientIds, sendAmounts, false))

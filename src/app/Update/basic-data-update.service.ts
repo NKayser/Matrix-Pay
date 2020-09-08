@@ -15,7 +15,8 @@ import {
 import {AtomarChange} from '../DataModel/Group/AtomarChange';
 import {Activity} from '../DataModel/Group/Activity';
 import {ActivityType} from '../DataModel/Group/ActivityType';
-import {getTimeByID} from '../SystemTests/Time';
+import {Time} from '../SystemTests/Time';
+import {StorageService} from 'ngx-webstorage-service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,9 +30,9 @@ export class BasicDataUpdateService {
   private languageBuffer: LanguageType[] = [];
   private currencyBuffer: CurrencyType[] = []; */
 
-  constructor(observables: ObservableService, private dataModel: DataModelService) {
+  constructor(observables: ObservableService, private dataModel: DataModelService, /*storage: StorageService*/) {
     if (Utils.log) { console.log('This is BasicDataUpdateService'); }
-    this.observables = observables; // TODO imlement observableInterface
+    this.observables = observables; // TODO implement observableInterface
     this.createUser();
     this.addGroup();
     this.addGroupActivity();
@@ -50,6 +51,33 @@ export class BasicDataUpdateService {
       console.log('updateService: createUser: user filled in: ' + param.contactId + ' , ' + param.name);
       this.dataModel.fillInUserData(param.contactId, param.name, this.currencyStringToEnum(param.currency),
         this.languageStringToEnum(param.language));
+      // TEST FOR LOCAL STORAGE
+
+      const currentToken = localStorage.getItem('token');
+      console.log(currentToken);
+      switch (currentToken) {
+        case '':
+          console.log('updateService: createUser: token was \'\'. Now being changed to \'token1\'');
+          localStorage.setItem('token', 'token1');
+          break;
+        case 'token1':
+          console.log('updateService: createUser: token was \'token1\'. Now being changed to \'token2\'');
+          localStorage.setItem('token', 'token2');
+          break;
+        case 'token2':
+          console.log('updateService: createUser: token was \'token2\'. Now being changed to \'token3\'');
+          localStorage.setItem('token', 'token3');
+          break;
+        case 'token3':
+          console.log('updateService: createUser: token was \'token3\'. Now being cleared');
+          localStorage.setItem('token', null); // alternatively use localStorage.clear() to clear entire storage.
+          break;
+        default:
+          console.log('updateService: createUser: token was none of the above. Now being changed to \'token1\'');
+          localStorage.setItem('token', 'token1');
+          break;
+      }
+
     });
   }
 
@@ -65,21 +93,25 @@ export class BasicDataUpdateService {
             // if (Utils.log) {console.log('New group detected:' + param.groupId);}
             this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
             console.log ('updateService: addGroup: group created: ' + param.groupId + ' , ' + param.groupName);
-            const startTime = getTimeByID(param.groupName + ' GROUPCREATIONTIMESTAMP');
+            // TimeStamp
+            const startTime = Time.groupCreationTime;
             if (startTime > 0) {
               console.log('updateService: addGroup: time taken for group: ' + param.groupName + ': ' + (Date.now() - startTime));
             }
+            // TimeStamp
             const newGroup = this.dataModel.getGroup(param.groupId);
             for (let i = 0; i < param.userIds.length; i++) {
               if (newGroup.getGroupmember(param.userIds[i]) === null) {
                 newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
                 console.log ('updateService: addGroup: member created: ' + param.userIds[i] + ' , ' + param.userNames[i]);
+                this.dataModel.getBalanceEmitter().emit();
               }
               else {
                 if (newGroup.getGroupmember(param.userIds[i]).contact.name === '') {
                   const member = newGroup.getGroupmember(param.userIds[i]);
                   member.contact.name = param.userNames[i];
                   console.log ('updateService: addGroup: member filled in: ' + param.userIds[i] + ' , ' + param.userNames[i]);
+                  this.dataModel.getBalanceEmitter().emit();
                 }
               }
             }
@@ -95,6 +127,12 @@ export class BasicDataUpdateService {
             newGroup.name = param.groupName;
             newGroup.currency = this.currencyStringToEnum(param.currency);
             console.log ('updateService: addGroup: group filled in: ' + param.groupId + ' , ' + param.groupName);
+            // TimeStamp
+            const startTime = Time.groupCreationTime;
+            if (startTime > 0) {
+              console.log('updateService: addGroup: time taken for group: ' + param.groupName + ': ' + (Date.now() - startTime));
+            }
+            // TimeStamp
           }
           else {
             this.dataModel.user.removeGroup(param.groupId);
@@ -281,18 +319,21 @@ export class BasicDataUpdateService {
           const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
           group.addActivity(activity);
           console.log('updateService: addGroupMember: created member: ' + param.userId + ' , ' + param.name);
+          this.dataModel.getBalanceEmitter().emit();
         } else {
           if (member.contact.name === '') {
             member.contact.name = param.name;
             const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
             group.addActivity(activity);
             console.log('updateService: addGroupMember: filled in member: ' + param.userId + ' , ' + param.name);
+            this.dataModel.getBalanceEmitter().emit();
           }
         }
       } else { // isleave
         group.getGroupmember(param.userId).active = false;
         // TODO: MEMBERLEFTGROUPACTIVITY
         console.log('updateService: addGroupMember: set member to inactive: ' + param.userId + ' , ' + param.name);
+        this.dataModel.getBalanceEmitter().emit();
       }
     });
   }
@@ -381,7 +422,7 @@ export class BasicDataUpdateService {
     }
     group.addActivity(activity);
     // TimeStamp
-    const timeStamp = getTimeByID(param.groupId + param.name);
+    const timeStamp = Time.getTransactionTimeByID(param.groupId + param.name);
     if (timeStamp > 0) {
       console.log('updateService: updateSingleTransaction: Time Taken for Transaction ' + param.transactionId + ' + ' + param.name + ': '
         + (Date.now() - timeStamp));
