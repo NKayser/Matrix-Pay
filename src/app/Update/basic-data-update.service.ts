@@ -16,6 +16,7 @@ import {AtomarChange} from '../DataModel/Group/AtomarChange';
 import {Activity} from '../DataModel/Group/Activity';
 import {ActivityType} from '../DataModel/Group/ActivityType';
 import {Time} from '../SystemTests/Time';
+import {StorageService} from 'ngx-webstorage-service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,9 +30,9 @@ export class BasicDataUpdateService {
   private languageBuffer: LanguageType[] = [];
   private currencyBuffer: CurrencyType[] = []; */
 
-  constructor(observables: ObservableService, private dataModel: DataModelService) {
+  constructor(observables: ObservableService, private dataModel: DataModelService, /*storage: StorageService*/) {
     if (Utils.log) { console.log('This is BasicDataUpdateService'); }
-    this.observables = observables; // TODO imlement observableInterface
+    this.observables = observables; // TODO implement observableInterface
     this.createUser();
     this.addGroup();
     this.addGroupActivity();
@@ -50,6 +51,32 @@ export class BasicDataUpdateService {
       console.log('updateService: createUser: user filled in: ' + param.contactId + ' , ' + param.name);
       this.dataModel.fillInUserData(param.contactId, param.name, this.currencyStringToEnum(param.currency),
         this.languageStringToEnum(param.language));
+      // TEST FOR LOCAL STORAGE
+
+      const currentToken = localStorage.getItem('token');
+      switch (currentToken) {
+        case '':
+          console.log('updateService: createUser: token was \'\'. Now being changed to \'token1\'');
+          localStorage.setItem('token', 'token1');
+          break;
+        case 'token1':
+          console.log('updateService: createUser: token was \'token1\'. Now being changed to \'token2\'');
+          localStorage.setItem('token', 'token2');
+          break;
+        case 'token2':
+          console.log('updateService: createUser: token was \'token2\'. Now being changed to \'token3\'');
+          localStorage.setItem('token', 'token3');
+          break;
+        case 'token3':
+          console.log('updateService: createUser: token was \'token3\'. Now being changed to \'token1\'');
+          localStorage.setItem('token', 'token1');
+          break;
+        default:
+          console.log('updateService: createUser: token was none of the above. Now being changed to \'token1\'');
+          localStorage.setItem('token', 'token1');
+          break;
+      }
+
     });
   }
 
