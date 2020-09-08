@@ -1,22 +1,24 @@
 export class Time{
 
-    public time: number;
-    public id: string;
-
     constructor(time: number, id: string) {
         this.time = time;
         this.id = id;
     }
-}
 
-export function getTimeByID(id: string) {
-    for (const time of times){
-        if (time.id == id){
-            return time.time;
-        }
+  public static transactionTimes: Time[] = [];
+  public static groupCreationTime = 0;
+
+    public time: number;
+    public id: string;
+
+  public static getTransactionTimeByID(id: string): number {
+    for (const time of Time.transactionTimes){
+      if (time.id === id){
+        return time.time;
+      }
     }
     return 0;
-}
+  }
 
-export const times: Time[] = [];
+}
 
