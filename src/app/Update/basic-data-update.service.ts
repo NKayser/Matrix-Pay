@@ -54,6 +54,7 @@ export class BasicDataUpdateService {
       // TEST FOR LOCAL STORAGE
 
       const currentToken = localStorage.getItem('token');
+      console.log(currentToken);
       switch (currentToken) {
         case '':
           console.log('updateService: createUser: token was \'\'. Now being changed to \'token1\'');
@@ -68,8 +69,8 @@ export class BasicDataUpdateService {
           localStorage.setItem('token', 'token3');
           break;
         case 'token3':
-          console.log('updateService: createUser: token was \'token3\'. Now being changed to \'token1\'');
-          localStorage.setItem('token', 'token1');
+          console.log('updateService: createUser: token was \'token3\'. Now being cleared');
+          localStorage.setItem('token', null); // alternatively use localStorage.clear() to clear entire storage.
           break;
         default:
           console.log('updateService: createUser: token was none of the above. Now being changed to \'token1\'');
