@@ -332,25 +332,11 @@ export class ObservableService implements ObservableInterface {
       });
   }
 
-  public async roomCallback(room): Promise<void> {
-    const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
-    console.log('members');
-    console.log(members);
-    if (members[this.matrixClient.getUserId()].membership === 'invite') {
-      await this.matrixClient.joinRoom(room.roomId);
-    }
-    if (members[this.matrixClient.getUserId()].membership === 'join') {
-      await this.processNewRoom(room);
-    }
-  }
-
   private roomListener(): void {
     // Fires whenever invited to a room or joining a room
     this.matrixClient.on('Room', async room => {
-      const roomType = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('org.matrix.msc1840', '');
-      console.log('---roomType---');
+      console.log('--- new Room ---');
       console.log(room.getLiveTimeline().getState(EventTimeline.FORWARDS));
-      console.log(roomType);
       const member = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getMember(this.matrixClient.getUserId());
       if (Utils.log) console.log(member);
       if (Utils.log) console.log(this.matrixClient.getUserId());
@@ -427,8 +413,10 @@ export class ObservableService implements ObservableInterface {
         this.filterCount++;
         const filter = Filter.fromJson(this.matrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount,
           this.filterDefinition);
-        console.log('---start client---');
+        console.log('--- start client ---');
+        console.log(this.filterDefinition.room.rooms);
         await this.matrixClient.startClient({includeArchivedRooms: false, filter});
+        console.log('started ' + this.filterCount);
       }
     });
   }

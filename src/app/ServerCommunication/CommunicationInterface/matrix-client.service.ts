@@ -54,17 +54,8 @@ export class MatrixClientService implements ClientInterface {
     }
     this.serverAddress = config['m.homeserver']['base_url'];
 
-    // Configure Client Store
-    const opts = {
-      localStorage: window.localStorage,
-      indexedDB: window.indexedDB
-    };
-    const store = new IndexedDBStore(opts);
-    await store.startup();
-
     // Create a Client
-    this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, store);
-    this.matrixClient.clearStores();
+    this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
     this.roomTypeMatrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
 
     // Login and get Access Token
