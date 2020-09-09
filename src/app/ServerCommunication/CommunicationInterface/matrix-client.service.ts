@@ -96,7 +96,7 @@ export class MatrixClientService implements ClientInterface {
     const configState: string = config['m.homeserver']['state'];
     if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
       return new UnsuccessfulResponse(ClientError.Autodiscovery,
-          config['m.homeserver']['error']);
+        config['m.homeserver']['error']);
     }
     this.serverAddress = config['m.homeserver']['base_url'];
   }
@@ -110,9 +110,9 @@ export class MatrixClientService implements ClientInterface {
 
       // Create Client AND Login
       this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, undefined,
-          {accessToken, account});
+        {accessToken, account});
       this.roomTypeMatrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, undefined,
-          {accessToken, account});
+        {accessToken, account});
       this.loginInfo = {access_token: accessToken};
     } else {
       // Login with Account/pw
@@ -158,9 +158,9 @@ export class MatrixClientService implements ClientInterface {
 
     // Secondly: Set default settings on AccountData if previously not set.
     if (currencyEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
-        {'currency': MatrixClientService.DEFAULT_CURRENCY});
+      {'currency': MatrixClientService.DEFAULT_CURRENCY});
     if (languageEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
-        {'language': MatrixClientService.DEFAULT_LANGUAGE});
+      {'language': MatrixClientService.DEFAULT_LANGUAGE});
   }
 
   public getLoggedInEmitter(): EventEmitter<void> {
@@ -200,6 +200,13 @@ export class MatrixClientService implements ClientInterface {
     }
 
     return this.roomTypeMatrixClient;
+  }
+
+  public async getNewClient(): MatrixClient {
+    // TODO: handle failed client creation
+    const tokenObj = {accessToken: localStorage.getItem('accessToken'), account: localStorage.getItem('account')};
+    console.log(tokenObj);
+    return await this.matrixClassProviderService.createClient(this.serverAddress, undefined, tokenObj);
   }
 
   public isLoggedIn(): boolean {
