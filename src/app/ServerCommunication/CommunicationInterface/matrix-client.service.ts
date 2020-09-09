@@ -40,52 +40,11 @@ export class MatrixClientService implements ClientInterface {
   public async login(account: string, password?: string, accessToken?: string): Promise<ServerResponse> {
     if (this.loggedIn) throw new Error('already logged in');
 
-    // Discover Homeserver Address and throw Errors if not successful
-    const seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
-    if (seperatedAccount.length != 2 || seperatedAccount[1] == '' || seperatedAccount[1] == undefined) {
-      throw new Error('wrong user id format');
-    }
-    const domain = seperatedAccount[1];
+    // Discover Homeserver Address
+    const autodiscoveryResponse = await this.autodiscovery(account);
+    if (autodiscoveryResponse instanceof UnsuccessfulResponse) return autodiscoveryResponse;
 
-    // Discover base url and save it
-    const config: DiscoveredClientConfig = await this.matrixClassProviderService.findClientConfig(domain);
-    const configState: string = config['m.homeserver']['state'];
-    if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
-      return new UnsuccessfulResponse(ClientError.Autodiscovery,
-        config['m.homeserver']['error']);
-    }
-    this.serverAddress = config['m.homeserver']['base_url'];
-
-    // Configure Client Store
-    /*const opts = {
-      localStorage: window.localStorage,
-      indexedDB: window.indexedDB
-    };
-    const store = new IndexedDBStore(opts);
-    await store.startup();*/
-
-    if (accessToken === undefined){
-      this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
-      this.roomTypeMatrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
-    } else {
-      this.matrixClient = await this.matrixClassProviderService.createClient(undefined, undefined, {
-        baseUrl: this.serverAddress,
-        accessToken,
-        userId: account
-      });
-      this.roomTypeMatrixClient = await this.matrixClassProviderService.createClient(undefined, undefined, {
-        baseUrl: this.serverAddress,
-        accessToken,
-        userId: account
-      });
-    }
-
-    // Create a Client
-    /*this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, store);
-    this.matrixClient.clearStores();
-    this.roomTypeMatrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);*/
-
-    // Login and get Access Token
+    // Create Client, Login and set Access Token
     try {
       await this.authenticate(account, password, accessToken);
     } catch(error) {
@@ -102,29 +61,7 @@ export class MatrixClientService implements ClientInterface {
     }
 
     // Set settings to default values if non existent
-    // First: get current settings, catch if not yet set
-    let currencyEventContent;
-    let languageEventContent;
-
-    try {
-      currencyEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.CURRENCY_KEY);
-    } catch(error) {
-      console.log('caught ' + error.message + ' while getting currency setting');
-    }
-
-    try {
-      languageEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.LANGUAGE_KEY);
-    } catch(error) {
-      console.log('caught ' + error.message + ' while getting language setting');
-    }
-
-    console.log(currencyEventContent);
-
-    // Secondly: Set default settings on AccountData if previously not set.
-    if (currencyEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
-      {'currency': MatrixClientService.DEFAULT_CURRENCY});
-    if (languageEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
-      {'language': MatrixClientService.DEFAULT_LANGUAGE});
+    await this.setDefaultSettings();
 
     // Set prepared to true when the Client state is prepared
     const listener = async (state, prevState, res) => {
@@ -146,6 +83,24 @@ export class MatrixClientService implements ClientInterface {
     return new SuccessfulResponse();
   }
 
+  private async autodiscovery(account: string): Promise<null | ServerResponse> {
+    // Discover Homeserver Address and throw Errors if not successful
+    const seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
+    if (seperatedAccount.length != 2 || seperatedAccount[1] == '' || seperatedAccount[1] == undefined) {
+      throw new Error('wrong user id format');
+    }
+    const domain = seperatedAccount[1];
+
+    // Discover base url and save it
+    const config: DiscoveredClientConfig = await this.matrixClassProviderService.findClientConfig(domain);
+    const configState: string = config['m.homeserver']['state'];
+    if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
+      return new UnsuccessfulResponse(ClientError.Autodiscovery,
+          config['m.homeserver']['error']);
+    }
+    this.serverAddress = config['m.homeserver']['base_url'];
+  }
+
   private async authenticate(account: string, password?: string, accessToken?: string): Promise<void> {
     if (password === undefined) {
       // Login with given access token (if given)
@@ -153,15 +108,23 @@ export class MatrixClientService implements ClientInterface {
         return Promise.reject('No authentification data provided. Need either account/pw or accessToken.');
       }
 
-      await this.matrixClient.loginWithToken(accessToken);
-      await this.roomTypeMatrixClient.loginWithToken(accessToken);
-      this.loginInfo = accessToken;
+      // Create Client AND Login
+      this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, undefined,
+          {accessToken, account});
+      this.roomTypeMatrixClient = await this.matrixClassProviderService.createClient(this.serverAddress, undefined,
+          {accessToken, account});
+      this.loginInfo = {access_token: accessToken};
     } else {
       // Login with Account/pw
       if (account === undefined) {
         return Promise.reject('No authentification data provided. Need account, not only password.');
       }
 
+      // Just Create Client
+      this.matrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
+      this.roomTypeMatrixClient = await this.matrixClassProviderService.createClient(this.serverAddress);
+
+      // Now Login
       this.loginInfo = await this.matrixClient.loginWithPassword(account, password);
       await this.roomTypeMatrixClient.loginWithPassword(account, password);
     }
@@ -172,6 +135,32 @@ export class MatrixClientService implements ClientInterface {
     localStorage.setItem('accessToken', this.loginInfo.access_token);
     localStorage.setItem('account', account);
     this.loggedIn = true;
+  }
+
+  private async setDefaultSettings(): Promise<void> {
+    // First: get current settings, catch if not yet set
+    let currencyEventContent;
+    let languageEventContent;
+
+    try {
+      currencyEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.CURRENCY_KEY);
+    } catch(error) {
+      console.log('caught ' + error.message + ' while getting currency setting');
+    }
+
+    try {
+      languageEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.LANGUAGE_KEY);
+    } catch(error) {
+      console.log('caught ' + error.message + ' while getting language setting');
+    }
+
+    console.log(currencyEventContent);
+
+    // Secondly: Set default settings on AccountData if previously not set.
+    if (currencyEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
+        {'currency': MatrixClientService.DEFAULT_CURRENCY});
+    if (languageEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
+        {'language': MatrixClientService.DEFAULT_LANGUAGE});
   }
 
   public getLoggedInEmitter(): EventEmitter<void> {

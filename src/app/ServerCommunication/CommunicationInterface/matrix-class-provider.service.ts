@@ -17,18 +17,28 @@ export class MatrixClassProviderService {
   }
 
   public createClient(serverAddress: string, store?: any, tokenObject?: any): Promise<MatrixClient> {
+    let opts: string | any;
 
-    if (tokenObject === undefined) {
-      return createClient(serverAddress);
-    }
-
-    console.log(tokenObject);
-
-    const opts = {
+    if (tokenObject !== undefined && store !== undefined) {
+      opts = {
         baseUrl: serverAddress,
         accessToken: tokenObject.accessToken,
-        userId: tokenObject.userId
-    };
+        userId: tokenObject.account,
+        store};
+    } else if (tokenObject === undefined && store !== undefined) {
+      opts = {
+        baseUrl: serverAddress,
+        store};
+    } else if (tokenObject !== undefined && store === undefined) {
+      opts = {
+        baseUrl: serverAddress,
+        accessToken: tokenObject.accessToken,
+        userId: tokenObject.account};
+    } else {
+      opts = serverAddress;
+    }
+
+    console.log(opts);
 
     // forwards call to createClient() method of the sdk
     return createClient(opts);
