@@ -32,6 +32,11 @@ import {ServerResponse} from "../ServerCommunication/Response/ServerResponse";
 import {Groupmember} from "../DataModel/Group/Groupmember";
 import {GroupTransactionComponent} from "../ViewModel/group-transaction/group-transaction.component";
 import {PaymentModalComponent} from "../ViewModel/payment-modal/payment-modal.component";
+import {ConfirmPaybackModalComponent} from "../ViewModel/confirm-payback-modal/confirm-payback-modal.component";
+import {Recommendation} from "../DataModel/Group/Recommendation";
+import {AtomarChange} from "../DataModel/Group/AtomarChange";
+import {GroupBalanceComponent} from "../ViewModel/group-balance/group-balance.component";
+import {EventEmitter} from "events";
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -44,6 +49,8 @@ describe('ViewModel_ServerCommunication', () => {
     let addMemberComponent: AddMemberToGroupModalComponent;
     let leaveGroupComponent: LeaveGroupModalComponent;
     let settingsComponent: SettingsComponent;
+    let groupBalanceComponent: GroupBalanceComponent;
+    let confirmPaybackComponent: ConfirmPaybackModalComponent;
 
     // Fixtures
     let loginFixture: ComponentFixture<LoginComponent>;
@@ -54,11 +61,15 @@ describe('ViewModel_ServerCommunication', () => {
     let addMemberFixture: ComponentFixture<AddMemberToGroupModalComponent>;
     let leaveGroupFixture: ComponentFixture<LeaveGroupModalComponent>;
     let settingsFixture: ComponentFixture<SettingsComponent>;
+    let groupBalanceFixture: ComponentFixture<GroupBalanceComponent>;
+    let confirmPaybackFixture: ComponentFixture<ConfirmPaybackModalComponent>;
 
     // Modals
     let createGroupMatDialogRef: jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
     let addMemberMatDialogRef: jasmine.SpyObj<MatDialogRef<AddMemberToGroupModalComponent>>;
     let leaveGroupMatDialogRef: jasmine.SpyObj<MatDialogRef<LeaveGroupModalComponent>>;
+    let paymentMatDialogRef: jasmine.SpyObj<MatDialogRef<PaymentModalComponent>>;
+    let confirmPaybackMatDialogRef: jasmine.SpyObj<MatDialogRef<ConfirmPaybackModalComponent>>;
 
     // Mock Matrix-js-sdk methods and Data Model Service
     let classProviderSpy: jasmine.SpyObj<MatrixClassProviderService>;
@@ -75,7 +86,8 @@ describe('ViewModel_ServerCommunication', () => {
     beforeEach(async(() => {
         classProviderSpy = jasmine.createSpyObj('MatrixClassProviderService',
             ['createClient', 'findClientConfig']);
-        dataModelService = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'navItem$']);
+        dataModelService = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups',
+            'navItem$', 'getBalanceEmitter']);
         mockedClient = jasmine.createSpyObj('MatrixClient',
             ['setAccountData', 'getAccountDataFromServer', 'invite', 'getRoom', 'getUserId', 'sendEvent',
                 'setRoomAccountData', 'createRoom', 'sendStateEvent', 'scrollback', 'leave', 'loginWithPassword', 'on', 'removeListener', 'clearStores',
@@ -89,7 +101,8 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Components
         TestBed.configureTestingModule({
-            declarations: [ LoginComponent, GroupSelectionComponent, SettingsComponent, GroupTransactionComponent ],
+            declarations: [ LoginComponent, GroupSelectionComponent, SettingsComponent, GroupTransactionComponent,
+            GroupBalanceComponent ],
             providers: [
                 { provide: MatrixClassProviderService, useValue: classProviderSpy },
                 { provide: DataModelService, useValue: dataModelService },
@@ -123,6 +136,8 @@ describe('ViewModel_ServerCommunication', () => {
         createGroupMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<CreateGroupModalComponent>>;
         addMemberMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<AddMemberToGroupModalComponent>>;
         leaveGroupMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<LeaveGroupModalComponent>>;
+        paymentMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<PaymentModalComponent>>;
+        confirmPaybackMatDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<ConfirmPaybackModalComponent>>;
 
         // Components
         loginFixture = TestBed.createComponent(LoginComponent);
@@ -133,6 +148,8 @@ describe('ViewModel_ServerCommunication', () => {
         addMemberFixture = TestBed.createComponent(AddMemberToGroupModalComponent);
         leaveGroupFixture = TestBed.createComponent(LeaveGroupModalComponent);
         settingsFixture = TestBed.createComponent(SettingsComponent);
+        groupBalanceFixture = TestBed.createComponent(GroupBalanceComponent);
+        confirmPaybackFixture = TestBed.createComponent(ConfirmPaybackModalComponent);
 
         loginComponent = loginFixture.componentInstance;
         groupComponent = groupFixture.componentInstance;
@@ -142,6 +159,8 @@ describe('ViewModel_ServerCommunication', () => {
         addMemberComponent = addMemberFixture.componentInstance;
         leaveGroupComponent = leaveGroupFixture.componentInstance;
         settingsComponent = settingsFixture.componentInstance;
+        groupBalanceComponent = groupBalanceFixture.componentInstance;
+        confirmPaybackComponent = confirmPaybackFixture.componentInstance;
     }));
 
     async function login(): Promise<ServerResponse> {
@@ -427,8 +446,55 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Expected
         expect(modalSpyOpen).toHaveBeenCalled();
-        expect(addMemberMatDialogRef.close).toHaveBeenCalledWith(data);
+        expect(paymentMatDialogRef.close).toHaveBeenCalledWith(data);
         expect(basicSpy).toHaveBeenCalledWith('g1', 'Essen', 'c1', [ 'c2', 'c3', 'c4' ], [ 600, 600, 600 ], false);
+        const actualResponse = await basicSpy.calls.mostRecent().returnValue;
+        expect(actualResponse instanceof SuccessfulResponse).toBe(true);
+        expect(actualResponse.getValue()).toBe('event_id');
+
+        done();
+    });
+
+    // Test Case T110
+    it('should confirm payback', async (done: DoneFn) => {
+        // Define Stub Values
+        const c1 = new Contact('c1', 'A');
+        const c2 = new Contact('c2', 'B');
+        const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
+        const g1 = new Group('g1', 'Unigruppe', Currency.USD);
+        g1.addGroupmember(new Groupmember(c1, g1));
+        g1.addGroupmember(new Groupmember(c2, g1));
+        const data = {
+            recommendation: new Recommendation(g1, new AtomarChange(c1, 100), new AtomarChange(c2, -100))
+        };
+        g1.setRecommendations([data.recommendation]);
+
+        // Spies
+        const basicSpy = spyOn(matrixBasicDataService, 'createTransaction').and.callThrough();
+        // @ts-ignore
+        const modalSpyOpen = spyOn(groupBalanceComponent.dialog, 'open').and.returnValue({afterClosed: () => of(data)});
+
+        // Mocking
+        dataModelService.getUser.and.returnValue(stubValueUser);
+        dataModelService.getGroups.and.returnValue([g1]);
+        dataModelService.getBalanceEmitter.and.returnValue(new Subject<void>());
+        mockedClient.sendEvent.and.returnValue(Promise.resolve({event_id: 'event_id'}));
+
+        // login and preparation
+        await preparedLogin();
+        groupBalanceComponent.group = g1;
+        groupBalanceComponent.ngOnChanges();
+
+        // Confirm Recommendation
+        groupBalanceFixture.detectChanges();
+        groupBalanceComponent.confirmPayback(0);
+        confirmPaybackComponent.data = data;
+        confirmPaybackComponent.onSave();
+
+        // Expected
+        expect(modalSpyOpen).toHaveBeenCalled();
+        expect(confirmPaybackMatDialogRef.close).toHaveBeenCalledWith(data);
+        expect(basicSpy).toHaveBeenCalledWith('g1', 'Payback from A to B', 'c1', [ 'c2' ], [ -100 ], true);
         const actualResponse = await basicSpy.calls.mostRecent().returnValue;
         expect(actualResponse instanceof SuccessfulResponse).toBe(true);
         expect(actualResponse.getValue()).toBe('event_id');
