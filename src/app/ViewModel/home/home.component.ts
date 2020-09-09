@@ -10,6 +10,11 @@ import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {DialogProviderService} from '../dialog-provider.service';
 import {gridListResize} from '../gridListResizer';
 
+interface BalanceTuple {
+  balance: number;
+  currency: Currency;
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -20,6 +25,8 @@ export class HomeComponent implements OnInit {
   public usedCurrencies: Set<Currency> = new Set();
   public recommendations: Recommendation[] = [];
   public currencyMap = currencyMap;
+
+  public balanceList: BalanceTuple[] = [];
 
   public loadingConfirmPayback = false;
 
@@ -47,8 +54,20 @@ export class HomeComponent implements OnInit {
       this.usedCurrencies.add(group.currency);
     }
 
+    this.calculateBalances();
+    this.dataModelService.getBalanceEmitter().subscribe(() => {this.calculateBalances(); console.log('TRIGGER'); } );
+
     // initialize the number of the grid list columns for the recommendations
     this.breakpoint = gridListResize(window.innerWidth, 2200, 4);
+  }
+
+  private calculateBalances(): void{
+    this.balanceList = [];
+    for (const currency of this.usedCurrencies){
+      const balance = this.getTotalBalance(currency);
+      this.balanceList.push({balance, currency});
+    }
+    console.log(this.balanceList);
   }
 
   /**

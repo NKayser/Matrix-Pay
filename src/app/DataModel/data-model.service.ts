@@ -8,9 +8,9 @@ import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimis
 import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
-import {Subject} from 'rxjs';
-import {Recommendation} from './Group/Recommendation';
-import {AtomarChange} from './Group/AtomarChange';
+import {Observable, Subject} from 'rxjs';
+import {Recommendation} from "./Group/Recommendation";
+import {AtomarChange} from "./Group/AtomarChange";
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +19,13 @@ import {AtomarChange} from './Group/AtomarChange';
  * Service that provides an entry point for the DataModel.
  */
 export class DataModelService {
+  private status: Status;
+  private _userExists = false;
+  private balanceChangeEmitter: Subject<void> = new Subject<void>();
+
+  public getBalanceEmitter(): Observable<void> {
+    return this.balanceChangeEmitter;
+  }
 
   get userExists(): boolean {
     return this._userExists;
@@ -183,7 +190,7 @@ export class DataModelService {
         // Do some Error stuff
       }
     }*/
-    this.balanceChangeEmitter.emit();
-    console.log('DataModelService: calculateBalances: Time taken for balances and recommendations: ' + (Date.now() - startTime));
+
+    this.balanceChangeEmitter.next();
   }
 }

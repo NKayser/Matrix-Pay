@@ -111,28 +111,28 @@ describe('ObservableService', () => {
 
   });
 
-  it('language observable should emit changes', (done: DoneFn) => {
+  it('obs: currency observable should emit changes', (done: DoneFn) => {
 
-    const languageObservable: Observable<LanguageType> = service.getSettingsLanguageObservable();
-    languageObservable.subscribe((language: LanguageType) => {
-      console.log('callback called');
-      expect(language.language).toEqual('ENGLISH');
-      done();
-    });
+      const currencyObservable: Observable<CurrencyType> = service.getSettingsCurrencyObservable();
+      currencyObservable.subscribe((currency: CurrencyType) => {
+          console.log('callback called');
+          expect(currency.currency).toEqual('EUR');
+          done();
+      });
 
-    clientEmitter.emit('accountData',
+      clientEmitter.emit('accountData',
         {
           getType(): string {
-            return 'com.matrixpay.language';
+            return 'com.matrixpay.currency';
           },
           getContent(): object {
-            return {language: 'ENGLISH'};
+            return {currency: 'EUR'};
           },
         },
         {});
   });
 
-  it('check invite', () => {
+  it('obs: check if user joins when invited', () => {
 
     clientEmitter.emit('Room',
         fakeRoom({
@@ -143,7 +143,7 @@ describe('ObservableService', () => {
     expect(mockedClient.joinRoom).toHaveBeenCalled();
   });
 
-  it('check membership join', (done: DoneFn) => {
+  it('obs: check if new user gets emitted when he joins', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
 
@@ -175,7 +175,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('check membership leave', (done: DoneFn) => {
+  it('obs: check if group emitter emits when user leaves', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
 
@@ -210,7 +210,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('check membership other join', (done: DoneFn) => {
+  it('obs: check membership when other user joins', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
 
@@ -242,7 +242,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('check membership other leave', (done: DoneFn) => {
+  it('obs: check when other member leaves', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
 
@@ -274,28 +274,28 @@ describe('ObservableService', () => {
     );
   });
 
-  it('currency observable should emit changes', (done: DoneFn) => {
+  it('obs: language observable should emit changes', (done: DoneFn) => {
 
-    const currencyObservable: Observable<CurrencyType> = service.getSettingsCurrencyObservable();
-    currencyObservable.subscribe((currency: CurrencyType) => {
+    const languageObservable: Observable<LanguageType> = service.getSettingsLanguageObservable();
+    languageObservable.subscribe((language: LanguageType) => {
       console.log('callback called');
-      expect(currency.currency).toBe('EUR');
+      expect(language.language).toBe('ENGLISH');
       done();
     });
 
     clientEmitter.emit('accountData',
       {
         getType(): string {
-          return 'com.matrixpay.currency';
+          return 'com.matrixpay.language';
         },
         getContent(): object {
-          return {currency: 'EUR'};
+          return {language: 'ENGLISH'};
         },
       },
       {});
   });
 
-  it('message expense test edit', (done: DoneFn) => {
+  it('obs: check if modified transaction gets emitted when not live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {roomId: 'room1'};
@@ -349,7 +349,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('message create room test', (done: DoneFn) => {
+  it('obs: check if room activity gets emitted when receiving room create event not live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {roomId: 'room1'};
@@ -380,7 +380,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('message room member join', (done: DoneFn) => {
+  it('obs: check if group membership gets emitted when other user joins not live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {
@@ -418,7 +418,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('message room member leave', (done: DoneFn) => {
+  it('obs: check if group membership gets emitted when other user leaves not live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {
@@ -456,7 +456,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('message create room new test', (done: DoneFn) => {
+  it('obs: check if room activity gets emitted when receiving room create event live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {roomId: 'room1'};
@@ -487,7 +487,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('message payback test', (done: DoneFn) => {
+  it('obs: check if transaction gets emitted when new payback is created live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {roomId: 'room1'};
@@ -537,7 +537,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('message expense test', (done: DoneFn) => {
+  it('obs: check if transaction gets emitted when new transaction is created live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {roomId: 'room1'};
@@ -590,7 +590,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('message expense test edit', (done: DoneFn) => {
+  it('obs: check modified transaction gets emitted when edited live', (done: DoneFn) => {
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = {roomId: 'room1'};
@@ -643,7 +643,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('check join', (done: DoneFn) => {
+  it('obs: check join', (done: DoneFn) => {
     const groupObservable: Observable<GroupsType> = service.getGroupsObservable();
     groupObservable.subscribe((group: GroupsType) => {
         expect(group.currency).toBe('USD');
@@ -665,7 +665,7 @@ describe('ObservableService', () => {
       );
   });
 
-  it('message payback test room', (done: DoneFn) => {
+  it('obs: check new payback emitted not live', (done: DoneFn) => {
 
       console.log('i got called here');
 
@@ -736,7 +736,7 @@ describe('ObservableService', () => {
     );
   });
 
-  it('message expense test room', (done: DoneFn) => {
+  it('obs: check new expense emitted not live', (done: DoneFn) => {
 
     console.log('i got called here');
 
