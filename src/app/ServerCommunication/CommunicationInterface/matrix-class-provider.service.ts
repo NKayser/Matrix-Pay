@@ -16,15 +16,21 @@ export class MatrixClassProviderService {
     return AutoDiscovery.findClientConfig(domain);
   }
 
-  public createClient(serverAddress: string, store?: any): Promise<MatrixClient> {
-    if (store === undefined) {
+  public createClient(serverAddress: string, store?: any, tokenObject?: any): Promise<MatrixClient> {
+
+    if (tokenObject === undefined) {
       return createClient(serverAddress);
     }
 
+    console.log(tokenObject);
+
+    const opts = {
+        baseUrl: serverAddress,
+        accessToken: tokenObject.accessToken,
+        userId: tokenObject.userId
+    };
+
     // forwards call to createClient() method of the sdk
-    return createClient({
-      store: store,
-      baseUrl: serverAddress
-    });
+    return createClient(opts);
   }
 }

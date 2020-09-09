@@ -27,6 +27,7 @@ export class LoginComponent implements OnInit, OnDestroy{
   // Manages if the password is shown in the view
   public hidePassword = true;
   public loadingLogIn = false;
+  public autoLogin = false;
 
   private subscription: Subscription;
 
@@ -48,6 +49,23 @@ export class LoginComponent implements OnInit, OnDestroy{
     const accessToken = localStorage.getItem('accessToken');
     console.log(account);
     console.log(accessToken);
+
+    if (account !== null && accessToken !== null){
+      this.autoLogin = true;
+      promiseTimeout(TIMEOUT, this.clientService.login(account, undefined, accessToken))
+          .then((data) => {
+            if (!data.wasSuccessful()){
+              this.clientService.logout().then(() => {this.autoLogin = false; }, (err) => {this.autoLogin = false; });
+              this.dialogProviderService.openErrorModal('error login 1: ' + data.getMessage(), this.dialog);
+            } else {
+              this.autoLogin = false;
+            }
+          }, (err) => {
+            this.clientService.logout().then(() => {this.autoLogin = false; }, (err) => {this.autoLogin = false; });
+            this.dialogProviderService.openErrorModal('error login 2: ' + err, this.dialog);
+          });
+    }
+
   }
 
   ngOnDestroy(): void {
