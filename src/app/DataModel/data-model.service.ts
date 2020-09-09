@@ -8,7 +8,7 @@ import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimis
 import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {Recommendation} from "./Group/Recommendation";
 import {AtomarChange} from "./Group/AtomarChange";
 
@@ -21,9 +21,9 @@ import {AtomarChange} from "./Group/AtomarChange";
 export class DataModelService {
   private status: Status;
   private _userExists = false;
-  private balanceChangeEmitter: EventEmitter<void> = new EventEmitter<void>();
+  private balanceChangeEmitter: Subject<void> = new Subject<void>();
 
-  public getBalanceEmitter(): EventEmitter<void> {
+  public getBalanceEmitter(): Observable<void> {
     return this.balanceChangeEmitter;
   }
 
@@ -185,6 +185,6 @@ export class DataModelService {
       }
     }*/
 
-    this.balanceChangeEmitter.emit();
+    this.balanceChangeEmitter.next();
   }
 }
