@@ -406,13 +406,17 @@ export class ObservableService implements ObservableInterface {
         this.matrixClient.stopClient();
         console.log(room.roomId);
         console.log(event);
-        console.log(ObservableService.FILTER_ID + this.filterCount);
         // const oldFilter: Filter = this.matrixClient.getFilter(this.roomTypeMatrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount);
         // const oldFilterDefinition = oldFilter.getDefinition();
         this.filterDefinition.room.rooms.push(room.roomId);
+        const id = this.hashObject(this.filterDefinition);
+        console.log('--- hash ---');
+        console.log(this.filterDefinition);
+        console.log(id);
         this.filterCount++;
-        const filter = Filter.fromJson(this.matrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount,
+        const filter = Filter.fromJson(this.matrixClient.credentials.userId, id,
           this.filterDefinition);
+        console.log(filter.filterId);
         console.log('--- start client ---');
         console.log(this.filterDefinition.room.rooms);
         await this.matrixClient.startClient({includeArchivedRooms: false, filter});
@@ -422,6 +426,17 @@ export class ObservableService implements ObservableInterface {
   }
 
   // other functions
+
+  private hashObject(input: object) {
+    const str = JSON.stringify(input);
+    console.log(str);
+    var hash = 0, i = 0, len = str.length;
+    while ( i < len ) {
+      // tslint:disable-next-line:no-bitwise
+      hash  = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
+    }
+    return hash;
+  }
 
   private getExpenseFromEvent(room, event): TransactionType {
     const content = event.getContent();
