@@ -73,9 +73,15 @@ export class MatrixClientService implements ClientInterface {
     try {
       await this.authenticate(account, password, accessToken);
     } catch(error) {
+      console.log(error);
       this.loggedIn = false;
-      const errorMsg: string = error['data']['errcode'] + ': ' + error['data']['error'];
-      console.log(errorMsg);
+      let errorMsg: string;
+      if (typeof(error) === 'string') {
+        errorMsg = error;
+      } else {
+        errorMsg = error['data']['errcode'] + ': ' + error['data']['error'];
+      }
+
       return new UnsuccessfulResponse(ClientError.InvalidPassword, errorMsg);
     }
 
@@ -124,12 +130,11 @@ export class MatrixClientService implements ClientInterface {
     return new SuccessfulResponse();
   }
 
-  private async authenticate(account: string, password?: string, accessToken?: string): Promise<null | MatrixError> {
+  private async authenticate(account: string, password?: string, accessToken?: string): Promise<void> {
     if (password === undefined) {
       // Login with given access token (if given)
       if (accessToken === undefined) {
-        return Promise.reject({data: {errcode: 'NO_AUTH',
-            error: 'No authentification data provided. Need either account/pw or accessToken.'}});
+        return Promise.reject('No authentification data provided. Need either account/pw or accessToken.');
       }
 
       await this.matrixClient.loginWithToken(accessToken);
@@ -138,8 +143,7 @@ export class MatrixClientService implements ClientInterface {
     } else {
       // Login with Account/pw
       if (account === undefined) {
-        return Promise.reject({data: {errcode: 'NO_AUTH',
-            error: 'No authentification data provided. Need account, not only password.'}});
+        return Promise.reject('No authentification data provided. Need account, not only password.');
       }
 
       this.loginInfo = await this.matrixClient.loginWithPassword(account, password);
