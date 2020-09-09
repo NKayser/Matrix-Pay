@@ -141,7 +141,7 @@ describe('ViewModel_ServerCommunication', () => {
             const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
             return Promise.resolve(config);
         });
-        mockedClient.loginWithPassword.and.returnValue(Promise.resolve());
+        mockedClient.loginWithPassword.and.returnValue(Promise.resolve({access_token: 'example_accessToken'}));
         mockedClient.setAccountData.and.returnValue(null);
         mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
         mockedClient.on.and.returnValue(null);
@@ -162,7 +162,7 @@ describe('ViewModel_ServerCommunication', () => {
             const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
             return Promise.resolve(config);
         });
-        mockedClient.loginWithPassword.and.returnValue(Promise.resolve());
+        mockedClient.loginWithPassword.and.returnValue(Promise.resolve({access_token: 'example_accessToken'}));
         mockedClient.setAccountData.and.returnValue(null);
         mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
         // @ts-ignore

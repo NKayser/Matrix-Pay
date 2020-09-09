@@ -19,7 +19,7 @@ describe('MatrixClientServiceService', () => {
   function setupLogin(): void {
     classProviderSpy.findClientConfig.and.returnValue(
       {'m.homeserver': {'state': 'SUCCESS', 'base_url': 'https://matrix.dsn.scc.kit.edu'}});
-    mockedClient.loginWithPassword.and.returnValue(Promise.resolve());
+    mockedClient.loginWithPassword.and.returnValue(Promise.resolve({access_token: 'example_accessToken'}));
     mockedClient.loginWithToken.and.returnValue(Promise.resolve());
     mockedClient.setAccountData.and.returnValue();
     mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
