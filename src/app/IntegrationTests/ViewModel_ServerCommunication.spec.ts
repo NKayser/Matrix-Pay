@@ -27,6 +27,8 @@ import {SettingsComponent} from "../ViewModel/settings/settings.component";
 import {NavigationMenuComponent} from "../ViewModel/navigation-menu/navigation-menu.component";
 import {DialogProviderService} from "../ViewModel/dialog-provider.service";
 import {BreakpointObserver} from "@angular/cdk/layout";
+import {log} from "util";
+import {ServerResponse} from "../ServerCommunication/Response/ServerResponse";
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -131,7 +133,9 @@ describe('ViewModel_ServerCommunication', () => {
         settingsComponent = settingsFixture.componentInstance;
     }));
 
-    async function login(): Promise<void> {
+    async function login(): Promise<ServerResponse> {
+        const loginSpy = spyOn(matrixClientService, 'login').and.callThrough();
+
         // Mock the Client
         classProviderSpy.findClientConfig.and.callFake(() => {
             const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
@@ -145,10 +149,14 @@ describe('ViewModel_ServerCommunication', () => {
         // Login with these values
         loginComponent.matrixUrlControl.setValue('@username:host');
         loginComponent.passwordControl.setValue('password123');
-        await loginComponent.login();
+        loginComponent.login();
+
+        return await loginSpy.calls.mostRecent().returnValue;
     }
 
-    async function preparedLogin(): Promise<void> {
+    async function preparedLogin(): Promise<ServerResponse> {
+        const loginSpy = spyOn(matrixClientService, 'login').and.callThrough();
+
         // Mock the Client
         classProviderSpy.findClientConfig.and.callFake(() => {
             const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
@@ -163,14 +171,18 @@ describe('ViewModel_ServerCommunication', () => {
         // Login with these values
         loginComponent.matrixUrlControl.setValue('@username:host');
         loginComponent.passwordControl.setValue('password123');
-        await loginComponent.login();
+        loginComponent.login();
+
+        return await loginSpy.calls.mostRecent().returnValue;
     }
 
     // Test-case T10
     it('should login', async (done: DoneFn) => {
-        await login();
+        const response = await login();
 
         // Expected
+        expect(response).toBeDefined();
+        expect(response instanceof SuccessfulResponse).toBe(true);
         expect(matrixClientService.isLoggedIn()).toBe(true);
         done();
     });
