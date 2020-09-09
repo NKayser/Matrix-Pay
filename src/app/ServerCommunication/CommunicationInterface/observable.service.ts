@@ -403,6 +403,7 @@ export class ObservableService implements ObservableInterface {
     this.roomTypeMatrixClient.on('RoomState.events', async (event, room, toStartOfTimeline, removed, data) => {
       if (event.getType() === 'org.matrix.msc1840') {
         this.matrixClient.stopClient();
+        this.matrixClient.removeAllListeners();
         console.log(room.roomId);
         this.filterDefinition.room.rooms.push(room.roomId);
         const id = this.hashObject(this.filterDefinition);
@@ -410,8 +411,17 @@ export class ObservableService implements ObservableInterface {
           this.filterDefinition);
         console.log(filter.filterId);
         console.log(this.filterDefinition.room.rooms);
-        await this.matrixClient.startClient({includeArchivedRooms: false, filter})
-          .then(console.log('started'));
+        /*await this.matrixClient.startClient({includeArchivedRooms: false, filter})
+          .then(console.log('started'));*/
+        this.matrixClient = await this.clientService.getNewClient();
+        await this.matrixClient.startClient({includeArchivedRooms: false, filter});
+        this.accountDataListener();
+        // this.roomAccountDataListener();
+        this.timelineListener();
+        this.roomListener();
+        this.membershipListener();
+        this.timelineResetListener();
+        this.roomStateListener();
       }
     });
   }
