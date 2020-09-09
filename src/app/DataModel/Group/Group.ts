@@ -192,5 +192,21 @@ export class Group {
    */
   public addActivity(activity: Activity): void { // TODO: OPTIONAL: sort array or insert in right position to ensure post-condition
     this._activities.push(activity);
+    this._activities = this._activities.sort(this.compare);
+    console.log(this._activities[0].creationDate);
+  }
+
+  private compare(a: Activity, b: Activity): number {
+    // Use toUpperCase() to ignore character casing
+    const dateA = a.creationDate;
+    const dateB = b.creationDate;
+
+    let comparison = 0;
+    if (dateA > dateB) {
+      comparison = 1;
+    } else if (dateA < dateB) {
+      comparison = -1;
+    }
+    return comparison;
   }
 }

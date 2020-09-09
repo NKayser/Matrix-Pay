@@ -6,7 +6,7 @@
       <mat-card>
         <div class="label_div">
           <div *ngIf="activity.activityType===activityTypes.NEWPAYBACK">
-            <mat-label>{{activity.actor.name}} paid back in {{activity.subject.name}}</mat-label>
+            <mat-label>{{activity.subject.name}}</mat-label>
           </div>
           <div *ngIf="activity.activityType===activityTypes.NEWCONTACTINGROUP">
             <mat-label>{{activity.actor.name}} has been added to {{activity.subject.name}}</mat-label>
@@ -24,7 +24,8 @@
             <mat-label>{{activity.actor.name}} created {{activity.subject.name}} in {{activity.subject.group.name}}</mat-label>
           </div>
         </div>
-        <mat-label class="date">{{activity.creationDate.getDay()}}.{{activity.creationDate.getMonth()}}.{{activity.creationDate.getFullYear()}}</mat-label>
+        <mat-label class="date">{{activity.creationDate.toDateString()}}</mat-label>
+        <!--<mat-label class="date">{{activity.creationDate.getDay()}}.{{activity.creationDate.getMonth()}}.{{activity.creationDate.getFullYear()}}</mat-label>-->
       </mat-card>
 
     </mat-list-item>

@@ -3,7 +3,7 @@ import { ServerResponse } from '../Response/ServerResponse';
 import {EventEmitter} from "@angular/core";
 
 export interface ClientInterface {
-  login(account: string, password: string): Promise<ServerResponse>;
+  login(account: string, password?: string, accessToken?: string): Promise<ServerResponse>;
   logout(): Promise<ServerResponse>;
   getClient(): MatrixClient;
   getRoomTypeClient(): MatrixClient;

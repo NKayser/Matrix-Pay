@@ -31,9 +31,6 @@ export class DataModelService {
     return this._userExists;
   }
 
-  private emitter = new Subject();
-  navItem$ = this.emitter.asObservable();
-
   /**
    * Cunstructor for DataModelService
    * @param balanceCalculator  An Instance of BalanceCalculatorService that is used in DataModelService
@@ -47,6 +44,23 @@ export class DataModelService {
     const user = new User(contact, Currency.EUR, Language.ENGLISH);
     this.status = new Status();
     this._userExists = true;
+  }
+
+  /**
+   * Returns user object, which is a singleton
+   */
+  public get user(): User {
+    return User.singleUser;
+  }
+  private status: Status;
+  private _userExists = false;
+  private balanceChangeEmitter: EventEmitter<void> = new EventEmitter<void>();
+
+  private emitter = new Subject();
+  navItem$ = this.emitter.asObservable();
+
+  public getBalanceEmitter(): EventEmitter<void> {
+    return this.balanceChangeEmitter;
   }
 
   // Notifies the ViewModel when the dataModel has loaded
@@ -87,13 +101,6 @@ export class DataModelService {
     const user = new User(contact, Currency.EUR, Language.GERMAN);
     this.status = new Status();
     return user;
-  }
-
-  /**
-   * Returns user object, which is a singleton
-   */
-  public get user(): User {
-    return User.singleUser;
   }
 
   /**
@@ -146,32 +153,31 @@ export class DataModelService {
    * @param lastTransactionId  ID of the last transaction that is regarded by the calculation.
    */
   public async calculateBalances(groupId: string, transactions: Transaction[], lastTransactionId: string): Promise<void> {
+    const startTime = Date.now();
     const group = this.getGroup(groupId);
 
     const problem = this.balanceCalculator.calculateBalances(group.groupmembers, transactions);
 
     const solution = this.greedyOptimisation.calculateOptimisation(problem);
-    //console.log('solution hat been returned');
-    //console.log(solution);
+    // console.log('solution hat been returned');
+    // console.log(solution);
     const recommendations: Recommendation[] = [];
-    //console.log('length of solution.PayerIds' + solution.getPayerIds().length);
+    // console.log('length of solution.PayerIds' + solution.getPayerIds().length);
     for (let i = 0; i < solution.getPayerIds().length; i++) {
-      //console.log('iteration' + i + '.0');
-      //console.log(solution.getPayerIds());
-      //console.log(group);
+      // console.log('iteration' + i + '.0');
+      // console.log(solution.getPayerIds());
+      // console.log(group);
       const payer = new AtomarChange(group.getGroupmember(solution.getPayerIds()[i]).contact, solution.getAmounts()[i]);
-      //console.log('iteration' + i + '.1');
+      // console.log('iteration' + i + '.1');
       const recipient = new AtomarChange(group.getGroupmember(solution.getRecipientIds()[i]).contact, solution.getAmounts()[i]);
-      //console.log('iteration' + i + '.2');
+      // console.log('iteration' + i + '.2');
       const recommendation = new Recommendation(group, payer, recipient);
-      //console.log('iteration' + i + '.3');
+      // console.log('iteration' + i + '.3');
       recommendations.push(recommendation);
     }
     group.setRecommendations(recommendations);
-    console.log('recommendations: ');
-    console.log(group.recommendations);
-
-    /*OLD COMMUNICATION METHOD const response = await this.matrixEmergentData.setBalances(groupId, problem.getBalances(), problem.getUsers(), lastTransactionId);
+    /*OLD COMMUNICATION METHOD const response = await this.matrixEmergentData.setBalances(groupId, problem.getBalances(),
+          problem.getUsers(), lastTransactionId);
       this.status.newResponse(response);
     if (!response.wasSuccessful()) {
       // Do some Error stuff
