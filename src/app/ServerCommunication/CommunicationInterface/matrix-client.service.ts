@@ -18,7 +18,7 @@ export class MatrixClientService implements ClientInterface {
   private matrixClient: MatrixClient;
   private roomTypeMatrixClient: MatrixClient;
   private serverAddress: string;
-  private accessToken: string;
+  private loginInfo: any;
   private loggedIn: boolean = false;
   private prepared: boolean = false;
   private loggedInEmitter: EventEmitter<void>;
@@ -134,7 +134,7 @@ export class MatrixClientService implements ClientInterface {
 
       await this.matrixClient.loginWithToken(accessToken);
       await this.roomTypeMatrixClient.loginWithToken(accessToken);
-      this.accessToken = accessToken;
+      this.loginInfo = accessToken;
     } else {
       // Login with Account/pw
       if (account === undefined) {
@@ -142,12 +142,14 @@ export class MatrixClientService implements ClientInterface {
             error: 'No authentification data provided. Need account, not only password.'}});
       }
 
-      this.accessToken = await this.matrixClient.loginWithPassword(account, password);
+      this.loginInfo = await this.matrixClient.loginWithPassword(account, password);
       await this.roomTypeMatrixClient.loginWithPassword(account, password);
     }
 
     // Login successful
-    localStorage.setItem('accessToken', this.accessToken);
+    console.log('token written');
+    console.log(this.loginInfo);
+    localStorage.setItem('accessToken', this.loginInfo.access_token);
     localStorage.setItem('account', account);
     this.loggedIn = true;
   }
@@ -165,7 +167,7 @@ export class MatrixClientService implements ClientInterface {
 
     // Clear local storage and reset access token
     localStorage.clear();
-    this.accessToken = undefined;
+    this.loginInfo = undefined;
 
     // User was already logged out
     return new SuccessfulResponse();

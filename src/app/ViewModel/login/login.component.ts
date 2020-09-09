@@ -43,6 +43,11 @@ export class LoginComponent implements OnInit, OnDestroy{
   ngOnInit(): void {
     this.subscription = this.dataModelService.navItem$.subscribe(item => {if (item){this.loggedIn.emit(true);
                                                                                     this.loadingLogIn = false; } });
+
+    const account = localStorage.getItem('account');
+    const accessToken = localStorage.getItem('accessToken');
+    console.log(account);
+    console.log(accessToken);
   }
 
   ngOnDestroy(): void {
