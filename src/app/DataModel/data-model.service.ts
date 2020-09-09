@@ -1,4 +1,4 @@
-import {EventEmitter, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {User} from './User/User';
 import {Status} from './Status/Status';
 import {Group} from './Group/Group';
@@ -8,9 +8,9 @@ import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimis
 import {Contact} from './Group/Contact';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
-import {Observable, Subject} from 'rxjs';
-import {Recommendation} from "./Group/Recommendation";
-import {AtomarChange} from "./Group/AtomarChange";
+import {Subject} from 'rxjs';
+import {Recommendation} from './Group/Recommendation';
+import {AtomarChange} from './Group/AtomarChange';
 
 @Injectable({
   providedIn: 'root'
@@ -22,8 +22,10 @@ export class DataModelService {
   private status: Status;
   private _userExists = false;
   private balanceChangeEmitter: Subject<void> = new Subject<void>();
+  private emitter = new Subject();
+  navItem$ = this.emitter.asObservable();
 
-  public getBalanceEmitter(): Observable<void> {
+  public getBalanceEmitter(): Subject<void> {
     return this.balanceChangeEmitter;
   }
 
@@ -52,16 +54,8 @@ export class DataModelService {
   public get user(): User {
     return User.singleUser;
   }
-  private status: Status;
-  private _userExists = false;
-  private balanceChangeEmitter: EventEmitter<void> = new EventEmitter<void>();
 
-  private emitter = new Subject();
-  navItem$ = this.emitter.asObservable();
 
-  public getBalanceEmitter(): EventEmitter<void> {
-    return this.balanceChangeEmitter;
-  }
 
   // Notifies the ViewModel when the dataModel has loaded
   private notifyViewModelWhenReady(): void{

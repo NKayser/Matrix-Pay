@@ -14,7 +14,7 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {Observable, Subscription} from 'rxjs';
+import {Subject, Subscription} from 'rxjs';
 
 describe('HomeComponentCancel', () => {
   let component: HomeComponent;
@@ -42,7 +42,7 @@ describe('HomeComponentCancel', () => {
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
 
-    dataModelService.getBalanceEmitter.and.returnValue({subscribe(): Subscription{ return new Subscription(); } } as Observable<void>);
+    dataModelService.getBalanceEmitter.and.returnValue({subscribe(): Subscription{ return new Subscription(); } } as Subject<void>);
 
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
