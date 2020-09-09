@@ -402,25 +402,16 @@ export class ObservableService implements ObservableInterface {
   private roomTypeListener(): void {
     this.roomTypeMatrixClient.on('RoomState.events', async (event, room, toStartOfTimeline, removed, data) => {
       if (event.getType() === 'org.matrix.msc1840') {
-        console.log('---stop client---');
         this.matrixClient.stopClient();
         console.log(room.roomId);
-        console.log(event);
-        // const oldFilter: Filter = this.matrixClient.getFilter(this.roomTypeMatrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount);
-        // const oldFilterDefinition = oldFilter.getDefinition();
         this.filterDefinition.room.rooms.push(room.roomId);
         const id = this.hashObject(this.filterDefinition);
-        console.log('--- hash ---');
-        console.log(this.filterDefinition);
-        console.log(id);
-        this.filterCount++;
         const filter = Filter.fromJson(this.matrixClient.credentials.userId, id,
           this.filterDefinition);
         console.log(filter.filterId);
-        console.log('--- start client ---');
         console.log(this.filterDefinition.room.rooms);
-        await this.matrixClient.startClient({includeArchivedRooms: false, filter});
-        console.log('started ' + this.filterCount);
+        await this.matrixClient.startClient({includeArchivedRooms: false, filter})
+          .then(console.log('started'));
       }
     });
   }
