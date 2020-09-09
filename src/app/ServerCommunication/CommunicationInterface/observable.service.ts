@@ -27,6 +27,11 @@ export class ObservableService implements ObservableInterface {
   private static TRANSACTION_TYPE_EXPENSE = 'EXPENSE';
   private static FILTER_ID = 'edu.kit.tm.dsn.psess2020.matrixpay-v';
   private static ROOM_TYPE_FILTER_ID = 'edu.kit.tm.dsn.psess2020.matrixpay-roomType';
+
+  private static CHECK_TRANSACTION_PROPERTIES = ['name', 'recipients', 'payer', 'amounts'];
+  private static CHECK_CURRENCY_PROPERTIES = ['currency'];
+  private static CHECK_LANGUAGE_PROPERTIES = ['language'];
+
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
   private matrixClient: MatrixClient;
   private roomTypeMatrixClient: MatrixClient;
@@ -119,8 +124,13 @@ export class ObservableService implements ObservableInterface {
     const currencyEventContent = await this.matrixClient.getAccountDataFromServer('com.matrixpay.currency'); // content of the matrix event
     const languageEventContent = await this.matrixClient.getAccountDataFromServer('com.matrixpay.language');
     if (currencyEventContent !== null) {
-      this.userObservable.next({contactId: userId, name: this.matrixClient.getUser(userId).displayName,
-        currency: currencyEventContent.currency, language: languageEventContent.language});
+
+      if (!this.checkProperties(currencyEventContent, ObservableService.CHECK_CURRENCY_PROPERTIES)){
+        console.log('Found invalid currency event');
+      } else {
+        this.userObservable.next({contactId: userId, name: this.matrixClient.getUser(userId).displayName,
+          currency: currencyEventContent.currency, language: languageEventContent.language});
+      }
     }
   }
 
@@ -136,8 +146,15 @@ export class ObservableService implements ObservableInterface {
       // no such event type or no valid events with this event type and state key
       console.log('no currency set');
     } else {
-      currency = currencyEvent.getContent().currency;
-      if (Utils.log) { console.log(currencyEvent.getContent().currency); }
+
+      if (!this.checkProperties(currencyEvent.getContent(), ObservableService.CHECK_CURRENCY_PROPERTIES)){
+        console.log('Found invalid currency event');
+      } else {
+        currency = currencyEvent.getContent().currency;
+        if (Utils.log) {
+          console.log(currencyEvent.getContent().currency);
+        }
+      }
     }
 
 
@@ -180,13 +197,21 @@ export class ObservableService implements ObservableInterface {
     switch (event.getType()) {
       case ('com.matrixpay.currency'): {
         if (Utils.log) { console.log('got currency change to ' + event.getContent().currency); }
-        this.settingsCurrencyObservable.next({currency: event.getContent().currency});
-        console.log('currency sent');
+        if (!this.checkProperties(event.getContent(), ObservableService.CHECK_CURRENCY_PROPERTIES)){
+          console.log('found invalid currency event');
+        } else {
+          this.settingsCurrencyObservable.next({currency: event.getContent().currency});
+          console.log('currency sent');
+        }
         break;
       }
       case ('com.matrixpay.language'): {
-        if (Utils.log) { console.log('got language change to ' + event.getContent().language); }
-        this.settingsLanguageObservable.next({language: event.getContent().language});
+        if (!this.checkProperties(event.getContent(), ObservableService.CHECK_LANGUAGE_PROPERTIES)){
+          console.log('found invalid language event');
+        } else {
+          if (Utils.log) { console.log('got language change to ' + event.getContent().language); }
+          this.settingsLanguageObservable.next({language: event.getContent().language});
+        }
         break;
       }
     }
@@ -240,32 +265,51 @@ export class ObservableService implements ObservableInterface {
             case ('com.matrixpay.payback'): {
               console.log('got an old payback. name: ' + event.getContent().name + ' room: ' + room.name);
 
-              if (this.initializedPayRooms.has(room.roomId)){
-                this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
+              if (!this.checkProperties(event.getContent(), ObservableService.CHECK_TRANSACTION_PROPERTIES)){
+                console.log('Found invalid transaction');
               } else {
-                if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
-                this.transactions[room.roomId].push(this.getPaybackFromEvent(room, event));
+
+                if (this.initializedPayRooms.has(room.roomId)){
+                  this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
+                } else {
+                  if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
+                  this.transactions[room.roomId].push(this.getPaybackFromEvent(room, event));
+                }
+
               }
 
               break;
             }
             case ('com.matrixpay.expense'): {
-              if (!event.isRelation()) {
-                // If the event has been replaced, getContent() returns the content of the replacing event.
-                if (Utils.log) { console.log('got an old expense. name: ' + event.getContent().name); }
 
-                if (this.initializedPayRooms.has(room.roomId)){
-                  this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
-                } else {
-                  if (!this.transactions.hasOwnProperty(room.roomId)) { this.transactions[room.roomId] = []; }
-                  this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
+              if (!this.checkProperties(event.getContent(), ObservableService.CHECK_TRANSACTION_PROPERTIES)){
+                console.log('Found invalid transaction');
+              } else {
+
+                if (!event.isRelation()) {
+                  // If the event has been replaced, getContent() returns the content of the replacing event.
+                  if (Utils.log) {
+                    console.log('got an old expense. name: ' + event.getContent().name);
+                  }
+
+                  if (this.initializedPayRooms.has(room.roomId)) {
+                    this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
+                  } else {
+                    if (!this.transactions.hasOwnProperty(room.roomId)) {
+                      this.transactions[room.roomId] = [];
+                    }
+                    this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
+                  }
+
+                  console.log(this.transactions[room.roomId]);
+                } else if (event.isRelation('m.replace')) {
+                  if (Utils.log) {
+                    console.log('got an old editing of an expense. name: ' + event.getContent().name);
+                  }
+                  // this.oldModifiedTransactions[room.roomId].push(transaction);
+                  this.modifiedTransactionsObservable.next(this.getExpenseFromEvent(room, event));
                 }
 
-                console.log(this.transactions[room.roomId]);
-              } else if (event.isRelation('m.replace')) {
-                if (Utils.log) { console.log('got an old editing of an expense. name: ' + event.getContent().name); }
-                // this.oldModifiedTransactions[room.roomId].push(transaction);
-                this.modifiedTransactionsObservable.next(this.getExpenseFromEvent(room, event));
               }
               break;
             }
@@ -298,23 +342,40 @@ export class ObservableService implements ObservableInterface {
           // Process the events retrieved by /sync
           switch (event.getType()) {
             case ('com.matrixpay.payback'): {
-              this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
+
+              if (!this.checkProperties(event.getContent(), ObservableService.CHECK_TRANSACTION_PROPERTIES)){
+                console.log('Found invalid transaction');
+              } else {
+
+                this.multipleNewTransactionsObservable.next([this.getPaybackFromEvent(room, event)]);
+
+              }
               break;
             }
             case ('com.matrixpay.expense'): {
-              if (!event.isRelation()) {
-                // We could consider using getOriginalContent() instead of getContent(), because if this event has been replaced
-                // (replacing event in the same /sync batch),
-                // getContent() returns the content of the replacing event (?), but the information about the replacement
-                // will be received through the replacing event.
-                // However, using using getContent() won't hurt.
-                if (Utils.log) {
-                  console.log('got expense. name: ' + event.getContent().name);
+
+              console.log(event);
+              if (!this.checkProperties(event.getContent(), ObservableService.CHECK_TRANSACTION_PROPERTIES)){
+                console.log('Found invalid transaction');
+              } else {
+
+                if (!event.isRelation()) {
+                  // We could consider using getOriginalContent() instead of getContent(), because if this event has been replaced
+                  // (replacing event in the same /sync batch),
+                  // getContent() returns the content of the replacing event (?), but the information about the replacement
+                  // will be received through the replacing event.
+                  // However, using using getContent() won't hurt.
+                  if (Utils.log) {
+                    console.log('got expense. name: ' + event.getContent().name);
+                  }
+                  this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
+                } else if (event.isRelation('m.replace')) {
+                  if (Utils.log) {
+                    console.log('got editing of payback. name: ' + event.getContent().name);
+                  }
+                  this.modifiedTransactionsObservable.next(this.getExpenseFromEvent(room, event));
                 }
-                this.multipleNewTransactionsObservable.next([this.getExpenseFromEvent(room, event)]);
-              } else if (event.isRelation('m.replace')) {
-                if (Utils.log) { console.log('got editing of payback. name: ' + event.getContent().name); }
-                this.modifiedTransactionsObservable.next(this.getExpenseFromEvent(room, event));
+
               }
               break;
             }
@@ -462,6 +523,19 @@ export class ObservableService implements ObservableInterface {
       recipientIds: content.recipients,
       recipientAmounts: content.amounts,
       senderId: event.getSender()};
+  }
+
+  // checks if a received event contains all necessary fields for processing
+  private checkProperties(eventContent, properties): boolean{
+    for (const property of properties){
+      console.log(property);
+      console.log(eventContent.hasOwnProperty(property));
+      if (!eventContent.hasOwnProperty(property)){
+        return false;
+      }
+    }
+
+    return true;
   }
 
   public getUserObservable(): Observable<UserType> {
