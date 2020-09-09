@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 // @ts-ignore
-import {MatrixClient, IndexedDBStore} from 'matrix-js-sdk';
+import {MatrixClient, IndexedDBStore, MatrixError} from 'matrix-js-sdk';
 
 import { ServerResponse } from '../Response/ServerResponse';
 import { ClientInterface } from './ClientInterface';
@@ -18,7 +18,7 @@ export class MatrixClientService implements ClientInterface {
   private matrixClient: MatrixClient;
   private roomTypeMatrixClient: MatrixClient;
   private serverAddress: string;
-  private accessToken: string;
+  private loginInfo: any;
   private loggedIn: boolean = false;
   private prepared: boolean = false;
   private loggedInEmitter: EventEmitter<void>;
@@ -35,7 +35,9 @@ export class MatrixClientService implements ClientInterface {
     this.loggedInEmitter = new EventEmitter();
   }
 
-  public async login(account: string, password: string): Promise<ServerResponse> {
+  // to login with accessToken, call: await login('@user:url', undefined, 'accessToken');
+  // accessToken will be saved in localStorage under key 'accessToken'.
+  public async login(account: string, password?: string, accessToken?: string): Promise<ServerResponse> {
     if (this.loggedIn) throw new Error('already logged in');
 
     // Discover Homeserver Address and throw Errors if not successful
@@ -60,13 +62,17 @@ export class MatrixClientService implements ClientInterface {
 
     // Login and get Access Token
     try {
-      this.accessToken = await this.matrixClient.loginWithPassword(account, password);
-      await this.roomTypeMatrixClient.loginWithPassword(account, password);
-      this.loggedIn = true;
+      await this.authenticate(account, password, accessToken);
     } catch(error) {
+      console.log(error);
       this.loggedIn = false;
-      const errorMsg: string = error['data']['errcode'] + ': ' + error['data']['error'];
-      console.log(errorMsg);
+      let errorMsg: string;
+      if (typeof(error) === 'string') {
+        errorMsg = error;
+      } else {
+        errorMsg = error['data']['errcode'] + ': ' + error['data']['error'];
+      }
+
       return new UnsuccessfulResponse(ClientError.InvalidPassword, errorMsg);
     }
 
@@ -115,6 +121,34 @@ export class MatrixClientService implements ClientInterface {
     return new SuccessfulResponse();
   }
 
+  private async authenticate(account: string, password?: string, accessToken?: string): Promise<void> {
+    if (password === undefined) {
+      // Login with given access token (if given)
+      if (accessToken === undefined) {
+        return Promise.reject('No authentification data provided. Need either account/pw or accessToken.');
+      }
+
+      await this.matrixClient.loginWithToken(accessToken);
+      await this.roomTypeMatrixClient.loginWithToken(accessToken);
+      this.loginInfo = accessToken;
+    } else {
+      // Login with Account/pw
+      if (account === undefined) {
+        return Promise.reject('No authentification data provided. Need account, not only password.');
+      }
+
+      this.loginInfo = await this.matrixClient.loginWithPassword(account, password);
+      await this.roomTypeMatrixClient.loginWithPassword(account, password);
+    }
+
+    // Login successful
+    console.log('token written');
+    console.log(this.loginInfo);
+    localStorage.setItem('accessToken', this.loginInfo.access_token);
+    localStorage.setItem('account', account);
+    this.loggedIn = true;
+  }
+
   public getLoggedInEmitter(): EventEmitter<void> {
     return this.loggedInEmitter;
   }
@@ -126,6 +160,10 @@ export class MatrixClientService implements ClientInterface {
       this.prepared = false;
     }
 
+    // Clear local storage and reset access token
+    localStorage.clear();
+    this.loginInfo = undefined;
+
     // User was already logged out
     return new SuccessfulResponse();
   }
@@ -133,18 +171,18 @@ export class MatrixClientService implements ClientInterface {
   public getClient(): MatrixClient {
     if (this.loggedIn == false) {
       throw new Error('can only get Client if logged in');
-    } else if (this.matrixClient == undefined) {
-      throw new Error('unknown error')
+    } else if (this.matrixClient === undefined) {
+      throw new Error('unknown error');
     }
 
     return this.matrixClient;
   }
 
   public getRoomTypeClient(): MatrixClient {
-    if (this.loggedIn == false) {
+    if (this.loggedIn === false) {
       throw new Error('can only get Client if logged in');
-    } else if (this.matrixClient == undefined) {
-      throw new Error('unknown error')
+    } else if (this.matrixClient === undefined) {
+      throw new Error('unknown error');
     }
 
     return this.roomTypeMatrixClient;

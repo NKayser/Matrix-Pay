@@ -11,14 +11,16 @@ import {EventEmitter} from "@angular/core";
 describe('MatrixClientServiceService', () => {
   let service: MatrixClientService;
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['loginWithPassword', 'setAccountData', 'getAccountDataFromServer', 'on', 'logout', 'clearStores']);
+    ['loginWithPassword', 'loginWithToken', 'setAccountData', 'getAccountDataFromServer', 'on', 'logout',
+      'clearStores']);
   const classProviderSpy = jasmine.createSpyObj('MatrixClassProviderService',
     ['createClient', 'findClientConfig']);
 
   function setupLogin(): void {
     classProviderSpy.findClientConfig.and.returnValue(
       {'m.homeserver': {'state': 'SUCCESS', 'base_url': 'https://matrix.dsn.scc.kit.edu'}});
-    mockedClient.loginWithPassword.and.returnValue(Promise.resolve());
+    mockedClient.loginWithPassword.and.returnValue(Promise.resolve({access_token: 'example_accessToken'}));
+    mockedClient.loginWithToken.and.returnValue(Promise.resolve());
     mockedClient.setAccountData.and.returnValue();
     mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
     mockedClient.on.and.callFake((key: string, listener: (state, prevState, res) => void) => {return;});
@@ -46,6 +48,24 @@ describe('MatrixClientServiceService', () => {
     let emitted: boolean = false;
     service.getLoggedInEmitter().subscribe(() => emitted = true);
     const response = await service.login('@uxxxx:dsn.tm.kit.edu', 'password');
+
+    // Expected
+    expect(classProviderSpy.createClient).toHaveBeenCalled();
+    expect(emitted).toBe(true);
+    expect(response).toBeDefined();
+    expect(response.wasSuccessful()).toBe(true);
+    expect(service.isLoggedIn()).toBe(true);
+    done();
+  });
+
+  it('should login with accessToken', async (done: DoneFn) => {
+    // Set up Mocks
+    setupLogin();
+
+    // Actual
+    let emitted: boolean = false;
+    service.getLoggedInEmitter().subscribe(() => emitted = true);
+    const response = await service.login('@user:url', undefined, 'access_Token_abc');
 
     // Expected
     expect(classProviderSpy.createClient).toHaveBeenCalled();
@@ -205,6 +225,25 @@ describe('MatrixClientServiceService', () => {
     expect(actualClient).toBe(mockedClient);
   });
 
+  it('should get RoomTypeClient if logged in', async () => {
+    // Mock and login
+    setupLogin();
+    await service.login('@uxxxx:dsn.tm.kit.edu', 'password');
+
+    let actualClient;
+
+    // Actual
+    try {
+      actualClient = service.getRoomTypeClient();
+    } catch(err) {
+      fail('should not have thrown error');
+    }
+
+    // Expected
+    expect(actualClient).toBeDefined();
+    expect(actualClient).toBe(mockedClient);
+  });
+
   it('get Client should throw error if not logged in', () => {
     expect(service.isLoggedIn()).toBe(false);
 
@@ -214,6 +253,25 @@ describe('MatrixClientServiceService', () => {
     // Actual
     try {
       actualClient = service.getClient();
+    } catch(err) {
+      errorThrown = true;
+      expect(err.message).toContain('can only get Client if logged in');
+    }
+
+    // Expected
+    expect(errorThrown).toBe(true);
+    expect(actualClient).not.toBeDefined();
+  });
+
+  it('get RoomTypeClient should throw error if not logged in', () => {
+    expect(service.isLoggedIn()).toBe(false);
+
+    let actualClient;
+    let errorThrown: boolean = false;
+
+    // Actual
+    try {
+      actualClient = service.getRoomTypeClient();
     } catch(err) {
       errorThrown = true;
       expect(err.message).toContain('can only get Client if logged in');

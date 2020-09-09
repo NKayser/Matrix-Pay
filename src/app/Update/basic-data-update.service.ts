@@ -10,32 +10,28 @@ import {Utils} from '../ServerCommunication/Response/Utils';
 import {Transaction} from '../DataModel/Group/Transaction';
 import {TransactionType} from '../DataModel/Group/TransactionType';
 import {
-  CurrencyType,
-  GroupActivityType,
-  GroupMemberType,
-  GroupsType,
-  LanguageType,
   TransactionType as TransactionTypeInterface
 } from '../ServerCommunication/CommunicationInterface/parameterTypes';
 import {AtomarChange} from '../DataModel/Group/AtomarChange';
 import {Activity} from '../DataModel/Group/Activity';
 import {ActivityType} from '../DataModel/Group/ActivityType';
+import {Time} from '../SystemTests/Time';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BasicDataUpdateService {
   private observables: ObservableInterface;
-  private transactionBuffer: TransactionTypeInterface[][] = [];
+  /*private transactionBuffer: TransactionTypeInterface[][] = [];
   private activityBuffer: GroupActivityType[] = [];
   private membershipBuffer: GroupMemberType[] = [];
   private groupBuffer: GroupsType[] = [];
   private languageBuffer: LanguageType[] = [];
-  private currencyBuffer: CurrencyType[] = [];
+  private currencyBuffer: CurrencyType[] = []; */
 
-  constructor(observables: ObservableService, private dataModel: DataModelService) {
+  constructor(observables: ObservableService, private dataModel: DataModelService, /*storage: StorageService*/) {
     if (Utils.log) { console.log('This is BasicDataUpdateService'); }
-    this.observables = observables; // TODO imlement observableInterface
+    this.observables = observables; // TODO implement observableInterface
     this.createUser();
     this.addGroup();
     this.addGroupActivity();
@@ -69,17 +65,25 @@ export class BasicDataUpdateService {
             // if (Utils.log) {console.log('New group detected:' + param.groupId);}
             this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
             console.log ('updateService: addGroup: group created: ' + param.groupId + ' , ' + param.groupName);
+            // TimeStamp
+            const startTime = Time.groupCreationTime;
+            if (startTime > 0) {
+              console.log('updateService: addGroup: time taken for group: ' + param.groupName + ': ' + (Date.now() - startTime));
+            }
+            // TimeStamp
             const newGroup = this.dataModel.getGroup(param.groupId);
             for (let i = 0; i < param.userIds.length; i++) {
               if (newGroup.getGroupmember(param.userIds[i]) === null) {
                 newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
                 console.log ('updateService: addGroup: member created: ' + param.userIds[i] + ' , ' + param.userNames[i]);
+                this.dataModel.getBalanceEmitter().next();
               }
               else {
                 if (newGroup.getGroupmember(param.userIds[i]).contact.name === '') {
                   const member = newGroup.getGroupmember(param.userIds[i]);
                   member.contact.name = param.userNames[i];
                   console.log ('updateService: addGroup: member filled in: ' + param.userIds[i] + ' , ' + param.userNames[i]);
+                  this.dataModel.getBalanceEmitter().next();
                 }
               }
             }
@@ -95,6 +99,12 @@ export class BasicDataUpdateService {
             newGroup.name = param.groupName;
             newGroup.currency = this.currencyStringToEnum(param.currency);
             console.log ('updateService: addGroup: group filled in: ' + param.groupId + ' , ' + param.groupName);
+            // TimeStamp
+            const startTime = Time.groupCreationTime;
+            if (startTime > 0) {
+              console.log('updateService: addGroup: time taken for group: ' + param.groupName + ': ' + (Date.now() - startTime));
+            }
+            // TimeStamp
           }
           else {
             this.dataModel.user.removeGroup(param.groupId);
@@ -261,7 +271,7 @@ export class BasicDataUpdateService {
 
   /**
    * Adds a groupmember to a group if isLeave is false. Removes a groupmember from a group if isLeave is true.
-   * TODO: create an activity. both times.
+   * TODO: create an activity. both time.
    */
   private async addGroupMember(): Promise<void> {
     this.observables.getGroupMembershipObservable().subscribe( param => {
@@ -281,18 +291,21 @@ export class BasicDataUpdateService {
           const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
           group.addActivity(activity);
           console.log('updateService: addGroupMember: created member: ' + param.userId + ' , ' + param.name);
+          this.dataModel.getBalanceEmitter().next();
         } else {
           if (member.contact.name === '') {
             member.contact.name = param.name;
             const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
             group.addActivity(activity);
             console.log('updateService: addGroupMember: filled in member: ' + param.userId + ' , ' + param.name);
+            this.dataModel.getBalanceEmitter().next();
           }
         }
       } else { // isleave
-        group.removeGroupmember(param.userId);
+        group.getGroupmember(param.userId).active = false;
         // TODO: MEMBERLEFTGROUPACTIVITY
-        console.log('updateService: addGroupMember: removed member: ' + param.userId + ' , ' + param.name);
+        console.log('updateService: addGroupMember: set member to inactive: ' + param.userId + ' , ' + param.name);
+        this.dataModel.getBalanceEmitter().next();
       }
     });
   }
@@ -370,9 +383,23 @@ export class BasicDataUpdateService {
     const newTransaction = new Transaction(this.transactionStringToEnum(param.transactionType), param.transactionId,
       param.name, param.creationDate, group, payer, recipients, senderMember);
     group.addTransaction(newTransaction);
-    const activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, senderMember.contact, param.creationDate);
+    let activity: Activity;
+    if (newTransaction.transactionType === TransactionType.EXPENSE){
+      activity = new Activity(ActivityType.NEWEXPENSE, newTransaction, senderMember.contact, param.creationDate);
+      console.log('updateService: updateSingleTransaction: crated expense: ' + param.transactionId + ' + ' + param.name);
+    }
+    if (newTransaction.transactionType === TransactionType.PAYBACK){
+      activity = new Activity(ActivityType.NEWPAYBACK, newTransaction, senderMember.contact, param.creationDate);
+      console.log('updateService: updateSingleTransaction: crated payback: ' + param.transactionId + ' + ' + param.name);
+    }
     group.addActivity(activity);
-    console.log('updateService: updateSingleTransaction: crated transaction: ' + param.transactionId + ' + ' + param.name);
+    // TimeStamp
+    const timeStamp = Time.getTransactionTimeByID(param.groupId + param.name);
+    if (timeStamp > 0) {
+      console.log('updateService: updateSingleTransaction: Time Taken for Transaction ' + param.transactionId + ' + ' + param.name + ': '
+        + (Date.now() - timeStamp));
+    }
+    // TimeStamp
     return newTransaction;
   }
 

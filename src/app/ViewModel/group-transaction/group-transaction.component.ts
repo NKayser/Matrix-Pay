@@ -13,6 +13,7 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 // @ts-ignore
 import {MatrixEvent} from 'matrix-js-sdk';
 import {PaymentViewComponent} from '../payment-view/payment-view.component';
+import {Time} from '../../SystemTests/Time';
 
 @Component({
   selector: 'app-group-transaction',
@@ -73,6 +74,9 @@ export class GroupTransactionComponent implements OnChanges {
 
 
         this.loadingCreateExpense = true;
+        // Timestamp
+        Time.transactionTimes.push(new Time(Date.now(), this.group.groupId + this.data.description));
+        // Timestamp
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.group.groupId, this.data.description,
           this.data.payer.contactId, recipientIds, sendAmounts, false))
           .then((data) => {
@@ -162,13 +166,21 @@ export class GroupTransactionComponent implements OnChanges {
     const modalTitle = 'Create Transaction';
     const recipients = Array<Contact>(0);
     const description = '';
-    const payer = this.group.groupmembers[0].contact;
+    let payer = this.group.groupmembers[0].contact;
+    for (const currentPayer of this.group.groupmembers){
+      if (currentPayer.active){
+        payer = currentPayer.contact;
+        break;
+      }
+    }
     const amount = Array<number>(0);
     const isAdded = Array<boolean>(0);
     for (const recipient of this.group.groupmembers){
-      recipients.push(recipient.contact);
-      amount.push(0);
-      isAdded.push(true);
+      if (recipient.active){
+        recipients.push(recipient.contact);
+        amount.push(0);
+        isAdded.push(true);
+      }
     }
     const currency = this.group.currency;
 

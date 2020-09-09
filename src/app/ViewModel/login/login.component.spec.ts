@@ -6,7 +6,9 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 import {MatrixEmergentDataService} from '../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {SuccessfulResponse} from '../../ServerCommunication/Response/SuccessfulResponse';
-import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
+import {MockDialogCancel} from '../_mockServices/MockDialog';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -31,6 +33,7 @@ describe('LoginComponent', () => {
         { provide: MatrixBasicDataService, useValue: spyBasicMatrix },
         { provide: MatrixEmergentDataService, useValue: spyEmergent },
         { provide: DataModelService, useValue: spyData },
+        { provide: MatDialog, useValue: MockDialogCancel }
       ],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })

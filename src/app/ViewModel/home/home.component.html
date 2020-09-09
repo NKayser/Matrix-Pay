@@ -8,10 +8,16 @@
     </mat-list-item>
   </mat-list>-->
   <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)" rowHeight="2:1">
-    <mat-grid-tile *ngFor="let currency of usedCurrencies">
+    <!--<mat-grid-tile *ngFor="let currency of usedCurrencies">
       <mat-card class="center">
         <mat-label class="balance_label">Balance {{currencyMap[currency]}}</mat-label>
         <mat-label class="balance_number" [ngStyle]="{'color' : (getTotalBalance(currency) >= 0) ? 'green' : 'red'}" >{{getTotalBalance(currency) / 100}}</mat-label>
+      </mat-card>
+    </mat-grid-tile>-->
+    <mat-grid-tile *ngFor="let balanceTupel of balanceList">
+      <mat-card class="center">
+        <mat-label class="balance_label">Balance {{currencyMap[balanceTupel.currency]}}</mat-label>
+        <mat-label class="balance_number" [ngStyle]="{'color' : (balanceTupel.balance >= 0) ? 'green' : 'red'}" >{{balanceTupel.balance / 100}}</mat-label>
       </mat-card>
     </mat-grid-tile>
   </mat-grid-list>

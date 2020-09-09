@@ -63,7 +63,7 @@ export class GroupBalanceComponent implements OnChanges {
     this.userContact = this.dataModelService.getUser().contact;
     // Initializes the graph with the balances of the members
     this.updateBalances();
-    this.dataModelService.getBalanceEmitter().subscribe(this.updateBalances());
+    this.dataModelService.getBalanceEmitter().subscribe(() => {this.updateBalances(); });
 
     this.recommendations = this.group.recommendations;
 
@@ -75,7 +75,9 @@ export class GroupBalanceComponent implements OnChanges {
     this.balanceData = [];
     const groupMembers = this.group.groupmembers;
     for (const groupMember of groupMembers){
-      this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance / 100});
+      if (groupMember.active){
+        this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance / 100});
+      }
     }
   }
 

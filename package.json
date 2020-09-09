@@ -24,6 +24,7 @@
     "@angular/router": "^10.0.11",
     "axios": "^0.19.2",
     "matrix-js-sdk": "^7.1.0",
+    "ngx-webstorage-service": "^4.1.0",
     "rxjs": "~6.5.5",
     "tslib": "^2.0.1",
     "zone.js": "~0.10.3"

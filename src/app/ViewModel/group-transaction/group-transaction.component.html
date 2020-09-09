@@ -11,7 +11,8 @@
             <mat-label class="title">{{transaction.name}}</mat-label>
             <div class="description">
               <mat-label class="description_left">Paid by {{transaction.payer.contact.name}}</mat-label>
-              <mat-label>{{transaction.creationDate.getDay()}}.{{transaction.creationDate.getMonth()}}.{{transaction.creationDate.getFullYear()}}</mat-label>
+              <mat-label>{{transaction.creationDate.toDateString()}}</mat-label>
+              <!--<mat-label>{{transaction.creationDate.getDay()}}.{{transaction.creationDate.getMonth()}}.{{transaction.creationDate.getFullYear()}}</mat-label>-->
             </div>
             <mat-label class="payed_amount">{{transaction.payer.amount / 100}}{{currencyMap[transaction.group.currency]}}</mat-label>
 
