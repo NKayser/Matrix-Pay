@@ -15,13 +15,16 @@ import {Recommendation} from "../DataModel/Group/Recommendation";
 import {Groupmember} from "../DataModel/Group/Groupmember";
 import {Contact} from "../DataModel/Group/Contact";
 import {AtomarChange} from "../DataModel/Group/AtomarChange";
-import {Language} from "../DataModel/Utils/Language";
+import {Transaction} from "../DataModel/Group/Transaction";
+import {TransactionType} from "../DataModel/Group/TransactionType";
+import {GroupTransactionComponent} from "../ViewModel/group-transaction/group-transaction.component";
 
 
 describe('ViewModel_DataModel', () => {
     // Components
     let groupBalanceComponent: GroupBalanceComponent;
     let groupSelectionComponent: GroupSelectionComponent;
+    let groupTransactionComponent: GroupTransactionComponent;
     let homeComponent: HomeComponent;
     let loginComponent: LoginComponent;
     let settingsComponent: SettingsComponent;
@@ -29,6 +32,7 @@ describe('ViewModel_DataModel', () => {
     // Fixtures
     let groupBalanceFixture: ComponentFixture<GroupBalanceComponent>;
     let groupSelectionFixture: ComponentFixture<GroupSelectionComponent>;
+    let groupTransactionFixture: ComponentFixture<GroupTransactionComponent>;
     let homeFixture: ComponentFixture<HomeComponent>;
     let loginFixture: ComponentFixture<LoginComponent>;
     let settingsFixture: ComponentFixture<SettingsComponent>;
@@ -45,7 +49,8 @@ describe('ViewModel_DataModel', () => {
 
         // Components
         TestBed.configureTestingModule({
-            declarations: [GroupBalanceComponent, GroupSelectionComponent, HomeComponent, LoginComponent, SettingsComponent],
+            declarations: [GroupBalanceComponent, GroupSelectionComponent, HomeComponent, LoginComponent,
+                SettingsComponent, GroupTransactionComponent],
             providers: [
                 {provide: MatrixClientService, useValue: matrixClientService},
                 {provide: MatDialog, useValue: MockDialog},
@@ -65,27 +70,18 @@ describe('ViewModel_DataModel', () => {
         // Components
         groupBalanceFixture = TestBed.createComponent(GroupBalanceComponent);
         groupSelectionFixture = TestBed.createComponent(GroupSelectionComponent);
+        groupTransactionFixture = TestBed.createComponent(GroupTransactionComponent);
         homeFixture = TestBed.createComponent(HomeComponent);
         loginFixture = TestBed.createComponent(LoginComponent);
         settingsFixture = TestBed.createComponent(SettingsComponent);
 
         groupBalanceComponent = groupBalanceFixture.componentInstance;
         groupSelectionComponent = groupSelectionFixture.componentInstance;
+        groupTransactionComponent = groupTransactionFixture.componentInstance;
         homeComponent = homeFixture.componentInstance;
         loginComponent = loginFixture.componentInstance;
         settingsComponent = settingsFixture.componentInstance;
     }));
-
-    async function login(): Promise<void> {
-        // Mock the Client
-        matrixClientService.login.and.returnValue(Promise.resolve(new SuccessfulResponse()));
-        matrixClientService.isLoggedIn.and.returnValue(true);
-
-        // Login with these values
-        loginComponent.matrixUrlControl.setValue('@username:host');
-        loginComponent.passwordControl.setValue('password123');
-        await loginComponent.login();
-    }
 
     // Group Balance Component
     it('should display recommendations and balances', () => {
@@ -148,6 +144,35 @@ describe('ViewModel_DataModel', () => {
         groupSelectionFixture.detectChanges();
         expect(groupSelectionComponent.currentGroup.groupId).toEqual('g2');
         expect(matLabel.textContent).toEqual('name_g2');
+    });
+
+    // Group Transaction Component
+    it('should display group info', () => {
+        dataModelService.initializeUserFirstTime('c1', 'Alice');
+        const user = dataModelService.getUser();
+
+        const g1 = user.createGroup('g1', 'name_g1', Currency.USD);
+        const mg1 = new Groupmember(user.contact, g1);
+        g1.addGroupmember(mg1);
+        const t1 = new Transaction(TransactionType.EXPENSE, 't1', 'name_t1', new Date('05.05.2005'), g1,
+            new AtomarChange(user.contact, 10),
+            [
+                new AtomarChange(new Contact('c2', 'Bob'), -5),
+                new AtomarChange(new Contact('c3', 'Eve'), -5),
+            ], mg1);
+        g1.addTransaction(t1);
+
+        groupTransactionComponent.group = g1;
+        groupTransactionComponent.ngOnChanges();
+        groupTransactionFixture.detectChanges();
+
+        const nativeElement: HTMLElement = groupTransactionFixture.nativeElement;
+
+        expect(groupTransactionComponent.group).toBe(g1);
+        expect(groupTransactionComponent.transactions).toEqual([t1]);
+        expect(nativeElement.querySelector('.title').textContent).toEqual(t1.name);
+        expect(nativeElement.querySelector('.description_left').textContent).toEqual('Paid by ' + t1.payer.contact.name);
+        expect(nativeElement.querySelector('.payed_amount').textContent).toBe('0.1$');
     });
 
     // Home Component
