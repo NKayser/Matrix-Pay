@@ -16,7 +16,6 @@ import {AtomarChange} from '../DataModel/Group/AtomarChange';
 import {Activity} from '../DataModel/Group/Activity';
 import {ActivityType} from '../DataModel/Group/ActivityType';
 import {Time} from '../SystemTests/Time';
-import {StorageService} from 'ngx-webstorage-service';
 
 @Injectable({
   providedIn: 'root'
@@ -104,14 +103,14 @@ export class BasicDataUpdateService {
               if (newGroup.getGroupmember(param.userIds[i]) === null) {
                 newGroup.addGroupmember(new Groupmember(new Contact(param.userIds[i], param.userNames[i]), newGroup));
                 console.log ('updateService: addGroup: member created: ' + param.userIds[i] + ' , ' + param.userNames[i]);
-                this.dataModel.getBalanceEmitter().emit();
+                this.dataModel.getBalanceEmitter().next();
               }
               else {
                 if (newGroup.getGroupmember(param.userIds[i]).contact.name === '') {
                   const member = newGroup.getGroupmember(param.userIds[i]);
                   member.contact.name = param.userNames[i];
                   console.log ('updateService: addGroup: member filled in: ' + param.userIds[i] + ' , ' + param.userNames[i]);
-                  this.dataModel.getBalanceEmitter().emit();
+                  this.dataModel.getBalanceEmitter().next();
                 }
               }
             }
@@ -319,21 +318,21 @@ export class BasicDataUpdateService {
           const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
           group.addActivity(activity);
           console.log('updateService: addGroupMember: created member: ' + param.userId + ' , ' + param.name);
-          this.dataModel.getBalanceEmitter().emit();
+          this.dataModel.getBalanceEmitter().next();
         } else {
           if (member.contact.name === '') {
             member.contact.name = param.name;
             const activity = new Activity(ActivityType.NEWCONTACTINGROUP, group, member.contact, param.date);
             group.addActivity(activity);
             console.log('updateService: addGroupMember: filled in member: ' + param.userId + ' , ' + param.name);
-            this.dataModel.getBalanceEmitter().emit();
+            this.dataModel.getBalanceEmitter().next();
           }
         }
       } else { // isleave
         group.getGroupmember(param.userId).active = false;
         // TODO: MEMBERLEFTGROUPACTIVITY
         console.log('updateService: addGroupMember: set member to inactive: ' + param.userId + ' , ' + param.name);
-        this.dataModel.getBalanceEmitter().emit();
+        this.dataModel.getBalanceEmitter().next();
       }
     });
   }
