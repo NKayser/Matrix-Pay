@@ -30,7 +30,7 @@ export class BasicDataUpdateService {
   private currencyBuffer: CurrencyType[] = []; */
 
   constructor(observables: ObservableService, private dataModel: DataModelService, /*storage: StorageService*/) {
-    if (Utils.log) { console.log('This is BasicDataUpdateService'); }
+    if (Utils.log) { console.log('This is BasicDataUpdateService!'); }
     this.observables = observables; // TODO implement observableInterface
     this.createUser();
     this.addGroup();
