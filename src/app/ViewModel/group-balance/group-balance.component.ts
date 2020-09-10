@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnChanges} from '@angular/core';
 import {Group} from '../../DataModel/Group/Group';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {currencyMap} from '../../DataModel/Utils/Currency';
@@ -51,7 +51,8 @@ export class GroupBalanceComponent implements OnChanges {
   }
 
   constructor(public dialog: MatDialog, public matrixBasicDataService: MatrixBasicDataService,
-              private dialogProviderService: DialogProviderService, private dataModelService: DataModelService) {
+              private dialogProviderService: DialogProviderService, private dataModelService: DataModelService,
+              private ref: ChangeDetectorRef) {
   }
 
   /**
@@ -64,6 +65,8 @@ export class GroupBalanceComponent implements OnChanges {
     // Initializes the graph with the balances of the members
     this.initBalancesRecommendations();
     this.dataModelService.getBalanceEmitter().subscribe(() => {this.initBalancesRecommendations(); });
+
+    this.group.getMemberChangeEmitter().subscribe(() => {this.ref.detectChanges(); });
 
     // initialize the number of the grid list columns for the recommendations
     this.breakpoint = gridListResize(window.innerWidth, 1920, 3);
