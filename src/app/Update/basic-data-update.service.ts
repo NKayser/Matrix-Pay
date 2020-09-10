@@ -9,9 +9,7 @@ import {Groupmember} from '../DataModel/Group/Groupmember';
 import {Utils} from '../ServerCommunication/Response/Utils';
 import {Transaction} from '../DataModel/Group/Transaction';
 import {TransactionType} from '../DataModel/Group/TransactionType';
-import {
-  TransactionType as TransactionTypeInterface
-} from '../ServerCommunication/CommunicationInterface/parameterTypes';
+import {TransactionType as TransactionTypeInterface} from '../ServerCommunication/CommunicationInterface/parameterTypes';
 import {AtomarChange} from '../DataModel/Group/AtomarChange';
 import {Activity} from '../DataModel/Group/Activity';
 import {ActivityType} from '../DataModel/Group/ActivityType';
@@ -187,14 +185,23 @@ export class BasicDataUpdateService {
         group = this.dataModel.user.createGroup(param.groupId, '', Currency.EUR);
         console.log('updateService: addGroupActivity: added empty group: ' + param.groupId + ' , ' + group.name);
       }
-      let creator = group.getGroupmember(param.creatorId);
-      if (creator === null) {
-        creator = new Groupmember(new Contact(param.creatorId, ''), group);
-        group.addGroupmember(creator);
+      let groupActivityExists = false;
+      for (const a of group.activities){
+        if (a.activityType === ActivityType.GROUPCREATION){
+          groupActivityExists = true;
+          break;
+        }
       }
-      const activity = new Activity(ActivityType.GROUPCREATION, group, creator.contact, param.creationDate);
-      group.addActivity(activity);
-      console.log('updateService: addGroupActivity: ' + param.groupId + ' , ' + group.name);
+      if (!groupActivityExists){
+        let creator = group.getGroupmember(param.creatorId);
+        if (creator === null) {
+          creator = new Groupmember(new Contact(param.creatorId, ''), group);
+          group.addGroupmember(creator);
+        }
+        const activity = new Activity(ActivityType.GROUPCREATION, group, creator.contact, param.creationDate);
+        group.addActivity(activity);
+        console.log('updateService: addGroupActivity: ' + param.groupId + ' , ' + group.name);
+      }
     });
   }
 
