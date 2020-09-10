@@ -58,10 +58,10 @@ export class LoginComponent implements OnInit, OnDestroy{
               this.clientService.logout().then(() => {this.autoLogin = false; }, (err) => {this.autoLogin = false; });
               this.dialogProviderService.openErrorModal('error login 1: ' + data.getMessage(), this.dialog);
             } else {
-              this.autoLogin = false;
+              // this.autoLogin = false;
             }
           }, (err) => {
-            this.clientService.logout().then(() => {this.autoLogin = false; }, (err) => {this.autoLogin = false; });
+            this.clientService.logout().then(() => {this.autoLogin = false; }, (err1) => {this.autoLogin = false; });
             this.dialogProviderService.openErrorModal('error login 2: ' + err, this.dialog);
           });
     }
@@ -119,10 +119,10 @@ export class LoginComponent implements OnInit, OnDestroy{
               this.clientService.logout().then(() => {this.loadingLogIn = false; }, (err) => {this.loadingLogIn = false; });
               this.dialogProviderService.openErrorModal('error login 1: ' + data.getMessage(), this.dialog);
             } else {
-              this.loadingLogIn = false;
+              // this.loadingLogIn = false;
             }
           }, (err) => {
-            this.clientService.logout().then(() => {this.loadingLogIn = false; }, (err) => {this.loadingLogIn = false; });
+            this.clientService.logout().then(() => {this.loadingLogIn = false; }, (err1) => {this.loadingLogIn = false; });
             this.dialogProviderService.openErrorModal('error login 2: ' + err, this.dialog);
           });
     }

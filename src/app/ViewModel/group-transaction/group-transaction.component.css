@@ -1,4 +1,3 @@
-
 .createButtonDiv {
   position: fixed;
   right: 50%;
@@ -7,17 +6,16 @@
   margin: 0 auto;
 }
 
-@media only screen and (min-width: 1200px) {
-  .createButtonDiv {
-    position: fixed;
-    right: 40px;
-    bottom: 40px;
-    transform: translate(0%, 0%);
-  }
+.transaction {
+  margin-top: 100px;
+  margin-bottom: 50px;
 }
 
-.transaction {
-  margin-top: 50px;
+.payed_amount {
+  position: absolute;
+  right: 20px;
+  bottom: 30px;
+  font-size: 30px;
 }
 
 .first {
@@ -35,19 +33,46 @@
 }
 
 .description{
-  margin-right: 500px;
   color: gray;
+  margin-bottom: 50px;
 }
 
 .description_left{
   margin-right: 20px;
 }
 
-.payed_amount {
-  position: absolute;
-  right: 20px;
-  top: 30px;
-  font-size: 60px;
+@media only screen and (min-width: 1200px) {
+  .createButtonDiv {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    transform: translate(0%, 0%);
+  }
+
+  .transaction {
+    margin-top: 50px;
+    margin-bottom: 25px;
+  }
+
+  .description{
+    margin-right: 500px;
+    margin-bottom: 0;
+    color: gray;
+  }
+
+  .payed_amount {
+    position: absolute;
+    right: 20px;
+    top: 30px;
+    font-size: 60px;
+  }
+
 }
+
+
+
+
+
+
 
 

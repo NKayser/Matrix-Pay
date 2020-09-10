@@ -1,10 +1,12 @@
 .sidenav-container {
-  height: 100%;
+  height: 90vh;
   /*TODO make it so that this view isn't scrollable anymore*/
 }
 
 .spinner{
-  margin-left: 10px;
+  position: absolute;
+  top: 4px;
+  margin-left: 100px;
 }
 
 .sidenav {

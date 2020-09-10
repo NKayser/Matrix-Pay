@@ -68,8 +68,8 @@ export class HomeComponent implements OnInit {
     for (const currency of this.usedCurrencies){
       const balance = this.getTotalBalance(currency);
       this.balanceList = this.balanceList.concat({balance, currency});
-      this.ref.detectChanges();
     }
+    this.ref.detectChanges();
     console.log('BALANCELIST');
     console.log(this.balanceList);
   }
