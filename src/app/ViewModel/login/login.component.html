@@ -1,5 +1,6 @@
 <div class = "baseDiv">
-  <mat-card class = "center">
+
+  <mat-card class = "center" *ngIf="!autoLogin">
 
     <!--contains the Title text-->
     <div class = "centerText">
@@ -36,6 +37,10 @@
 
 
   </mat-card>
+
+  <div *ngIf="autoLogin">
+    <mat-spinner class="centerspinner" [diameter]="50"></mat-spinner>
+  </div>
 
 
 </div>
