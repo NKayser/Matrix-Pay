@@ -332,25 +332,11 @@ export class ObservableService implements ObservableInterface {
       });
   }
 
-  public async roomCallback(room): Promise<void> {
-    const members = room.getLiveTimeline().getState(EventTimeline.FORWARDS).members;
-    console.log('members');
-    console.log(members);
-    if (members[this.matrixClient.getUserId()].membership === 'invite') {
-      await this.matrixClient.joinRoom(room.roomId);
-    }
-    if (members[this.matrixClient.getUserId()].membership === 'join') {
-      await this.processNewRoom(room);
-    }
-  }
-
   private roomListener(): void {
     // Fires whenever invited to a room or joining a room
     this.matrixClient.on('Room', async room => {
-      const roomType = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getStateEvents('org.matrix.msc1840', '');
-      console.log('---roomType---');
+      console.log('--- new Room ---');
       console.log(room.getLiveTimeline().getState(EventTimeline.FORWARDS));
-      console.log(roomType);
       const member = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getMember(this.matrixClient.getUserId());
       if (Utils.log) console.log(member);
       if (Utils.log) console.log(this.matrixClient.getUserId());
@@ -416,24 +402,42 @@ export class ObservableService implements ObservableInterface {
   private roomTypeListener(): void {
     this.roomTypeMatrixClient.on('RoomState.events', async (event, room, toStartOfTimeline, removed, data) => {
       if (event.getType() === 'org.matrix.msc1840') {
-        console.log('---stop client---');
         this.matrixClient.stopClient();
+        this.matrixClient.removeAllListeners();
         console.log(room.roomId);
-        console.log(event);
-        console.log(ObservableService.FILTER_ID + this.filterCount);
-        // const oldFilter: Filter = this.matrixClient.getFilter(this.roomTypeMatrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount);
-        // const oldFilterDefinition = oldFilter.getDefinition();
         this.filterDefinition.room.rooms.push(room.roomId);
-        this.filterCount++;
-        const filter = Filter.fromJson(this.matrixClient.credentials.userId, ObservableService.FILTER_ID + this.filterCount,
+        const id = this.hashObject(this.filterDefinition);
+        const filter = Filter.fromJson(this.matrixClient.credentials.userId, id,
           this.filterDefinition);
-        console.log('---start client---');
+        console.log(filter.filterId);
+        console.log(this.filterDefinition.room.rooms);
+        /*await this.matrixClient.startClient({includeArchivedRooms: false, filter})
+          .then(console.log('started'));*/
+        this.matrixClient = await this.clientService.getNewClient();
         await this.matrixClient.startClient({includeArchivedRooms: false, filter});
+        this.accountDataListener();
+        // this.roomAccountDataListener();
+        this.timelineListener();
+        this.roomListener();
+        this.membershipListener();
+        this.timelineResetListener();
+        this.roomStateListener();
       }
     });
   }
 
   // other functions
+
+  private hashObject(input: object) {
+    const str = JSON.stringify(input);
+    console.log(str);
+    var hash = 0, i = 0, len = str.length;
+    while ( i < len ) {
+      // tslint:disable-next-line:no-bitwise
+      hash  = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
+    }
+    return hash;
+  }
 
   private getExpenseFromEvent(room, event): TransactionType {
     const content = event.getContent();
