@@ -4,7 +4,9 @@
 }
 
 .spinner{
-  margin-left: 10px;
+  position: absolute;
+  top: 4px;
+  margin-left: 100px;
 }
 
 .sidenav {
