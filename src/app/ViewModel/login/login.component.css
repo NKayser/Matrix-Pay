@@ -1,11 +1,9 @@
 
 /*places the card that contains all elements in the center*/
 .center {
-
   margin: auto;
   max-width: 300px;
   padding: 20px;
-
 }
 
 .centerspinner {
@@ -36,7 +34,7 @@
 /*Makes the div cover the hole screen and colors it
 TODO Remove scroll that is caused by the height:100% parameter*/
 .baseDiv {
-  padding-top: 150px;
+  padding-top: 25vh;
   background-color: lightblue;
-  height: 100%;
+  height: 75vh;
 }
