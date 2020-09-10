@@ -122,4 +122,8 @@ export class User {
       if (item.groupId === groupId) { this._groups.splice(index, 1); }
     });
   }
+
+  public deleteAllGroups(): void {
+    this._groups = [];
+  }
 }

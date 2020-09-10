@@ -447,12 +447,7 @@ export class BasicDataUpdateService {
 
   private logout(): void {
     this.observables.getLogoutObservable().subscribe(() => {
-      const groups = this.dataModel.getUser().groups;
-      console.log(groups);
-      groups.forEach((value, index, array) => {
-        this.dataModel.getUser().removeGroup(value.groupId);
-        console.log('removed group ' + value.groupId);
-      });
+      this.dataModel.getUser().deleteAllGroups();
     });
   }
 
