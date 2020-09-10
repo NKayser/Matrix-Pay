@@ -29,7 +29,7 @@ describe('BasicDataUpdateService and DataModel', () => {
 
   const mockedObservableService = jasmine.createSpyObj('ObservableService',
     ['getUserObservable', 'getGroupsObservable', 'getGroupActivityObservable', 'getSettingsLanguageObservable',
-      'getSettingsCurrencyObservable', 'getGroupMembershipObservable', 'getMultipleNewTransactionsObservable']);
+      'getSettingsCurrencyObservable', 'getGroupMembershipObservable', 'getMultipleNewTransactionsObservable', 'getLogoutObservable']);
   const mockedBalanceCalculatorService = jasmine.createSpyObj('BalanceCalculatorService', ['calculateBalances']);
   const mockedGreedyOptimisationService = jasmine.createSpyObj('GreedyOptimisationService', ['calculateOptimisation']);
 
@@ -56,6 +56,9 @@ describe('BasicDataUpdateService and DataModel', () => {
 
     const transactoinsObservable: Subject<TransactionTypeInterface[]> = new Subject<TransactionTypeInterface[]>();
     mockedObservableService.getMultipleNewTransactionsObservable.and.returnValue(transactoinsObservable);
+
+    const logoutObservable: Subject<void> = new Subject<void>();
+    mockedObservableService.getLogoutObservable.and.returnValue(logoutObservable);
 
     updateService = new BasicDataUpdateService(mockedObservableService, dataModel);
   });

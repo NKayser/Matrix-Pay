@@ -50,8 +50,9 @@ describe('ObservableService', () => {
   const mockedClient = jasmine.createSpyObj('MatrixClient',
     ['credentials', 'startClient', 'getUserId', 'getAccountDataFromServer', 'getUser', 'on', 'joinRoom']);
   const clientServiceSpy = jasmine.createSpyObj('MatrixClientService',
-    ['getLoggedInEmitter', 'isPrepared', 'getClient', 'getRoomTypeClient']);
+    ['getLoggedInEmitter', 'isPrepared', 'getClient', 'getRoomTypeClient', 'getLogoutEmitter']);
   const loggedInEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
+  const logoutEmitter = jasmine.createSpyObj('EventEmitter', ['subscribe']);
   let clientEmitter;
 
   beforeEach(() => {
@@ -64,6 +65,7 @@ describe('ObservableService', () => {
 
     // Replace the returned loggedInEmitter with the mocked loggedInEmitter in the test
     clientServiceSpy.getLoggedInEmitter.and.returnValue(loggedInEmitter);
+    clientServiceSpy.getLogoutEmitter.and.returnValue(logoutEmitter);
     clientServiceSpy.isPrepared.and.returnValue(true);
 
     // Mock client
