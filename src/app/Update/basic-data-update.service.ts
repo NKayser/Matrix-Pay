@@ -40,6 +40,7 @@ export class BasicDataUpdateService {
     this.addGroupMember();
     // this.updateModifiedGroupTransaction();
     this.updateNewGroupTransactions();
+    this.logout();
   }
 
   /**
@@ -441,6 +442,17 @@ export class BasicDataUpdateService {
       const promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
           param[param.length - 1].groupId);
       console.log('updateService: updateNewGroupTransactions: calculated Balances: ' + param[0].groupId );
+    });
+  }
+
+  private logout(): void {
+    this.observables.getLogoutObservable().subscribe(() => {
+      const groups = this.dataModel.getUser().groups;
+      console.log(groups);
+      groups.forEach((value, index, array) => {
+        this.dataModel.getUser().removeGroup(value.groupId);
+        console.log('removed group ' + value.groupId);
+      });
     });
   }
 

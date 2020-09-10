@@ -22,6 +22,7 @@ export class MatrixClientService implements ClientInterface {
   private loggedIn: boolean = false;
   private prepared: boolean = false;
   private loggedInEmitter: EventEmitter<void>;
+  private logoutEmitter: EventEmitter<void>;
 
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
@@ -33,6 +34,7 @@ export class MatrixClientService implements ClientInterface {
   // The MatrixClassProviderService encapsules global methods of the matrix-js-sdk, which is needed in this service.
   constructor(private matrixClassProviderService: MatrixClassProviderService) {
     this.loggedInEmitter = new EventEmitter();
+    this.logoutEmitter = new EventEmitter();
   }
 
   // to login with accessToken, call: await login('@user:url', undefined, 'accessToken');
@@ -167,6 +169,10 @@ export class MatrixClientService implements ClientInterface {
     return this.loggedInEmitter;
   }
 
+  public getLogoutEmitter(): EventEmitter<void> {
+    return this.logoutEmitter;
+  }
+
   public async logout(): Promise<ServerResponse> {
     if (this.loggedIn) {
       await this.matrixClient.logout();
@@ -177,6 +183,8 @@ export class MatrixClientService implements ClientInterface {
     // Clear local storage and reset access token
     localStorage.clear();
     this.loginInfo = undefined;
+
+    this.logoutEmitter.emit();
 
     // User was already logged out
     return new SuccessfulResponse();

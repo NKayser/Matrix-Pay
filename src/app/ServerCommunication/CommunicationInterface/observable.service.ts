@@ -66,6 +66,7 @@ export class ObservableService implements ObservableInterface {
   private multipleNewTransactionsObservable: Subject<TransactionType[]>;
   private newTransactionObservable: Subject<TransactionType>;
   private groupActivityObservable: Subject<GroupActivityType>;
+  private logoutObservable: Subject<void>;
   private transactions = {};
 
   private initializedPayRooms = new Set<string>();
@@ -84,10 +85,13 @@ export class ObservableService implements ObservableInterface {
     this.multipleNewTransactionsObservable = new Subject();
     this.settingsLanguageObservable = new Subject();
     this.groupActivityObservable = new Subject();
+    this.logoutObservable = new Subject();
 
     this.clientService.getLoggedInEmitter().subscribe(async () => {
       await this.setUp();
     });
+
+    this.clientService.getLogoutEmitter().subscribe(() => this.logoutObservable.next());
   }
 
   private async setUp(): Promise<void> {
@@ -584,5 +588,9 @@ export class ObservableService implements ObservableInterface {
 
   public getGroupActivityObservable(): Observable<GroupActivityType> {
     return this.groupActivityObservable;
+  }
+
+  public getLogoutObservable(): Observable<void> {
+    return this.logoutObservable;
   }
 }

@@ -32,4 +32,5 @@ export interface ObservableInterface {
 
   getSettingsCurrencyObservable(): Observable<CurrencyType>;
 
+  getLogoutObservable(): Observable<void>;
 }
