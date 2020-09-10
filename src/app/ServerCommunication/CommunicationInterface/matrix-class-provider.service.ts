@@ -39,7 +39,7 @@ export class MatrixClassProviderService {
         useAutorizationHeader: true};
     } else {
       opts = {
-        serverAddress,
+        baseUrl: serverAddress,
         useAutorizationHeader: true};
     }
 
