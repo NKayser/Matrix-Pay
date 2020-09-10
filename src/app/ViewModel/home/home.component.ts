@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Currency, currencyMap} from '../../DataModel/Utils/Currency';
@@ -37,7 +37,8 @@ export class HomeComponent implements OnInit {
 
   constructor(private dataModelService: DataModelService, public dialog: MatDialog,
               private matrixBasicDataService: MatrixBasicDataService,
-              private dialogProviderService: DialogProviderService) {}
+              private dialogProviderService: DialogProviderService,
+              private ref: ChangeDetectorRef) {}
 
   /**
    * Get reference to the recommendations and user
@@ -45,28 +46,31 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
 
     this.userContact = this.dataModelService.getUser().contact;
-    const groups = this.dataModelService.getGroups();
-    for (const group of groups){
-      for (const recommendation of group.recommendations){
-        this.recommendations.push(recommendation);
-      }
-
-      this.usedCurrencies.add(group.currency);
-    }
-
-    this.calculateBalances();
-    this.dataModelService.getBalanceEmitter().subscribe(() => {this.calculateBalances(); console.log('TRIGGER'); } );
+    console.log('caused by init');
+    this.initBalancesRecommendations();
+    this.dataModelService.getBalanceEmitter().subscribe(() => {console.log('caused by emitter'); this.initBalancesRecommendations(); } );
 
     // initialize the number of the grid list columns for the recommendations
     this.breakpoint = gridListResize(window.innerWidth, 2200, 4);
   }
 
-  private calculateBalances(): void{
+  private initBalancesRecommendations(): void{
+    const groups = this.dataModelService.getGroups();
+    this.recommendations = [];
+    for (const group of groups){
+      for (const recommendation of group.recommendations){
+        this.recommendations.push(recommendation);
+      }
+      this.usedCurrencies.add(group.currency);
+    }
+
     this.balanceList = [];
     for (const currency of this.usedCurrencies){
       const balance = this.getTotalBalance(currency);
-      this.balanceList.push({balance, currency});
+      this.balanceList = this.balanceList.concat({balance, currency});
+      this.ref.detectChanges();
     }
+    console.log('BALANCELIST');
     console.log(this.balanceList);
   }
 

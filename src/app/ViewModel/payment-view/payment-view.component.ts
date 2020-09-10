@@ -22,13 +22,16 @@ export class PaymentViewComponent implements OnInit{
    */
   ngOnInit(): void {
 
-    const tempData = [];
+    const tempRecipients = [];
+    const tempAmounts = [];
     for (let i = 0; i < this.data.amount.length; i++){
       if (this.data.isAdded[i]){
-        tempData.push(this.data.recipients[i]);
+        tempRecipients.push(this.data.recipients[i]);
+        tempAmounts.push(this.data.amount[i]);
       }
     }
-    this.data.recipients = tempData;
+    this.data.recipients = tempRecipients;
+    this.data.amount = tempAmounts;
 
   }
 

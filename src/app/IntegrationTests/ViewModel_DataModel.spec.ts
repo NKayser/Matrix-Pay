@@ -15,7 +15,6 @@ import {Recommendation} from "../DataModel/Group/Recommendation";
 import {Groupmember} from "../DataModel/Group/Groupmember";
 import {Contact} from "../DataModel/Group/Contact";
 import {AtomarChange} from "../DataModel/Group/AtomarChange";
-import {Language} from "../DataModel/Utils/Language";
 
 
 describe('ViewModel_DataModel', () => {
@@ -167,7 +166,7 @@ describe('ViewModel_DataModel', () => {
         expect(homeComponent.recommendations).toEqual([r1]);
 
         const nativeElement: HTMLElement = homeFixture.nativeElement;
-        expect(nativeElement.querySelector('.approve_person').textContent).toBe('Alice');
+        expect(nativeElement.querySelector('.approve_person').textContent).toBe('Bob');
         expect(nativeElement.querySelector('.approve_group').textContent).toBe('name_g1');
         expect(nativeElement.querySelector('.approve_amount').textContent).toBe('1€');
     });
