@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {Router} from '@angular/router';
-import {BasicDataUpdateService} from "./Update/basic-data-update.service";
-import {EmergentDataUpdateService} from "./Update/emergent-data-update.service";
+import {BasicDataUpdateService} from './Update/basic-data-update.service';
+import {EmergentDataUpdateService} from './Update/emergent-data-update.service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +13,7 @@ export class AppComponent {
   loggedIn = false;
 
   constructor(private router: Router,
+              // Don't delete update services
               private updateBasicData: BasicDataUpdateService,
               private updateEmergentData: EmergentDataUpdateService) { }
 
@@ -21,7 +22,7 @@ export class AppComponent {
    */
   public logout(): void{
     this.loggedIn = false;
-    this.router.navigate(['/login']);
+    // this.router.navigate(['/login']);
   }
 
   /**
@@ -29,6 +30,6 @@ export class AppComponent {
    */
   public login(): void{
     this.loggedIn = true;
-    this.router.navigate(['/home']);
+    // this.router.navigate(['/home']);
   }
 }
