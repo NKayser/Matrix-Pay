@@ -30,7 +30,7 @@ export class BasicDataUpdateService {
   private currencyBuffer: CurrencyType[] = []; */
 
   constructor(observables: ObservableService, private dataModel: DataModelService, /*storage: StorageService*/) {
-    if (Utils.log) { console.log('This is BasicDataUpdateService'); }
+    if (Utils.log) { console.log('This is BasicDataUpdateService!'); }
     this.observables = observables; // TODO implement observableInterface
     this.createUser();
     this.addGroup();
@@ -436,8 +436,11 @@ export class BasicDataUpdateService {
 
       const multipleTransactions: Transaction[] = [];
       for (const transactionType of param) {
-        const currentTransaction = this.updateSingleTransaction(transactionType);
-        multipleTransactions.push(currentTransaction);
+        if (this.dataModel.getGroup(transactionType.groupId) === null || this.dataModel.getGroup(transactionType.groupId).
+          getTransaction(transactionType.transactionId) === null){
+          const currentTransaction = this.updateSingleTransaction(transactionType);
+          multipleTransactions.push(currentTransaction);
+        }
       }
       const promise = this.dataModel.calculateBalances(param[0].groupId, multipleTransactions,
           param[param.length - 1].groupId);

@@ -24,18 +24,23 @@ export class MatrixClassProviderService {
         baseUrl: serverAddress,
         accessToken: tokenObject.accessToken,
         userId: tokenObject.account,
-        store};
+        store,
+        useAutorizationHeader: true};
     } else if (tokenObject === undefined && store !== undefined) {
       opts = {
         baseUrl: serverAddress,
-        store};
+        store,
+        useAutorizationHeader: true};
     } else if (tokenObject !== undefined && store === undefined) {
       opts = {
         baseUrl: serverAddress,
         accessToken: tokenObject.accessToken,
-        userId: tokenObject.account};
+        userId: tokenObject.account,
+        useAutorizationHeader: true};
     } else {
-      opts = serverAddress;
+      opts = {
+        baseUrl: serverAddress,
+        useAutorizationHeader: true};
     }
 
     console.log(opts);
