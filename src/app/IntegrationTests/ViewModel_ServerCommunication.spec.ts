@@ -94,6 +94,7 @@ describe('ViewModel_ServerCommunication', () => {
                 'removeListener', 'logout']);
 
         dataModelService.navItem$ = (new Subject()).asObservable();
+        dataModelService.getBalanceEmitter.and.returnValue(new Subject<void>());
         classProviderSpy.createClient.and.returnValue(Promise.resolve(mockedClient));
         // @ts-ignore
         mockedClient.clearStores.and.returnValue(null);
@@ -477,7 +478,6 @@ describe('ViewModel_ServerCommunication', () => {
         // Mocking
         dataModelService.getUser.and.returnValue(stubValueUser);
         dataModelService.getGroups.and.returnValue([g1]);
-        dataModelService.getBalanceEmitter.and.returnValue(new Subject<void>());
         mockedClient.sendEvent.and.returnValue(Promise.resolve({event_id: 'event_id'}));
 
         // login and preparation
