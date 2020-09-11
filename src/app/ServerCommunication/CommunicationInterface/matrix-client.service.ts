@@ -86,6 +86,12 @@ export class MatrixClientService implements ClientInterface {
   }
 
   private async autodiscovery(account: string): Promise<null | ServerResponse> {
+    const savedAddress = localStorage.getItem('baseUrl');
+    if (savedAddress !== null) {
+      this.serverAddress = savedAddress;
+      return;
+    }
+
     // Discover Homeserver Address and throw Errors if not successful
     const seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
     if (seperatedAccount.length != 2 || seperatedAccount[1] == '' || seperatedAccount[1] == undefined) {
@@ -97,10 +103,12 @@ export class MatrixClientService implements ClientInterface {
     const config: DiscoveredClientConfig = await this.matrixClassProviderService.findClientConfig(domain);
     const configState: string = config['m.homeserver']['state'];
     if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
+      console.log(config);
       return new UnsuccessfulResponse(ClientError.Autodiscovery,
         config['m.homeserver']['error']);
     }
     this.serverAddress = config['m.homeserver']['base_url'];
+    localStorage.setItem('baseUrl', this.serverAddress);
   }
 
   private async authenticate(account: string, password?: string, accessToken?: string): Promise<void> {
@@ -129,13 +137,14 @@ export class MatrixClientService implements ClientInterface {
       // Now Login
       this.loginInfo = await this.matrixClient.loginWithPassword(account, password);
       await this.roomTypeMatrixClient.loginWithPassword(account, password);
+
+      localStorage.setItem('accessToken', this.loginInfo.access_token);
+      localStorage.setItem('account', account);
     }
 
     // Login successful
     console.log('token written');
     console.log(this.loginInfo);
-    localStorage.setItem('accessToken', this.loginInfo.access_token);
-    localStorage.setItem('account', account);
     this.loggedIn = true;
   }
 
