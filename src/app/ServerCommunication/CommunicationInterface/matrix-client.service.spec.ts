@@ -93,6 +93,7 @@ describe('MatrixClientServiceService', () => {
   });
 
   it('should throw Error on login with wrong input format', async (done: DoneFn) => {
+    localStorage.clear();
     // Setup
     const invalidUserIdExamples: string[] = ['', '@', ':', '@abc:', '@abc:def:', '@a:b:c'];
 
