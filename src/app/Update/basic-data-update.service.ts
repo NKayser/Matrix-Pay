@@ -27,6 +27,8 @@ export class BasicDataUpdateService {
   private languageBuffer: LanguageType[] = [];
   private currencyBuffer: CurrencyType[] = []; */
 
+  private static readonly EMPTY_GROUP_NAME: string = 'Empty Group';
+
   constructor(observables: ObservableService, private dataModel: DataModelService, /*storage: StorageService*/) {
     if (Utils.log) { console.log('This is BasicDataUpdateService!'); }
     this.observables = observables; // TODO implement observableInterface
@@ -97,6 +99,7 @@ export class BasicDataUpdateService {
             const newGroup = this.dataModel.getGroup(param.groupId);
             newGroup.name = param.groupName;
             newGroup.currency = this.currencyStringToEnum(param.currency);
+            this.dataModel.getUser().getGroupChangeEmitter().next();
             console.log ('updateService: addGroup: group filled in: ' + param.groupId + ' , ' + param.groupName);
             // TimeStamp
             const startTime = Time.groupCreationTime;
@@ -182,7 +185,7 @@ export class BasicDataUpdateService {
     this.observables.getGroupActivityObservable().subscribe(param => {
       let group = this.dataModel.getGroup(param.groupId);
       if (group === null) {
-        group = this.dataModel.user.createGroup(param.groupId, '', Currency.EUR);
+        group = this.dataModel.user.createGroup(param.groupId, BasicDataUpdateService.EMPTY_GROUP_NAME, Currency.EUR);
         console.log('updateService: addGroupActivity: added empty group: ' + param.groupId + ' , ' + group.name);
       }
       let groupActivityExists = false;

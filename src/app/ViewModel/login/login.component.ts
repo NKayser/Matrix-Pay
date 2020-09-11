@@ -104,6 +104,8 @@ export class LoginComponent implements OnInit, OnDestroy{
    */
   public login(): void {
 
+    if (this.loadingLogIn || this.passwordControl.invalid || this.matrixUrlControl.invalid) return;
+
     this.loadingLogIn = true;
 
     // check all formControls to make sure all values are correct
