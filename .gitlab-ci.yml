@@ -29,7 +29,7 @@ build:
       - node_modules/
     policy: pull
   script:
-    - ng build
+    - ng build --prod
   tags:
     - chrome
     - nodejs
