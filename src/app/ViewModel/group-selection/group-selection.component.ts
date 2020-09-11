@@ -54,7 +54,7 @@ export class GroupSelectionComponent implements OnInit{
       this.currentGroup = this.groups[0];
     }
 
-    this.dataModelService.getUser().getGroupChangeEmitter().subscribe(() => {this.ref.detectChanges(); } );
+    this.dataModelService.getUser().getGroupChangeEmitter().subscribe(() => {this.ref.detectChanges();} );
   }
 
   /**

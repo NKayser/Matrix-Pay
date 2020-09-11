@@ -72,6 +72,7 @@ export class Group {
    */
   public set name(value: string) {
     this._name = value;
+    // It may be necessary to call a Change Emitter here in case the ViewModel is not updated fast enough
   }
 
   /**
