@@ -16,7 +16,7 @@ export interface GroupCreateDialogData {
 export class CreateGroupModalComponent implements OnInit{
 
   // Save the FormControl which checks the GroupName
-  formControlGroupName = new FormControl('', [Validators.required]);
+  formControlGroupName = new FormControl('', [Validators.required, Validators.maxLength(30)]);
   // Save the currently selected currency
   selectedCurrency: Currency;
   currencyMap = currencyMap;
@@ -51,7 +51,11 @@ export class CreateGroupModalComponent implements OnInit{
    * Return error message if the group name is invalid
    */
   public getInvalidGroupNameErrorMessage(): string{
-    return 'Not a valid group name';
+    if (this.formControlGroupName.hasError('required')){
+      return 'Please enter a group name';
+    } else {
+      return 'The group name is too long';
+    }
   }
 
 
