@@ -3,6 +3,7 @@ import {Currency} from '../Utils/Currency';
 import {Language} from '../Utils/Language';
 import {Group} from '../Group/Group';
 import {Groupmember} from '../Group/Groupmember';
+import {Subject} from 'rxjs';
 
 /**
  * User of the application. The user is the person using this application right now.
@@ -14,6 +15,12 @@ export class User {
   private _currency: Currency;
   private _language: Language;
   private _groups: Group[];
+
+  private groupChangeEmitter: Subject<void> = new Subject<void>();
+
+  public getGroupChangeEmitter(): Subject<void> {
+    return this.groupChangeEmitter;
+  }
 
   /**
    * Constructor for user. In addition to setting the values given by the arguments, groups is initialized as an empty array and the user
@@ -110,6 +117,7 @@ export class User {
     const group: Group = new Group(groupId, name, currency);
     this._groups.push(group);
     // group.addGroupmember(new Groupmember(this._contact, group));
+    this.groupChangeEmitter.next();
     return group;
   }
 

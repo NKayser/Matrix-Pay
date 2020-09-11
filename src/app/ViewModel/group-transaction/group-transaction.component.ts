@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnChanges} from '@angular/core';
 import {PaymentDialogData, PaymentModalComponent} from '../payment-modal/payment-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {Transaction} from '../../DataModel/Group/Transaction';
@@ -36,7 +36,7 @@ export class GroupTransactionComponent implements OnChanges {
   public currencyMap = currencyMap;
 
   constructor(public dialog: MatDialog, private matrixBasicDataService: MatrixBasicDataService,
-              private dialogProviderService: DialogProviderService) {
+              private dialogProviderService: DialogProviderService, private ref: ChangeDetectorRef) {
   }
 
   /**
@@ -45,6 +45,8 @@ export class GroupTransactionComponent implements OnChanges {
    */
   ngOnChanges(): void {
     this.transactions = this.group.transactions;
+
+    this.group.getTransactionChangeEmitter().subscribe(() => {this.ref.detectChanges(); });
   }
 
   /**

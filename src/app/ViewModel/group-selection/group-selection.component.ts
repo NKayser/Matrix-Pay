@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {Observable} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
@@ -43,7 +43,8 @@ export class GroupSelectionComponent implements OnInit{
     );
 
   constructor(private breakpointObserver: BreakpointObserver, public dialog: MatDialog, private dataModelService: DataModelService,
-              private matrixBasicDataService: MatrixBasicDataService, private dialogProviderService: DialogProviderService) {}
+              private matrixBasicDataService: MatrixBasicDataService, private dialogProviderService: DialogProviderService,
+              private ref: ChangeDetectorRef) {}
 
   // set default selected group
   ngOnInit(): void{
@@ -52,6 +53,8 @@ export class GroupSelectionComponent implements OnInit{
     if (this.groups.length >= 1){
       this.currentGroup = this.groups[0];
     }
+
+    this.dataModelService.getUser().getGroupChangeEmitter().subscribe(() => {this.ref.detectChanges(); } );
   }
 
   /**
@@ -59,7 +62,12 @@ export class GroupSelectionComponent implements OnInit{
    * @param index the index of the group to select
    */
   public selectGroup(index: number): void{
-    this.currentGroup = this.groups[index];
+    if (this.groups.length === 0){
+      this.currentGroup = new Group('', '', null);
+    } else {
+      this.currentGroup = this.groups[index];
+    }
+    this.ref.detectChanges();
   }
 
   /**
@@ -79,6 +87,8 @@ export class GroupSelectionComponent implements OnInit{
 
             if (!data.wasSuccessful()){
               this.dialogProviderService.openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
+            } else {
+              this.selectGroup(0);
             }
             this.loadingLeaveGroup = false;
           }, (err) => {
