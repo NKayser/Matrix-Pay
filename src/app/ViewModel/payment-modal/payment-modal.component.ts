@@ -43,7 +43,7 @@ export class PaymentModalComponent implements OnInit{
       this.formControlAmount[i] = new FormControl(this.data.amount[i] / 100, [Validators.required, Validators.pattern('[0-9]*[.]?[0-9]?[0-9]?')]);
     }
 
-    this.formControlDescription = new FormControl(this.data.description, [Validators.required]);
+    this.formControlDescription = new FormControl(this.data.description, [Validators.required, Validators.maxLength(60)]);
     // this.formControlPayer = new FormControl(this.data.payer.name, [Validators.required]);
   }
 
@@ -113,7 +113,11 @@ export class PaymentModalComponent implements OnInit{
    * Return an error message if the description is invalid
    */
   public getInvalidDescriptionErrorMessage(): string{
-    return 'Not a description';
+    if (this.formControlDescription.hasError('required')){
+      return 'Please enter a description';
+    } else {
+      return 'The description is too long';
+    }
   }
 
   /**

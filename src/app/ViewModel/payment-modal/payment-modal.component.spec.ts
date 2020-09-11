@@ -4,7 +4,7 @@ import { PaymentModalComponent } from './payment-modal.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Contact} from '../../DataModel/Group/Contact';
 import {Currency} from '../../DataModel/Utils/Currency';
-import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 
 describe('PaymentModalComponent', () => {
   let component: PaymentModalComponent;
@@ -111,8 +111,26 @@ describe('PaymentModalComponent', () => {
   });
 
   it('check error messages', () => {
+    const c1 = new Contact('c1', 'Alice');
+    const c2 = new Contact('c2', 'Bob');
+    const c3 = new Contact('c2', 'Bob');
+    const amountArray = [3, 4.55555, 7];
+    const data = {
+      modalTitle: 'testModal',
+      description: '',
+      payer: c1,
+      recipients: [c1, c2, c3],
+      amount: amountArray,
+      isAdded: [true, true, true],
+      currency: Currency.EUR
+    };
+
+    component.data = data;
+    component.ngOnInit();
+
+    component.formControlDescription.setValue('');
     expect(component.getInvalidNumberErrorMessage()).toEqual('Not a valid number');
-    expect(component.getInvalidDescriptionErrorMessage()).toEqual('Not a description');
+    expect(component.getInvalidDescriptionErrorMessage()).toEqual('Please enter a description');
     expect(component.getInvalidFormErrorMessage()).toEqual('Not all inputs are valid');
   });
 });
