@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -6,18 +6,21 @@ import {MatrixClientService} from '../../ServerCommunication/CommunicationInterf
 import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogProviderService} from '../dialog-provider.service';
+import {DataModelService} from '../../DataModel/data-model.service';
+import {Contact} from '../../DataModel/Group/Contact';
 
 @Component({
   selector: 'app-navigation-menu',
   templateUrl: './navigation-menu.component.html',
   styleUrls: ['./navigation-menu.component.css']
 })
-export class NavigationMenuComponent {
+export class NavigationMenuComponent implements OnInit{
 
   // Emitter to tell AppComponent that the user is logged out
   @Output() loggedOut = new EventEmitter<boolean>();
 
   public loadingLogout = false;
+  public userContact = new Contact('', '');
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
@@ -26,7 +29,12 @@ export class NavigationMenuComponent {
     );
 
   constructor(private breakpointObserver: BreakpointObserver, private matrixClientService: MatrixClientService, public dialog: MatDialog,
-              private dialogProviderService: DialogProviderService) {}
+              private dialogProviderService: DialogProviderService, private dataModelService: DataModelService) {}
+
+
+  ngOnInit(): void {
+    this.userContact = this.dataModelService.getUser().contact;
+  }
 
   /**
    * Send output if the user logged out
