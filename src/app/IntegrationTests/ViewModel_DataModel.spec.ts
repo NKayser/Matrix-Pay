@@ -1,23 +1,23 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {LoginComponent} from "../ViewModel/login/login.component";
-import {DataModelService} from "../DataModel/data-model.service";
-import {MatrixClientService} from "../ServerCommunication/CommunicationInterface/matrix-client.service";
-import {GroupSelectionComponent} from "../ViewModel/group-selection/group-selection.component";
+import {LoginComponent} from '../ViewModel/login/login.component';
+import {DataModelService} from '../DataModel/data-model.service';
+import {MatrixClientService} from '../ServerCommunication/CommunicationInterface/matrix-client.service';
+import {GroupSelectionComponent} from '../ViewModel/group-selection/group-selection.component';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {MockDialog} from "../ViewModel/_mockServices/MockDialog";
-import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
-import {SuccessfulResponse} from "../ServerCommunication/Response/SuccessfulResponse";
-import {SettingsComponent} from "../ViewModel/settings/settings.component";
-import {GroupBalanceComponent} from "../ViewModel/group-balance/group-balance.component";
-import {HomeComponent} from "../ViewModel/home/home.component";
-import {Currency} from "../DataModel/Utils/Currency";
-import {Recommendation} from "../DataModel/Group/Recommendation";
-import {Groupmember} from "../DataModel/Group/Groupmember";
-import {Contact} from "../DataModel/Group/Contact";
-import {AtomarChange} from "../DataModel/Group/AtomarChange";
-import {Transaction} from "../DataModel/Group/Transaction";
-import {TransactionType} from "../DataModel/Group/TransactionType";
-import {GroupTransactionComponent} from "../ViewModel/group-transaction/group-transaction.component";
+import {MockDialog} from '../ViewModel/_mockServices/MockDialog';
+import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from '@angular/core';
+import {SuccessfulResponse} from '../ServerCommunication/Response/SuccessfulResponse';
+import {SettingsComponent} from '../ViewModel/settings/settings.component';
+import {GroupBalanceComponent} from '../ViewModel/group-balance/group-balance.component';
+import {HomeComponent} from '../ViewModel/home/home.component';
+import {Currency} from '../DataModel/Utils/Currency';
+import {Recommendation} from '../DataModel/Group/Recommendation';
+import {Groupmember} from '../DataModel/Group/Groupmember';
+import {Contact} from '../DataModel/Group/Contact';
+import {AtomarChange} from '../DataModel/Group/AtomarChange';
+import {Transaction} from '../DataModel/Group/Transaction';
+import {TransactionType} from '../DataModel/Group/TransactionType';
+import {GroupTransactionComponent} from '../ViewModel/group-transaction/group-transaction.component';
 
 
 describe('ViewModel_DataModel', () => {
@@ -84,7 +84,7 @@ describe('ViewModel_DataModel', () => {
     }));
 
     // Group Balance Component
-    it('should display recommendations and balances', () => {
+    it('should display recommendations and balances in group', () => {
         const userContact = dataModelService.initializeUserFirstTime('c1', 'Alice').contact;
 
         const g1 = dataModelService.getUser().createGroup('id_1', 'group_1', Currency.USD);
@@ -103,8 +103,8 @@ describe('ViewModel_DataModel', () => {
         g1.addGroupmember(mg1_b);
         g2.addGroupmember(mg2_a);
         g2.addGroupmember(mg2_b);
-        g1.setRecommendations([new Recommendation(g1, null, null)]);
-        g2.setRecommendations([new Recommendation(g2, null, null)]);
+        g1.setRecommendations([new Recommendation(g1, new AtomarChange(c2, -5), new AtomarChange(userContact, 5))]);
+        g2.setRecommendations([new Recommendation(g2, new AtomarChange(userContact, -10), new AtomarChange(c3, 10))]);
 
         // Expectations
         groupBalanceComponent.group = g1;
@@ -147,7 +147,7 @@ describe('ViewModel_DataModel', () => {
     });
 
     // Group Transaction Component
-    it('should display group info', () => {
+    it('should display group transactions', () => {
         dataModelService.initializeUserFirstTime('c1', 'Alice');
         const user = dataModelService.getUser();
 
