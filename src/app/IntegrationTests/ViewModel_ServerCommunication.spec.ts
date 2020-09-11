@@ -517,7 +517,7 @@ describe('ViewModel_ServerCommunication', () => {
         const clientSpy = spyOn(matrixClientService, 'logout').and.callThrough();
         const breakPointObserver = jasmine.createSpyObj('BreakPointObserver', ['observe']);
         breakPointObserver.observe.and.returnValue({pipe: () => {}});
-        const comp = new NavigationMenuComponent(breakPointObserver, matrixClientService, null, dialogProvider);
+        const comp = new NavigationMenuComponent(breakPointObserver, matrixClientService, null, dialogProvider, dataModelService);
 
         await login();
         comp.logout();
