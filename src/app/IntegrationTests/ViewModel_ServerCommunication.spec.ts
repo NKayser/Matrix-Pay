@@ -11,7 +11,7 @@ import {TransactionService} from "../ServerCommunication/GroupCommunication/tran
 import {MatrixEmergentDataService} from "../ServerCommunication/CommunicationInterface/matrix-emergent-data.service";
 import {Contact} from "../DataModel/Group/Contact";
 import {User} from "../DataModel/User/User";
-import {Currency} from "../DataModel/Utils/Currency";
+import {Currency, currencyMap, matrixCurrencyMap} from '../DataModel/Utils/Currency';
 import {Language} from "../DataModel/Utils/Language";
 import {Group} from "../DataModel/Group/Group";
 import {GroupSelectionComponent} from "../ViewModel/group-selection/group-selection.component";
@@ -280,7 +280,7 @@ describe('ViewModel_ServerCommunication', () => {
         // Expectations
         expect(modalSpyOpen).toHaveBeenCalled();
         expect(createGroupMatDialogRef.close).toHaveBeenCalledWith(data);
-        expect(basicSpy).toHaveBeenCalledWith('Unigruppe', Currency.USD.toString());
+        expect(basicSpy).toHaveBeenCalledWith('Unigruppe', matrixCurrencyMap[Currency.USD]);
         const actualResponse = await basicSpy.calls.mostRecent().returnValue;
         expect(actualResponse instanceof SuccessfulResponse).toBe(true);
         expect(actualResponse.getValue()).toBe('room_id');

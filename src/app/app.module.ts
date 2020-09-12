@@ -63,6 +63,7 @@ import { PaymentViewComponent } from './ViewModel/payment-view/payment-view.comp
     ErrorModalComponent,
     PaymentViewComponent
   ],
+
     imports: [
         BrowserModule,
         BrowserAnimationsModule,

@@ -12,7 +12,7 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, NgZone} from '@angular/core';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Language} from '../../DataModel/Utils/Language';
 
@@ -36,6 +36,10 @@ describe('GroupTransactionComponentCancel', () => {
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
+
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
 
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
@@ -127,11 +131,16 @@ describe('GroupTransactionComponentConfirm', () => {
       declarations: [ GroupTransactionComponent ],
       providers: [
         { provide: MatDialog, useValue: MockDialog },
-        { provide: MatrixBasicDataService, useValue: spyMatrix},
+        { provide: MatrixBasicDataService, useValue: spyMatrix}
       ],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
       .compileComponents();
+
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
+
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
 
     fixture = TestBed.createComponent(GroupTransactionComponent);

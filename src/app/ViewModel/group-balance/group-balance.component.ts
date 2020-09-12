@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, NgZone, OnChanges} from '@angular/core';
 import {Group} from '../../DataModel/Group/Group';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {currencyMap} from '../../DataModel/Utils/Currency';
@@ -55,7 +55,7 @@ export class GroupBalanceComponent implements OnChanges {
 
   constructor(public dialog: MatDialog, public matrixBasicDataService: MatrixBasicDataService,
               private dialogProviderService: DialogProviderService, private dataModelService: DataModelService,
-              private ref: ChangeDetectorRef) {
+              private ref: ChangeDetectorRef, private zone: NgZone) {
   }
 
   /**
@@ -113,6 +113,8 @@ export class GroupBalanceComponent implements OnChanges {
    */
   public confirmPayback(recommendationIndex: number): void {
 
+    this.zone.run(() => {
+
       const currentRec = this.recommendations[recommendationIndex];
       const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
         width: '350px',
@@ -121,28 +123,29 @@ export class GroupBalanceComponent implements OnChanges {
 
       dialogRef.afterClosed().subscribe(result => {
         this.dialogData = result;
-        if (this.dialogData !== undefined){
+        if (this.dialogData !== undefined) {
           this.loadingConfirmPayback = true;
 
           // TODO Missing recommendationId
           promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.dialogData.recommendation.group.groupId,
-            'Payback from ' + this.dialogData.recommendation.payer.contact.name + ' to ' +
-            this.dialogData.recommendation.recipient.contact.name,
-            this.dialogData.recommendation.payer.contact.contactId, [this.dialogData.recommendation.recipient.contact.contactId],
-            [this.dialogData.recommendation.recipient.amount], true))
-            .then((data) => {
-              if (!data.wasSuccessful()){
-                this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
-              }
-              this.loadingConfirmPayback = false;
-            }, (err) => {
-              this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
-              this.loadingConfirmPayback = false;
-            });
+              'Payback from ' + this.dialogData.recommendation.payer.contact.name + ' to ' +
+              this.dialogData.recommendation.recipient.contact.name,
+              this.dialogData.recommendation.payer.contact.contactId, [this.dialogData.recommendation.recipient.contact.contactId],
+              [this.dialogData.recommendation.recipient.amount], true))
+              .then((data) => {
+                if (!data.wasSuccessful()) {
+                  this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
+                }
+                this.loadingConfirmPayback = false;
+              }, (err) => {
+                this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
+                this.loadingConfirmPayback = false;
+              });
 
 
         }
       });
+    });
   }
 
 }

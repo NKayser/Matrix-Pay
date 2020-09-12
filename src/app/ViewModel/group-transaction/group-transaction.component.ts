@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, NgZone, OnChanges} from '@angular/core';
 import {PaymentDialogData, PaymentModalComponent} from '../payment-modal/payment-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {Transaction} from '../../DataModel/Group/Transaction';
@@ -42,7 +42,7 @@ export class GroupTransactionComponent implements OnChanges {
 
   constructor(public dialog: MatDialog, private matrixBasicDataService: MatrixBasicDataService,
               private dialogProviderService: DialogProviderService, private ref: ChangeDetectorRef,
-              private dataModelService: DataModelService) {
+              private dataModelService: DataModelService, private zone: NgZone) {
   }
 
   private calculateUserAmounts(): void {
@@ -75,7 +75,7 @@ export class GroupTransactionComponent implements OnChanges {
     this.transactions = this.group.transactions;
     this.calculateUserAmounts();
 
-    this.group.getTransactionChangeEmitter().subscribe(() => { this.calculateUserAmounts(); this.ref.detectChanges();});
+    this.group.getTransactionChangeEmitter().subscribe(() => { this.calculateUserAmounts(); this.ref.detectChanges(); } );
   }
 
   /**
@@ -122,6 +122,8 @@ export class GroupTransactionComponent implements OnChanges {
       }
 
     });
+
+
   }
 
   /**
@@ -132,9 +134,14 @@ export class GroupTransactionComponent implements OnChanges {
   public editExpense(expense: Transaction): void{
 
     if (expense.transactionType === TransactionType.EXPENSE){
-      this.dialog.open(PaymentViewComponent, {
-        width: '350px',
-        data: this.generateEditExpenseData(expense),
+
+      this.zone.run(() => {
+
+        this.dialog.open(PaymentViewComponent, {
+          width: '350px',
+          data: this.generateEditExpenseData(expense),
+        });
+
       });
 
       // This code is (unfinished work) that can set edit transactions to matrix
