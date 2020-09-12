@@ -157,30 +157,36 @@ export class GroupSelectionComponent implements OnInit{
    * Add a member to the group that is defined by this.currentGroup
    */
   public addMemberToGroup(): void{
-    const dialogRef = this.dialog.open(AddMemberToGroupModalComponent, {
-      width: '300px',
-      data: {group: this.currentGroup, user: ''}
-    });
 
-    dialogRef.afterClosed().subscribe(result => {
-      this.addUserToGroupData = result;
-      if (this.addUserToGroupData !== undefined){
+    if (this.currentGroup.groupId === ''){
+      this.dialogProviderService.openErrorModal('Please select a group to add a member', this.dialog);
+    } else {
 
-        this.loadingAddGroup = true;
-        promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupAddMember(this.addUserToGroupData.group.groupId,
-          this.addUserToGroupData.user))
-          .then((data) => {
-            if (!data.wasSuccessful()){
-              this.dialogProviderService.openErrorModal('error add member 1: ' + data.getMessage(), this.dialog);
-            }
-            this.loadingAddGroup = false;
-          }, (err) => {
-            this.dialogProviderService.openErrorModal('error add member 2: ' + err, this.dialog);
-            this.loadingAddGroup = false;
-          });
-      }
+      const dialogRef = this.dialog.open(AddMemberToGroupModalComponent, {
+        width: '300px',
+        data: {group: this.currentGroup, user: ''}
+      });
 
-    });
+      dialogRef.afterClosed().subscribe(result => {
+        this.addUserToGroupData = result;
+        if (this.addUserToGroupData !== undefined) {
+
+          this.loadingAddGroup = true;
+          promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupAddMember(this.addUserToGroupData.group.groupId,
+              this.addUserToGroupData.user))
+              .then((data) => {
+                if (!data.wasSuccessful()) {
+                  this.dialogProviderService.openErrorModal('error add member 1: ' + data.getMessage(), this.dialog);
+                }
+                this.loadingAddGroup = false;
+              }, (err) => {
+                this.dialogProviderService.openErrorModal('error add member 2: ' + err, this.dialog);
+                this.loadingAddGroup = false;
+              });
+        }
+
+      });
+    }
   }
 
 }
