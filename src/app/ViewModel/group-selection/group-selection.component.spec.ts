@@ -15,6 +15,7 @@ import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
 import {CUSTOM_ELEMENTS_SCHEMA, EventEmitter} from '@angular/core';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
+import {ReversePipePipe} from '../reverse-pipe.pipe';
 
 describe('GroupSelectionComponentCancel', () => {
   let component: GroupSelectionComponent;
@@ -29,7 +30,7 @@ describe('GroupSelectionComponentCancel', () => {
     const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['groupAddMember', 'leaveGroup', 'groupCreate']);
 
     TestBed.configureTestingModule({
-      declarations: [GroupSelectionComponent, GroupTransactionComponent, HistoryComponent, GroupBalanceComponent],
+      declarations: [GroupSelectionComponent, GroupTransactionComponent, HistoryComponent, GroupBalanceComponent, ReversePipePipe],
       providers: [
         { provide: MatDialog, useValue: MockDialogCancel },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
@@ -127,7 +128,7 @@ describe('GroupSelectionComponentConfirm1', () => {
     const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['groupAddMember', 'leaveGroup', 'groupCreate']);
 
     TestBed.configureTestingModule({
-      declarations: [GroupSelectionComponent, GroupTransactionComponent, HistoryComponent, GroupBalanceComponent],
+      declarations: [GroupSelectionComponent, GroupTransactionComponent, HistoryComponent, GroupBalanceComponent, ReversePipePipe],
       providers: [
         { provide: MatDialog, useValue: MockDialog },
         { provide: MatrixBasicDataService, useValue: spyMatrix},

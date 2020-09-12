@@ -16,6 +16,7 @@ import {PaymentViewComponent} from '../payment-view/payment-view.component';
 import {Time} from '../../SystemTests/Time';
 import {DataModelService} from '../../DataModel/data-model.service';
 
+
 @Component({
   selector: 'app-group-transaction',
   templateUrl: './group-transaction.component.html',
@@ -85,7 +86,7 @@ export class GroupTransactionComponent implements OnChanges {
   public createExpense(): void {
 
     const dialogRef = this.dialog.open(PaymentModalComponent, {
-      width: '350px',
+      width: '400px',
       data: this.generateCreateExpenseData(),
     });
 
@@ -133,7 +134,7 @@ export class GroupTransactionComponent implements OnChanges {
    */
   public editExpense(expense: Transaction): void{
 
-    if (expense.transactionType === TransactionType.EXPENSE){
+
 
       this.zone.run(() => {
 
@@ -175,7 +176,6 @@ export class GroupTransactionComponent implements OnChanges {
         }
 
       });*/
-    }
   }
 
   // Generate input data for expense Modal from the current transaction

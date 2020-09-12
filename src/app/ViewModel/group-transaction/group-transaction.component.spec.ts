@@ -15,6 +15,7 @@ import {AtomarChange} from '../../DataModel/Group/AtomarChange';
 import {CUSTOM_ELEMENTS_SCHEMA, NgZone} from '@angular/core';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Language} from '../../DataModel/Utils/Language';
+import {ReversePipePipe} from '../reverse-pipe.pipe';
 
 describe('GroupTransactionComponentCancel', () => {
   let component: GroupTransactionComponent;
@@ -27,11 +28,12 @@ describe('GroupTransactionComponentCancel', () => {
     const spyData = jasmine.createSpyObj('DataModelService', ['getUser']);
 
     TestBed.configureTestingModule({
-      declarations: [ GroupTransactionComponent ],
+      declarations: [ GroupTransactionComponent , ReversePipePipe],
       providers: [
         { provide: MatDialog, useValue: MockDialogCancel },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData},
+
       ],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
@@ -128,10 +130,10 @@ describe('GroupTransactionComponentConfirm', () => {
     const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['createTransaction', 'modifyTransaction']);
 
     TestBed.configureTestingModule({
-      declarations: [ GroupTransactionComponent ],
+      declarations: [ GroupTransactionComponent , ReversePipePipe],
       providers: [
         { provide: MatDialog, useValue: MockDialog },
-        { provide: MatrixBasicDataService, useValue: spyMatrix}
+        { provide: MatrixBasicDataService, useValue: spyMatrix},
       ],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })

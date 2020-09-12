@@ -19,7 +19,7 @@
   <!--Amount form-->
   <mat-action-list>
     <mat-list-item *ngFor="let recipient of data.recipients; let i = index">
-      <div><mat-checkbox [(ngModel)]="data.isAdded[i]"></mat-checkbox></div>
+      <div class="checkbox"><mat-checkbox [(ngModel)]="data.isAdded[i]"></mat-checkbox></div>
       <mat-label class="name_amount">{{recipient.name}}</mat-label>
       <mat-form-field *ngIf="data.isAdded[i]">
         <mat-label>Amount</mat-label>
@@ -30,8 +30,9 @@
   </mat-action-list>
 
   <!--Cancel and Save buttons-->
-  <button mat-raised-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button class="button_distance" (click)="onCancel()">Cancel</button>
   <button mat-raised-button (click)="onSave()" >Save</button>
+  <canvas height="1"></canvas>
   <mat-error *ngIf="formInvalid">{{getInvalidFormErrorMessage()}}</mat-error>
 
 </div>
