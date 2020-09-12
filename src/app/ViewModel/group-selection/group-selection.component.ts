@@ -13,6 +13,7 @@ import {DialogProviderService} from '../dialog-provider.service';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 import {Time} from '../../SystemTests/Time';
 import {matrixCurrencyMap} from '../../DataModel/Utils/Currency';
+import {Groupmember} from '../../DataModel/Group/Groupmember';
 
 @Component({
   selector: 'app-group-selection',
@@ -75,31 +76,49 @@ export class GroupSelectionComponent implements OnInit{
    * Leave the group that is defined by this.currentGroup
    */
   public leaveGroup(): void{
-    const dialogRef = this.dialog.open(LeaveGroupModalComponent, {
-      width: '300px',
-      data: {group: this.currentGroup}
-    });
 
-    dialogRef.afterClosed().subscribe(result => {
-      this.leaveGroupData = result;
-      if (this.leaveGroupData !== undefined){
-          this.loadingLeaveGroup = true;
-          promiseTimeout(TIMEOUT, this.matrixBasicDataService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
+    let memberUser: Groupmember = null;
+    for (const member of this.currentGroup.groupmembers){
+      if (this.dataModelService.getUser().contact.contactId === member.contact.contactId){
+        memberUser = member;
+        break;
+      }
+    }
+    if (memberUser === null){
+      this.dialogProviderService.openErrorModal('Please select a group', this.dialog);
+    } else {
+      if (memberUser.balance !== 0){
+        this.dialogProviderService.openErrorModal('Your balance needs to be 0 to leave the group', this.dialog);
+      } else{
 
-            if (!data.wasSuccessful()){
-              this.dialogProviderService.openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
-            } else {
-              this.selectGroup(0);
-            }
-            this.loadingLeaveGroup = false;
-          }, (err) => {
-            this.dialogProviderService.openErrorModal('error leave group 2: ' + err, this.dialog);
-            this.loadingLeaveGroup = false;
-          });
+        const dialogRef = this.dialog.open(LeaveGroupModalComponent, {
+          width: '300px',
+          data: {group: this.currentGroup}
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+          this.leaveGroupData = result;
+          if (this.leaveGroupData !== undefined){
+              this.loadingLeaveGroup = true;
+              promiseTimeout(TIMEOUT, this.matrixBasicDataService.leaveGroup(this.leaveGroupData.group.groupId)).then((data) => {
+
+                if (!data.wasSuccessful()){
+                  this.dialogProviderService.openErrorModal('error leave group 1: ' + data.getMessage(), this.dialog);
+                } else {
+                  this.selectGroup(0);
+                }
+                this.loadingLeaveGroup = false;
+              }, (err) => {
+                this.dialogProviderService.openErrorModal('error leave group 2: ' + err, this.dialog);
+                this.loadingLeaveGroup = false;
+              });
+
+          }
+
+        });
 
       }
-
-    });
+    }
   }
 
   /**

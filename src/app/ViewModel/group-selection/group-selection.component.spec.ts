@@ -14,6 +14,7 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
 import {CUSTOM_ELEMENTS_SCHEMA, EventEmitter} from '@angular/core';
+import {Groupmember} from '../../DataModel/Group/Groupmember';
 
 describe('GroupSelectionComponentCancel', () => {
   let component: GroupSelectionComponent;
@@ -170,9 +171,11 @@ describe('GroupSelectionComponentConfirm1', () => {
 
     const g1 = new Group('g1', 'name_g1', Currency.USD);
     const g2 = new Group('g2', 'name_g2', Currency.USD);
+    g1.addGroupmember(new Groupmember(c1, g1));
 
     dataModelService.getGroups.and.returnValue([g1, g2]);
     fixture.detectChanges();
+    component.selectGroup(0);
     component.leaveGroup();
     expect(matrixBasicDataService.leaveGroup).toHaveBeenCalled();
   });

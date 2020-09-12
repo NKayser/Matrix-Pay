@@ -340,6 +340,7 @@ describe('ViewModel_ServerCommunication', () => {
         const data = {
             group: g1
         };
+        g1.addGroupmember(new Groupmember(c1, g1));
 
         // Spies
         const basicSpy = spyOn(matrixBasicDataService, 'leaveGroup').and.callThrough();
@@ -359,6 +360,7 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Leave group
         groupFixture.detectChanges();
+        groupComponent.selectGroup(0);
         groupComponent.leaveGroup();
         leaveGroupComponent.data = data;
         leaveGroupComponent.ngOnInit();
