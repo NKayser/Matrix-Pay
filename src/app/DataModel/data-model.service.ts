@@ -57,7 +57,7 @@ export class DataModelService {
 
 
 
-  // Notifies the ViewModel when the dataModel has loaded
+  // Notifies the ViewModel when the dataModel has loadeda
   private notifyViewModelWhenReady(): void{
     this.emitter.next(true);
   }

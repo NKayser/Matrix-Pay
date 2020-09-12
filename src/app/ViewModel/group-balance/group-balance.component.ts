@@ -30,6 +30,9 @@ export class GroupBalanceComponent implements OnChanges {
   public balanceData = [];
   public userContact: Contact;
 
+  public chartHeight = 0;
+  private barHeight = 75;
+
   // used to resize the gridList
   public breakpoint: number;
 
@@ -73,7 +76,17 @@ export class GroupBalanceComponent implements OnChanges {
   }
 
   private initBalancesRecommendations(): void {
-    this.recommendations = this.group.recommendations;
+
+    // Filter all recommendations concerning the user
+    const tempRec = [];
+    for (const rec of this.group.recommendations) {
+      if (rec.payer.contact.contactId === this.userContact.contactId || rec.recipient.contact.contactId === this.userContact.contactId) {
+        tempRec.push(rec);
+      }
+    }
+
+    this.recommendations = tempRec;
+
     this.balanceData = [];
     const groupMembers = this.group.groupmembers;
     for (const groupMember of groupMembers){
@@ -81,6 +94,8 @@ export class GroupBalanceComponent implements OnChanges {
         this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance / 100});
       }
     }
+
+    this.chartHeight = this.balanceData.length * this.barHeight;
   }
 
   /**

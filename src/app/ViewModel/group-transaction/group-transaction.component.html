@@ -14,7 +14,8 @@
               <mat-label>{{transaction.creationDate.toDateString()}}</mat-label>
               <!--<mat-label>{{transaction.creationDate.getDay()}}.{{transaction.creationDate.getMonth()}}.{{transaction.creationDate.getFullYear()}}</mat-label>-->
             </div>
-            <mat-label class="payed_amount">{{transaction.payer.amount / 100}}{{currencyMap[transaction.group.currency]}}</mat-label>
+            <mat-label class="payed_amount" [ngStyle]="{'color' : (userAmounts[transaction.transactionId] >= 0) ? 'green' : 'red'}">{{userAmounts[transaction.transactionId] / 100}}{{currencyMap[transaction.group.currency]}}</mat-label>
+            <mat-label class="description">{{transaction.payer.amount / 100}}{{currencyMap[transaction.group.currency]}}</mat-label>
 
           </div>
         </mat-card>

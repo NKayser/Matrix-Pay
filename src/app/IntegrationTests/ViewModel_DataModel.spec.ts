@@ -192,7 +192,7 @@ describe('ViewModel_DataModel', () => {
         expect(homeComponent.recommendations).toEqual([r1]);
 
         const nativeElement: HTMLElement = homeFixture.nativeElement;
-        expect(nativeElement.querySelector('.approve_person').textContent).toBe('Alice');
+        expect(nativeElement.querySelector('.approve_person').textContent).toBe('You owe Bob');
         expect(nativeElement.querySelector('.approve_group').textContent).toBe('name_g1');
         expect(nativeElement.querySelector('.approve_amount').textContent).toBe('1€');
     });

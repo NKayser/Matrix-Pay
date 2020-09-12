@@ -5,6 +5,8 @@
   margin-top: 10px;
 }
 
+
+
 .center {
   /*display:grid is supper important to support the chart resize and correct behaviour of components below*/
   display: grid;

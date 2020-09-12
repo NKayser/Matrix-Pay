@@ -14,6 +14,7 @@ import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInt
 import {MatrixEvent} from 'matrix-js-sdk';
 import {PaymentViewComponent} from '../payment-view/payment-view.component';
 import {Time} from '../../SystemTests/Time';
+import {DataModelService} from '../../DataModel/data-model.service';
 
 @Component({
   selector: 'app-group-transaction',
@@ -35,8 +36,32 @@ export class GroupTransactionComponent implements OnChanges {
 
   public currencyMap = currencyMap;
 
+  public userContact: Contact;
+
+  public userAmounts = {};
+
   constructor(public dialog: MatDialog, private matrixBasicDataService: MatrixBasicDataService,
-              private dialogProviderService: DialogProviderService, private ref: ChangeDetectorRef) {
+              private dialogProviderService: DialogProviderService, private ref: ChangeDetectorRef,
+              private dataModelService: DataModelService) {
+  }
+
+  private calculateUserAmounts(): void {
+    for (const transaction of this.transactions){
+      if (this.userAmounts[transaction.transactionId] === undefined || this.userAmounts[transaction.transactionId] === null){
+        let userAmount = 0;
+        for (const recipient of transaction.recipients){
+          if (recipient.contact.contactId === this.userContact.contactId){
+            userAmount = recipient.amount;
+            break;
+          }
+        }
+        if (transaction.payer.contact.contactId === this.userContact.contactId){
+          this.userAmounts[transaction.transactionId] = transaction.payer.amount - userAmount;
+        } else {
+          this.userAmounts[transaction.transactionId] = -userAmount;
+        }
+      }
+    }
   }
 
   /**
@@ -44,9 +69,13 @@ export class GroupTransactionComponent implements OnChanges {
    * group switches the transactions
    */
   ngOnChanges(): void {
-    this.transactions = this.group.transactions;
 
-    this.group.getTransactionChangeEmitter().subscribe(() => {this.ref.detectChanges(); });
+    this.userContact = this.dataModelService.getUser().contact;
+
+    this.transactions = this.group.transactions;
+    this.calculateUserAmounts();
+
+    this.group.getTransactionChangeEmitter().subscribe(() => { this.calculateUserAmounts(); this.ref.detectChanges();});
   }
 
   /**

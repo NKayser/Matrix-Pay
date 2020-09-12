@@ -46,9 +46,8 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
 
     this.userContact = this.dataModelService.getUser().contact;
-    console.log('caused by init');
     this.initBalancesRecommendations();
-    this.dataModelService.getBalanceEmitter().subscribe(() => {console.log('caused by emitter'); this.initBalancesRecommendations(); } );
+    this.dataModelService.getBalanceEmitter().subscribe(() => {this.initBalancesRecommendations(); } );
 
     // initialize the number of the grid list columns for the recommendations
     this.breakpoint = gridListResize(window.innerWidth, 2200, 4);
@@ -58,9 +57,13 @@ export class HomeComponent implements OnInit {
     const groups = this.dataModelService.getGroups();
     this.recommendations = [];
     for (const group of groups){
-      for (const recommendation of group.recommendations){
-        this.recommendations.push(recommendation);
+      // Filter all recommendations concerning the user
+      for (const rec of group.recommendations) {
+        if (rec.payer.contact.contactId === this.userContact.contactId || rec.recipient.contact.contactId === this.userContact.contactId) {
+          this.recommendations.push(rec);
+        }
       }
+
       this.usedCurrencies.add(group.currency);
     }
 
@@ -70,8 +73,6 @@ export class HomeComponent implements OnInit {
       this.balanceList = this.balanceList.concat({balance, currency});
     }
     this.ref.detectChanges();
-    console.log('BALANCELIST');
-    console.log(this.balanceList);
   }
 
   /**
