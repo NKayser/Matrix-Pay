@@ -22,6 +22,8 @@ export class PaymentViewComponent implements OnInit{
    */
   ngOnInit(): void {
 
+    console.log('init');
+
     const tempRecipients = [];
     const tempAmounts = [];
     for (let i = 0; i < this.data.amount.length; i++){
@@ -39,6 +41,8 @@ export class PaymentViewComponent implements OnInit{
    * Close the dialog without returning the data
    */
   onCancel(): void {
+    console.log(this.data);
+    console.log('closing');
     this.dialogRef.close();
   }
 

@@ -37,6 +37,8 @@ import {Recommendation} from "../DataModel/Group/Recommendation";
 import {AtomarChange} from "../DataModel/Group/AtomarChange";
 import {GroupBalanceComponent} from "../ViewModel/group-balance/group-balance.component";
 import {EventEmitter} from "events";
+import {UnsuccessfulResponse} from "../ServerCommunication/Response/UnsuccessfulResponse";
+import {ClientError} from "../ServerCommunication/Response/ErrorTypes";
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -227,12 +229,18 @@ describe('ViewModel_ServerCommunication', () => {
         });
         mockedClient.loginWithPassword.and.returnValue(Promise.reject({data: {errcode: 'M_FORBIDDEN', error: 'Invalid password'}}));
 
+        // Spy
+        const loginSpy = spyOn(matrixClientService, 'login').and.callThrough();
+
         // Login with these values
         loginComponent.matrixUrlControl.setValue('@abc:host');
         loginComponent.passwordControl.setValue('uvw');
         await loginComponent.login();
 
         // Expected
+        const response = await loginSpy.calls.mostRecent().returnValue;
+        expect(response instanceof UnsuccessfulResponse).toBe(true);
+        expect(response.getError()).toBe(ClientError.InvalidPassword);
         expect(matrixClientService.isLoggedIn()).toBe(false);
         done();
     });
@@ -509,7 +517,7 @@ describe('ViewModel_ServerCommunication', () => {
         const clientSpy = spyOn(matrixClientService, 'logout').and.callThrough();
         const breakPointObserver = jasmine.createSpyObj('BreakPointObserver', ['observe']);
         breakPointObserver.observe.and.returnValue({pipe: () => {}});
-        const comp = new NavigationMenuComponent(breakPointObserver, matrixClientService, null, dialogProvider);
+        const comp = new NavigationMenuComponent(breakPointObserver, matrixClientService, null, dialogProvider, dataModelService);
 
         await login();
         comp.logout();

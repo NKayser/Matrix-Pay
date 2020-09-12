@@ -93,6 +93,7 @@ describe('MatrixClientServiceService', () => {
   });
 
   it('should throw Error on login with wrong input format', async (done: DoneFn) => {
+    localStorage.clear();
     // Setup
     const invalidUserIdExamples: string[] = ['', '@', ':', '@abc:', '@abc:def:', '@a:b:c'];
 
@@ -111,6 +112,7 @@ describe('MatrixClientServiceService', () => {
 
   it('login should be Unsuccessful when homeserver address cannot be found (AutoDiscovery)',
     async (done: DoneFn) => {
+    localStorage.clear();
     // Set up Mocks
     classProviderSpy.findClientConfig.and.returnValue(
       {'m.homeserver': {'state': 'ERROR', 'error': 'some message', 'base_url': null}});
