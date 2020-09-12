@@ -4,13 +4,21 @@
 }
 
 .spinner{
-  position: absolute;
-  top: 4px;
-  margin-left: 100px;
+  margin-left: 10px;
 }
 
 .sidenav {
   width: 200px;
+}
+
+.first {
+  float:right;
+  margin-right: 5px;
+  margin-top: 5px;
+}
+.second {
+  overflow: hidden;
+  margin-left: 150px;
 }
 
 .sidenav .mat-toolbar {
@@ -58,6 +66,15 @@
     margin-top: auto;
     position: absolute;
     right: 10px;
+  }
+
+  .first {
+    float:left;
+    margin-right: 5px;
+    margin-top: 0px;
+  }
+  .second {
+    overflow: hidden;
   }
 }
 
