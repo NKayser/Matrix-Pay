@@ -69,10 +69,17 @@
 
 }
 
-
-
-
-
-
+/*Safari only override*/
+@media not all and (min-resolution:0.001dpcm)
+{ @supports (-webkit-appearance:none) and (stroke-color:transparent) {
+  .createButtonDiv {
+    position: relative;
+    left: 5px;
+    top: 5px;
+    transform: translate(0%, 0%);
+    margin: 0 auto;
+  }
+}
+}
 
 
