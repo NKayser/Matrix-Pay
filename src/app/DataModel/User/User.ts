@@ -2,7 +2,6 @@ import {Contact} from '../Group/Contact';
 import {Currency} from '../Utils/Currency';
 import {Language} from '../Utils/Language';
 import {Group} from '../Group/Group';
-import {Groupmember} from '../Group/Groupmember';
 import {Subject} from 'rxjs';
 
 /**
@@ -131,7 +130,11 @@ export class User {
     });
   }
 
-  public deleteAllGroups(): void {
+  public resetUserData(): void {
     this._groups = [];
+    this._contact.contactId = '';
+    this._contact.name = '';
+    this._currency = Currency.EUR;
+    this._language = Language.ENGLISH;
   }
 }

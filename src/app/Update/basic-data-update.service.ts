@@ -457,7 +457,7 @@ export class BasicDataUpdateService {
 
   private logout(): void {
     this.observables.getLogoutObservable().subscribe(() => {
-      this.dataModel.getUser().deleteAllGroups();
+      this.dataModel.getUser().resetUserData();
     });
   }
 
