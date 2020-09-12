@@ -3,7 +3,7 @@ import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {Observable} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
 import {CreateGroupModalComponent, GroupCreateDialogData} from '../create-group-modal/create-group-modal.component';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {LeaveGroupDialogData, LeaveGroupModalComponent} from '../leave-group-modal/leave-group-modal.component';
 import {AddMemberToGroupDialogData, AddMemberToGroupModalComponent} from '../add-user-to-group-modal/add-member-to-group-modal.component';
 import {DataModelService} from '../../DataModel/data-model.service';
@@ -12,6 +12,7 @@ import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {DialogProviderService} from '../dialog-provider.service';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
 import {Time} from '../../SystemTests/Time';
+import {matrixCurrencyMap} from '../../DataModel/Utils/Currency';
 
 @Component({
   selector: 'app-group-selection',
@@ -54,7 +55,7 @@ export class GroupSelectionComponent implements OnInit{
       this.currentGroup = this.groups[0];
     }
 
-    this.dataModelService.getUser().getGroupChangeEmitter().subscribe(() => {this.ref.detectChanges();} );
+    this.dataModelService.getUser().getGroupChangeEmitter().subscribe(() => {this.ref.detectChanges(); } );
   }
 
   /**
@@ -118,7 +119,7 @@ export class GroupSelectionComponent implements OnInit{
         Time.groupCreationTime = Date.now();
         // TimeStamp
         promiseTimeout(TIMEOUT, this.matrixBasicDataService.groupCreate(this.createGroupData.groupName,
-          this.createGroupData.currency.toString()))
+          matrixCurrencyMap[this.createGroupData.currency]))
           .then((data) => {
           if (!data.wasSuccessful()){
             this.dialogProviderService.openErrorModal('error add group 1: ' + data.getMessage(), this.dialog);
