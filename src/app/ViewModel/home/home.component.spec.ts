@@ -13,7 +13,7 @@ import {Language} from '../../DataModel/Utils/Language';
 import {Contact} from '../../DataModel/Group/Contact';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, NgZone} from '@angular/core';
 import {Subject, Subscription} from 'rxjs';
 
 describe('HomeComponentCancel', () => {
@@ -38,6 +38,10 @@ describe('HomeComponentCancel', () => {
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
+
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
@@ -142,6 +146,10 @@ describe('HomeComponentConfirm', () => {
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
       .compileComponents();
+
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;

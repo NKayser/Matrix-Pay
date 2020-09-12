@@ -13,7 +13,7 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
-import {CUSTOM_ELEMENTS_SCHEMA, EventEmitter} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, EventEmitter, NgZone} from '@angular/core';
 
 describe('GroupBalanceComponent', () => {
   let component: GroupBalanceComponent;
@@ -37,6 +37,10 @@ describe('GroupBalanceComponent', () => {
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
+
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
@@ -149,6 +153,10 @@ describe('GroupBalanceComponent', () => {
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
       .compileComponents();
+
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
