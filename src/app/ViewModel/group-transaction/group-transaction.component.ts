@@ -75,7 +75,7 @@ export class GroupTransactionComponent implements OnChanges {
     this.transactions = this.group.transactions;
     this.calculateUserAmounts();
 
-    this.group.getTransactionChangeEmitter().subscribe(() => { this.calculateUserAmounts(); this.ref.detectChanges(); } );
+    this.group.getTransactionChangeEmitter().subscribe(() => {this.calculateUserAmounts(); this.ref.detectChanges(); } );
   }
 
   /**
@@ -84,46 +84,51 @@ export class GroupTransactionComponent implements OnChanges {
    */
   public createExpense(): void {
 
-    const dialogRef = this.dialog.open(PaymentModalComponent, {
-      width: '400px',
-      data: this.generateCreateExpenseData(),
-    });
+    if (this.group.groupId === ''){
+      this.dialogProviderService.openErrorModal('Please select a group', this.dialog);
+    } else {
 
-    dialogRef.afterClosed().subscribe((result) => {
-      this.data = result;
-      if (this.data !== undefined){
 
-        const recipientIds = [];
-        const sendAmounts = [];
-        for (let i = 0; i < this.data.recipients.length; i++){
-          if (this.data.isAdded[i] === true){
-            recipientIds.push(this.data.recipients[i].contactId);
-            sendAmounts.push(this.data.amount[i]);
+      const dialogRef = this.dialog.open(PaymentModalComponent, {
+        width: '400px',
+        data: this.generateCreateExpenseData(),
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        this.data = result;
+        if (this.data !== undefined) {
+
+          const recipientIds = [];
+          const sendAmounts = [];
+          for (let i = 0; i < this.data.recipients.length; i++) {
+            if (this.data.isAdded[i] === true) {
+              recipientIds.push(this.data.recipients[i].contactId);
+              sendAmounts.push(this.data.amount[i]);
+            }
+
           }
 
+
+          this.loadingCreateExpense = true;
+          // Timestamp
+          Time.transactionTimes.push(new Time(Date.now(), this.group.groupId + this.data.description));
+          // Timestamp
+          promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.group.groupId, this.data.description,
+              this.data.payer.contactId, recipientIds, sendAmounts, false))
+              .then((data) => {
+                if (!data.wasSuccessful()) {
+                  this.dialogProviderService.openErrorModal('error create transaction 1: ' + data.getMessage(), this.dialog);
+                }
+                this.loadingCreateExpense = false;
+              }, (err) => {
+                this.dialogProviderService.openErrorModal('error create Transaction 2: ' + err, this.dialog);
+                this.loadingCreateExpense = false;
+              });
         }
 
+      });
 
-        this.loadingCreateExpense = true;
-        // Timestamp
-        Time.transactionTimes.push(new Time(Date.now(), this.group.groupId + this.data.description));
-        // Timestamp
-        promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.group.groupId, this.data.description,
-          this.data.payer.contactId, recipientIds, sendAmounts, false))
-          .then((data) => {
-            if (!data.wasSuccessful()){
-              this.dialogProviderService.openErrorModal('error create transaction 1: ' + data.getMessage(), this.dialog);
-            }
-            this.loadingCreateExpense = false;
-          }, (err) => {
-            this.dialogProviderService.openErrorModal('error create Transaction 2: ' + err, this.dialog);
-            this.loadingCreateExpense = false;
-          });
-      }
-
-    });
-
-
+    }
   }
 
   /**
