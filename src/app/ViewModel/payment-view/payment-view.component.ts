@@ -22,8 +22,6 @@ export class PaymentViewComponent implements OnInit{
    */
   ngOnInit(): void {
 
-    console.log('init');
-
     const tempRecipients = [];
     const tempAmounts = [];
     for (let i = 0; i < this.data.amount.length; i++){
