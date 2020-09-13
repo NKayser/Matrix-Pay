@@ -1,4 +1,12 @@
-<div class="complete">
+<div>
+
+  <div>
+    <div class="createButtonDiv">
+      <mat-spinner class="first" *ngIf="loadingEditExpense || loadingCreateExpense" [diameter]="30"></mat-spinner>
+      <!--Button to open the create Transaction Dialog-->
+      <button (click)='createExpense()' class="second" mat-raised-button color="primary">Create Transaction</button>
+    </div>
+  </div>
 
   <div>
 
