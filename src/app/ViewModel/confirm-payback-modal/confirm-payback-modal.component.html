@@ -1,6 +1,6 @@
 <h1>Approve Paypack</h1>
 <div mat-dialog-content>
-  <mat-label class="text">Have you really payed back {{data.recommendation.payer.contact.name}} {{(data.recommendation.recipient.amount)/100}}
+  <mat-label class="text">Have you really payed back {{data.recommendation.recipient.contact.name}} {{(data.recommendation.recipient.amount)/100}}
     {{currencyMap[data.recommendation.group.currency]}} in  Group {{data.recommendation.group.name}}?</mat-label>
   <button mat-raised-button class="button_left" (click)="onCancel()">Cancel</button>
   <button mat-raised-button class="button_right" (click)="onSave()" >Confirm</button>
