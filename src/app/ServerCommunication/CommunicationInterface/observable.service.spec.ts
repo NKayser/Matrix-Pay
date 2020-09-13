@@ -97,18 +97,15 @@ describe('ObservableService', () => {
     mockedClient.joinRoom.and.returnValue({});
 
     clientServiceSpy.getClient.and.returnValue(mockedClient);
-
-    console.log('service');
     // @ts-ignore
     ObservableService.prototype.paginateBackwardsUntilTheEnd = (window: TimelineWindow): Promise<void> => {
-        console.log('wir habens bis hier geschafft :D');
         return Promise.resolve();
     };
     service = new ObservableService(clientServiceSpy);
     console.log(service);
 
     TimelineWindow.prototype.load = () => {
-        console.log('wir haben dich ersetzt');
+        console.log('Replaced Method');
     };
 
   });
@@ -117,7 +114,6 @@ describe('ObservableService', () => {
 
       const currencyObservable: Observable<CurrencyType> = service.getSettingsCurrencyObservable();
       currencyObservable.subscribe((currency: CurrencyType) => {
-          console.log('callback called');
           expect(currency.currency).toEqual('EUR');
           done();
       });
@@ -280,7 +276,6 @@ describe('ObservableService', () => {
 
     const languageObservable: Observable<LanguageType> = service.getSettingsLanguageObservable();
     languageObservable.subscribe((language: LanguageType) => {
-      console.log('callback called');
       expect(language.language).toBe('ENGLISH');
       done();
     });
@@ -669,7 +664,6 @@ describe('ObservableService', () => {
 
   it('obs: check new payback emitted not live', (done: DoneFn) => {
 
-      console.log('i got called here');
 
       const d1 = new Date('December 17, 1995 03:24:00');
       const room = fakeRoom({
@@ -680,7 +674,6 @@ describe('ObservableService', () => {
 
       // @ts-ignore
       ObservableService.prototype.paginateBackwardsUntilTheEnd = (window: TimelineWindow): Promise<void> => {
-          console.log('called1');
           clientEmitter.emit('Room.timeline',
               {
                   getType(): string {
@@ -714,7 +707,6 @@ describe('ObservableService', () => {
 
       const transactionsObservable: Observable<TransactionType[]> = service.getMultipleNewTransactionsObservable();
       transactionsObservable.subscribe((transactions: TransactionType[]) => {
-          console.log('testing now');
           console.log(transactions);
           expect(transactions).toEqual([
               {transactionType: type,
@@ -740,7 +732,6 @@ describe('ObservableService', () => {
 
   it('obs: check new expense emitted not live', (done: DoneFn) => {
 
-    console.log('i got called here');
 
     const d1 = new Date('December 17, 1995 03:24:00');
     const room = fakeRoom({
@@ -751,7 +742,6 @@ describe('ObservableService', () => {
 
     // @ts-ignore
     ObservableService.prototype.paginateBackwardsUntilTheEnd = (window: TimelineWindow): Promise<void> => {
-        console.log('called1');
         clientEmitter.emit('Room.timeline',
             {
                 getType(): string {
@@ -788,7 +778,6 @@ describe('ObservableService', () => {
 
     const transactionsObservable: Observable<TransactionType[]> = service.getMultipleNewTransactionsObservable();
     transactionsObservable.subscribe((transactions: TransactionType[]) => {
-        console.log('testing now');
         console.log(transactions);
         expect(transactions).toEqual([
             {transactionType: type,

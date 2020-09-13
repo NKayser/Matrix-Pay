@@ -6,7 +6,6 @@ import {Currency, matrixCurrencyMap} from '../DataModel/Utils/Currency';
 import {Contact} from '../DataModel/Group/Contact';
 import {Language} from '../DataModel/Utils/Language';
 import {Groupmember} from '../DataModel/Group/Groupmember';
-import {Utils} from '../ServerCommunication/Response/Utils';
 import {Transaction} from '../DataModel/Group/Transaction';
 import {TransactionType} from '../DataModel/Group/TransactionType';
 import {TransactionType as TransactionTypeInterface} from '../ServerCommunication/CommunicationInterface/parameterTypes';
@@ -19,6 +18,9 @@ import {Time} from '../SystemTests/Time';
   providedIn: 'root'
 })
 export class BasicDataUpdateService {
+
+  private static readonly EMPTY_GROUP_NAME: string = 'Empty Group';
+
   private observables: ObservableInterface;
   /*private transactionBuffer: TransactionTypeInterface[][] = [];
   private activityBuffer: GroupActivityType[] = [];
@@ -27,10 +29,7 @@ export class BasicDataUpdateService {
   private languageBuffer: LanguageType[] = [];
   private currencyBuffer: CurrencyType[] = []; */
 
-  private static readonly EMPTY_GROUP_NAME: string = 'Empty Group';
-
   constructor(observables: ObservableService, private dataModel: DataModelService, /*storage: StorageService*/) {
-    if (Utils.log) { console.log('This is BasicDataUpdateService!'); }
     this.observables = observables; // TODO implement observableInterface
     this.createUser();
     this.addGroup();
@@ -61,7 +60,6 @@ export class BasicDataUpdateService {
     this.observables.getGroupsObservable().subscribe(param => {
       if (this.dataModel.userExists) {
         if (this.dataModel.getGroup(param.groupId) === null) {
-          // console.log ('LOG007.4 user wasnt null');
           if (!param.isLeave) {
             // if (Utils.log) {console.log('New group detected:' + param.groupId);}
             this.dataModel.getUser().createGroup(param.groupId, param.groupName, this.currencyStringToEnum(param.currency));
@@ -288,7 +286,6 @@ export class BasicDataUpdateService {
     this.observables.getGroupMembershipObservable().subscribe( param => {
       /*console.log(this.dataModel.getGroups());
       console.log(param.groupId);*/
-      console.log(param);
       let group = this.dataModel.getGroup(param.groupId);
       if (group === null) {
         group = this.dataModel.user.createGroup(param.groupId, '', Currency.EUR);

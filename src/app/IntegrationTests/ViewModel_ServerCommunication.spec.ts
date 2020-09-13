@@ -1,44 +1,43 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {LoginComponent} from "../ViewModel/login/login.component";
-import {MatrixClassProviderService} from "../ServerCommunication/CommunicationInterface/matrix-class-provider.service";
-import {DataModelService} from "../DataModel/data-model.service";
-import {MatrixClientService} from "../ServerCommunication/CommunicationInterface/matrix-client.service";
-import {MatrixBasicDataService} from "../ServerCommunication/CommunicationInterface/matrix-basic-data.service";
-import {DiscoveredClientConfig, MatrixClient} from "../../matrix";
-import {GroupService} from "../ServerCommunication/GroupCommunication/group.service";
-import {SettingsService} from "../ServerCommunication/SettingsCommunication/settings.service";
-import {TransactionService} from "../ServerCommunication/GroupCommunication/transaction.service";
-import {MatrixEmergentDataService} from "../ServerCommunication/CommunicationInterface/matrix-emergent-data.service";
-import {Contact} from "../DataModel/Group/Contact";
-import {User} from "../DataModel/User/User";
+import {LoginComponent} from '../ViewModel/login/login.component';
+import {MatrixClassProviderService} from '../ServerCommunication/CommunicationInterface/matrix-class-provider.service';
+import {DataModelService} from '../DataModel/data-model.service';
+import {MatrixClientService} from '../ServerCommunication/CommunicationInterface/matrix-client.service';
+import {MatrixBasicDataService} from '../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
+import {DiscoveredClientConfig, MatrixClient} from '../../matrix';
+import {GroupService} from '../ServerCommunication/GroupCommunication/group.service';
+import {SettingsService} from '../ServerCommunication/SettingsCommunication/settings.service';
+import {TransactionService} from '../ServerCommunication/GroupCommunication/transaction.service';
+import {Contact} from '../DataModel/Group/Contact';
+import {User} from '../DataModel/User/User';
 import {Currency, currencyMap, matrixCurrencyMap} from '../DataModel/Utils/Currency';
-import {Language} from "../DataModel/Utils/Language";
-import {Group} from "../DataModel/Group/Group";
-import {GroupSelectionComponent} from "../ViewModel/group-selection/group-selection.component";
+import {Language} from '../DataModel/Utils/Language';
+import {Group} from '../DataModel/Group/Group';
+import {GroupSelectionComponent} from '../ViewModel/group-selection/group-selection.component';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {MockDialog, MockDialogCancel} from "../ViewModel/_mockServices/MockDialog";
-import {CreateGroupModalComponent} from "../ViewModel/create-group-modal/create-group-modal.component";
-import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
-import {Observable, of, Subject} from "rxjs";
-import {SuccessfulResponse} from "../ServerCommunication/Response/SuccessfulResponse";
-import {AddMemberToGroupModalComponent} from "../ViewModel/add-user-to-group-modal/add-member-to-group-modal.component";
-import {LeaveGroupModalComponent} from "../ViewModel/leave-group-modal/leave-group-modal.component";
-import {SettingsComponent} from "../ViewModel/settings/settings.component";
-import {NavigationMenuComponent} from "../ViewModel/navigation-menu/navigation-menu.component";
-import {DialogProviderService} from "../ViewModel/dialog-provider.service";
-import {BreakpointObserver} from "@angular/cdk/layout";
-import {log} from "util";
-import {ServerResponse} from "../ServerCommunication/Response/ServerResponse";
-import {Groupmember} from "../DataModel/Group/Groupmember";
-import {GroupTransactionComponent} from "../ViewModel/group-transaction/group-transaction.component";
-import {PaymentModalComponent} from "../ViewModel/payment-modal/payment-modal.component";
-import {ConfirmPaybackModalComponent} from "../ViewModel/confirm-payback-modal/confirm-payback-modal.component";
-import {Recommendation} from "../DataModel/Group/Recommendation";
-import {AtomarChange} from "../DataModel/Group/AtomarChange";
-import {GroupBalanceComponent} from "../ViewModel/group-balance/group-balance.component";
-import {EventEmitter} from "events";
-import {UnsuccessfulResponse} from "../ServerCommunication/Response/UnsuccessfulResponse";
-import {ClientError} from "../ServerCommunication/Response/ErrorTypes";
+import {MockDialog, MockDialogCancel} from '../ViewModel/_mockServices/MockDialog';
+import {CreateGroupModalComponent} from '../ViewModel/create-group-modal/create-group-modal.component';
+import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from '@angular/core';
+import {Observable, of, Subject} from 'rxjs';
+import {SuccessfulResponse} from '../ServerCommunication/Response/SuccessfulResponse';
+import {AddMemberToGroupModalComponent} from '../ViewModel/add-user-to-group-modal/add-member-to-group-modal.component';
+import {LeaveGroupModalComponent} from '../ViewModel/leave-group-modal/leave-group-modal.component';
+import {SettingsComponent} from '../ViewModel/settings/settings.component';
+import {NavigationMenuComponent} from '../ViewModel/navigation-menu/navigation-menu.component';
+import {DialogProviderService} from '../ViewModel/dialog-provider.service';
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {log} from 'util';
+import {ServerResponse} from '../ServerCommunication/Response/ServerResponse';
+import {Groupmember} from '../DataModel/Group/Groupmember';
+import {GroupTransactionComponent} from '../ViewModel/group-transaction/group-transaction.component';
+import {PaymentModalComponent} from '../ViewModel/payment-modal/payment-modal.component';
+import {ConfirmPaybackModalComponent} from '../ViewModel/confirm-payback-modal/confirm-payback-modal.component';
+import {Recommendation} from '../DataModel/Group/Recommendation';
+import {AtomarChange} from '../DataModel/Group/AtomarChange';
+import {GroupBalanceComponent} from '../ViewModel/group-balance/group-balance.component';
+import {EventEmitter} from 'events';
+import {UnsuccessfulResponse} from '../ServerCommunication/Response/UnsuccessfulResponse';
+import {ClientError} from '../ServerCommunication/Response/ErrorTypes';
 import {ReversePipePipe} from '../ViewModel/reverse-pipe.pipe';
 
 
@@ -83,7 +82,6 @@ describe('ViewModel_ServerCommunication', () => {
 
     // Real Services
     let matrixClientService: MatrixClientService;
-    let matrixEmergentDataService: MatrixEmergentDataService;
     let matrixBasicDataService: MatrixBasicDataService;
 
     beforeEach(async(() => {
@@ -114,7 +112,6 @@ describe('ViewModel_ServerCommunication', () => {
                 { provide: MatDialogRef, useValue: spyDialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: []},
                 MatrixClientService,
-                MatrixEmergentDataService,
                 MatrixBasicDataService
             ],
             schemas: [ NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA ]
@@ -122,9 +119,8 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Set up real services
         matrixClientService = new MatrixClientService(classProviderSpy);
-        matrixEmergentDataService = new MatrixEmergentDataService(matrixClientService);
         matrixBasicDataService = new MatrixBasicDataService(
-            new GroupService(new TransactionService(matrixClientService), matrixClientService, matrixEmergentDataService),
+            new GroupService(new TransactionService(matrixClientService), matrixClientService),
             new SettingsService(matrixClientService));
 
         // Mock Services
@@ -133,7 +129,6 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Real Services
         matrixClientService = TestBed.inject(MatrixClientService);
-        matrixEmergentDataService = TestBed.inject(MatrixEmergentDataService);
         matrixBasicDataService = TestBed.inject(MatrixBasicDataService);
 
         // MatDialogRefs
@@ -172,12 +167,13 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Mock the Client
         classProviderSpy.findClientConfig.and.callFake(() => {
-            const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
+            const config: DiscoveredClientConfig = {'m.homeserver': {state: 'SUCCESS', error: '', base_url: 'https://host.com'}};
             return Promise.resolve(config);
         });
         mockedClient.loginWithPassword.and.returnValue(Promise.resolve({access_token: 'example_accessToken'}));
         mockedClient.setAccountData.and.returnValue(null);
         mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
+        // @ts-ignore
         mockedClient.on.and.returnValue(null);
 
         // Login with these values
@@ -193,14 +189,14 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Mock the Client
         classProviderSpy.findClientConfig.and.callFake(() => {
-            const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
+            const config: DiscoveredClientConfig = {'m.homeserver': {state: 'SUCCESS', error: '', base_url: 'https://host.com'}};
             return Promise.resolve(config);
         });
         mockedClient.loginWithPassword.and.returnValue(Promise.resolve({access_token: 'example_accessToken'}));
         mockedClient.setAccountData.and.returnValue(null);
         mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
         // @ts-ignore
-        mockedClient.on.and.callFake((event: string, func: any) => {func('PREPARED', null, null);});
+        mockedClient.on.and.callFake((event: string, func: any) => {func('PREPARED', null, null); });
 
         // Login with these values
         loginComponent.matrixUrlControl.setValue('@abc:host');
@@ -225,7 +221,7 @@ describe('ViewModel_ServerCommunication', () => {
     it('should not login with invalid credentials', async (done: DoneFn) => {
         // Mock the Client
         classProviderSpy.findClientConfig.and.callFake(() => {
-            const config: DiscoveredClientConfig = {'m.homeserver': {'state': 'SUCCESS', 'error': '', 'base_url': 'https://host.com'}};
+            const config: DiscoveredClientConfig = {'m.homeserver': {state: 'SUCCESS', error: '', base_url: 'https://host.com'}};
             return Promise.resolve(config);
         });
         mockedClient.loginWithPassword.and.returnValue(Promise.reject({data: {errcode: 'M_FORBIDDEN', error: 'Invalid password'}}));

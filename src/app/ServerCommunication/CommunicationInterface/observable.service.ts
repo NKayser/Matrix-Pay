@@ -17,7 +17,6 @@ import {
 import {MatrixClient, MatrixEvent, EventTimeline, EventTimelineSet, TimelineWindow, Room, Filter, FilterComponent} from 'matrix-js-sdk';
 import {Utils} from '../Response/Utils';
 import {MatrixClientService} from './matrix-client.service';
-import {ClientInterface} from './ClientInterface';
 
 @Injectable({
   providedIn: 'root'
@@ -155,9 +154,6 @@ export class ObservableService implements ObservableInterface {
         console.log('Found invalid currency event');
       } else {
         currency = currencyEvent.getContent().currency;
-        if (Utils.log) {
-          console.log(currencyEvent.getContent().currency);
-        }
       }
     }
 
@@ -174,14 +170,12 @@ export class ObservableService implements ObservableInterface {
     // The things written into the timelines will eventually be detected by the listeners.
     const timelineWindow = new TimelineWindow(this.matrixClient, room.getLiveTimeline().getTimelineSet());
     timelineWindow.load();
-    // if (Utils.log) { console.log(timelineWindow.getEvents()); }
-    // if (Utils.log) { console.log('canPaginate in room ' + room.name + ': ' + timelineWindow.canPaginate(EventTimeline.BACKWARDS)); }
     await this.paginateBackwardsUntilTheEnd(timelineWindow);
     if (Utils.log) { console.log('found old transactions in room ' + room.roomId + ': ' + this.transactions.hasOwnProperty(room.roomId)); }
     if (this.transactions.hasOwnProperty(room.roomId)) {
       this.initializedPayRooms.add(room.roomId);
       this.multipleNewTransactionsObservable.next(this.transactions[room.roomId]);
-      if (Utils.log) { console.log('Anzahl Transaktionen: ' + this.transactions[room.roomId].length); }
+      if (Utils.log) { console.log('Number of transactions: ' + this.transactions[room.roomId].length); }
     }
   }
 
@@ -197,7 +191,6 @@ export class ObservableService implements ObservableInterface {
   // listeners
 
   public accountDataCallback(event, oldEvent): void {
-    // if (Utils.log) console.log('got account data change' + event.getType());
     switch (event.getType()) {
       case ('com.matrixpay.currency'): {
         if (Utils.log) { console.log('got currency change to ' + event.getContent().currency); }
@@ -232,7 +225,6 @@ export class ObservableService implements ObservableInterface {
   /*private roomAccountDataListener(): void {
     // Fires whenever room account data changes
     this.matrixClient.on('Room.accountData', (event, room, oldEvent) => {
-      // if (Utils.log) console.log('got account data change' + event.getType());
       switch (event.getType()) {
         case ('com.matrixpay.balances'): {
           const groupId = room.roomId;
@@ -262,7 +254,6 @@ export class ObservableService implements ObservableInterface {
     // Fires whenever the timeline in a room is updated
     this.matrixClient.on('Room.timeline',
       (event, room, toStartOfTimeline, removed, data) => {
-        // if (Utils.log) console.log('got a timeline change. event type: '  + event.getType());
         if (!data.liveEvent) {
           // Process the events retrieved by backpagination
           switch (event.getType()) {
@@ -304,8 +295,6 @@ export class ObservableService implements ObservableInterface {
                     }
                     this.transactions[room.roomId].push(this.getExpenseFromEvent(room, event));
                   }
-
-                  console.log(this.transactions[room.roomId]);
                 } else if (event.isRelation('m.replace')) {
                   if (Utils.log) {
                     console.log('got an old editing of an expense. name: ' + event.getContent().name);
@@ -328,15 +317,18 @@ export class ObservableService implements ObservableInterface {
               // use getPrevContent() if necessary
               let isLeave: boolean;
               if (event.getContent().membership === 'join') {
-                if (Utils.log) { console.log('got an old room membership change: ' + event.getStateKey() + ' joined the room ' + room.name); }
+                if (Utils.log) { console.log('got an old room membership change: ' + event.getStateKey() + ' joined the room ' +
+                    room.name); }
                 isLeave = false;
               }
               if (event.getContent().membership === 'leave') {
-                if (Utils.log) { console.log('got an old room membership change: ' + event.getStateKey() + ' left the room ' + room.name); }
+                if (Utils.log) { console.log('got an old room membership change: ' + event.getStateKey() + ' left the room ' +
+                    room.name); }
                 isLeave = true;
               }
               this.groupMembershipObservable.next(
-                {groupId: room.roomId, userId: event.getStateKey(), date: event.getDate(), isLeave, name: room.getMember(event.getStateKey()).user.displayName}
+                {groupId: room.roomId, userId: event.getStateKey(), date: event.getDate(), isLeave, name:
+                  room.getMember(event.getStateKey()).user.displayName}
                 );
               break;
             }
@@ -403,8 +395,12 @@ export class ObservableService implements ObservableInterface {
       console.log('--- new Room ---');
       console.log(room.getLiveTimeline().getState(EventTimeline.FORWARDS));
       const member = room.getLiveTimeline().getState(EventTimeline.FORWARDS).getMember(this.matrixClient.getUserId());
-      if (Utils.log) console.log(member);
-      if (Utils.log) console.log(this.matrixClient.getUserId());
+      if (Utils.log) {
+        console.log(member);
+      }
+      if (Utils.log) {
+        console.log(this.matrixClient.getUserId());
+      }
       if (member.membership === 'join') {
         console.log('triggered');
         await this.processNewRoom(room);
@@ -420,7 +416,8 @@ export class ObservableService implements ObservableInterface {
     this.matrixClient.on('RoomMember.membership', (event, member, oldMembership) => {
       const userId = member.userId;
       const groupId = member.roomId;
-      console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' + member.userId);
+      console.log('membership changed from ' + oldMembership + ' to ' + member.membership + '. room:  ' + groupId + ' member: ' +
+          member.userId);
       if (userId === this.matrixClient.getUserId()) {
         if ((oldMembership === 'invite' || oldMembership === 'leave' || oldMembership === null) && member.membership === 'join') {
           this.groupMembershipObservable.next(
@@ -493,10 +490,12 @@ export class ObservableService implements ObservableInterface {
 
   // other functions
 
-  private hashObject(input: object) {
+  private hashObject(input: object): number {
     const str = JSON.stringify(input);
     console.log(str);
-    var hash = 0, i = 0, len = str.length;
+    let hash = 0;
+    let i = 0;
+    const len = str.length;
     while ( i < len ) {
       // tslint:disable-next-line:no-bitwise
       hash  = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;

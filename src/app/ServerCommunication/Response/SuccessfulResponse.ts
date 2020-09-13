@@ -1,4 +1,4 @@
-import {ServerResponse} from "./ServerResponse";
+import {ServerResponse} from './ServerResponse';
 
 export class SuccessfulResponse<T> extends ServerResponse {
   private value: T;
@@ -14,7 +14,7 @@ export class SuccessfulResponse<T> extends ServerResponse {
 
   // Only defined if response failed.
   getMessage(): string {
-    return "";
+    return '';
   }
 
   // Optional, can be of any type.

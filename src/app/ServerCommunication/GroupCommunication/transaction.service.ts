@@ -12,10 +12,11 @@ import {MatrixEvent} from 'matrix-js-sdk';
   providedIn: 'root'
 })
 export class TransactionService {
-  private matrixClientService: ClientInterface;
 
   private static readonly MESSAGE_TYPE_EXPENSE: string = 'com.matrixpay.expense';
   private static readonly MESSAGE_TYPE_PAYBACK: string = 'com.matrixpay.payback';
+
+  private matrixClientService: ClientInterface;
 
   constructor(matrixClientService: MatrixClientService) {
     this.matrixClientService = matrixClientService;
@@ -31,16 +32,17 @@ export class TransactionService {
    * @param recipientIds User Ids of the recipients in this transaction
    * @param amounts How much money each recipient received, in Cents. Same order as recipient array. Should all be
    * positive.
-   * @param isPayback
+   * @param isPayback determinds if it is a payback or a expense
    */
-  public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[], isPayback: boolean): Promise<ServerResponse> {
+  public async createTransaction(groupId: string, description: string, payerId: string, recipientIds: string[], amounts: number[],
+                                 isPayback: boolean): Promise<ServerResponse> {
     const messageType = isPayback ? TransactionService.MESSAGE_TYPE_PAYBACK : TransactionService.MESSAGE_TYPE_EXPENSE;
 
     const content = {
-      'name': description,
-      'payer': payerId,
-      'recipients': recipientIds,
-      'amounts': amounts
+      name: description,
+      payer: payerId,
+      recipients: recipientIds,
+      amounts
     };
 
     return this.sendTransaction(groupId, messageType, content);
@@ -54,11 +56,9 @@ export class TransactionService {
     let oldContent: object;
     try {
       oldContent = await client.fetchRoomEvent(groupId, transactionId);
-    } catch(err) {
+    } catch (err) {
       return new UnsuccessfulResponse(GroupError.NoOriginal, err);
     }
-
-    console.log(oldContent);
 
     // Set content to new values if given
     let newDescription: string = description;
@@ -67,25 +67,31 @@ export class TransactionService {
     let newAmounts: number[] = amounts;
 
     // Use old values if new values not given
-    if (newDescription == undefined) newDescription = oldContent['content']['name'];
-    if (newPayerId == undefined) newPayerId = oldContent['content']['payer'];
-    if (newRecipientIds == undefined) newRecipientIds = oldContent['content']['recipients'];
-    if (newAmounts == undefined) newAmounts = oldContent['content']['amounts'];
+    if (newDescription === undefined) {
+      newDescription = oldContent['content']['name'];
+    }
+    if (newPayerId === undefined){
+      newPayerId = oldContent['content']['payer'];
+    }
+    if (newRecipientIds === undefined){
+      newRecipientIds = oldContent['content']['recipients'];
+    }
+    if (newAmounts === undefined){
+      newAmounts = oldContent['content']['amounts'];
+    }
 
     const newContent = {
-      'new_content': {
-        'name': newDescription,
-        'payer': newPayerId,
-        'recipients': newRecipientIds,
-        'amounts': newAmounts
+      new_content: {
+        name: newDescription,
+        payer: newPayerId,
+        recipients: newRecipientIds,
+        amounts: newAmounts
       },
-      'relates_to': {
-        'rel_type': 'replace',
-        'event_id': transactionId
+      relates_to: {
+        rel_type: 'replace',
+        event_id: transactionId
       }
     };
-
-    console.log(newContent);
 
     return this.sendTransaction(groupId, oldContent['type'], newContent);
   }
@@ -98,7 +104,7 @@ export class TransactionService {
     try {
       const event: MatrixEvent = await client.sendEvent(groupId, messageType, content, '');
       eventId = event['event_id'];
-    } catch(err) {
+    } catch (err) {
       return new UnsuccessfulResponse(GroupError.SendEvent, err);
     }
 

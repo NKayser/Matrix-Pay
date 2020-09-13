@@ -1,8 +1,7 @@
-import {ChangeDetectorRef, Component, Input, OnChanges, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnChanges} from '@angular/core';
 import {Activity} from '../../DataModel/Group/Activity';
 import {ActivityType} from '../../DataModel/Group/ActivityType';
 import {Group} from '../../DataModel/Group/Group';
-import {DataModelService} from '../../DataModel/data-model.service';
 
 @Component({
   selector: 'app-history',

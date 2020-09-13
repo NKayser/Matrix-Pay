@@ -6,7 +6,6 @@ import {GroupSelectionComponent} from '../ViewModel/group-selection/group-select
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MockDialog} from '../ViewModel/_mockServices/MockDialog';
 import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from '@angular/core';
-import {SuccessfulResponse} from '../ServerCommunication/Response/SuccessfulResponse';
 import {SettingsComponent} from '../ViewModel/settings/settings.component';
 import {GroupBalanceComponent} from '../ViewModel/group-balance/group-balance.component';
 import {HomeComponent} from '../ViewModel/home/home.component';
@@ -92,18 +91,18 @@ describe('ViewModel_DataModel', () => {
         const g2 = dataModelService.getUser().createGroup('id_2', 'group_2', Currency.USD);
         const c2 = new Contact('c2', 'Bob');
         const c3 = new Contact('c3', 'Eve');
-        const mg1_a = new Groupmember(userContact, g1);
-        mg1_a.balance = 5;
-        const mg1_b = new Groupmember(c2, g1);
-        mg1_b.balance = -5;
-        const mg2_a = new Groupmember(userContact, g2);
-        mg2_a.balance = -10;
-        const mg2_b = new Groupmember(c3, g2);
-        mg2_b.balance = 10;
-        g1.addGroupmember(mg1_a);
-        g1.addGroupmember(mg1_b);
-        g2.addGroupmember(mg2_a);
-        g2.addGroupmember(mg2_b);
+        const mg1A = new Groupmember(userContact, g1);
+        mg1A.balance = 5;
+        const mg1B = new Groupmember(c2, g1);
+        mg1B.balance = -5;
+        const mg2A = new Groupmember(userContact, g2);
+        mg2A.balance = -10;
+        const mg2B = new Groupmember(c3, g2);
+        mg2B.balance = 10;
+        g1.addGroupmember(mg1A);
+        g1.addGroupmember(mg1B);
+        g2.addGroupmember(mg2A);
+        g2.addGroupmember(mg2B);
         g1.setRecommendations([new Recommendation(g1, new AtomarChange(c2, -5), new AtomarChange(userContact, 5))]);
         g2.setRecommendations([new Recommendation(g2, new AtomarChange(userContact, -10), new AtomarChange(c3, 10))]);
 
@@ -131,8 +130,8 @@ describe('ViewModel_DataModel', () => {
         dataModelService.initializeUserFirstTime('c1', 'Alice');
         const user = dataModelService.getUser();
 
-        const g1 = user.createGroup('g1', 'name_g1', Currency.USD);
-        const g2 = user.createGroup('g2', 'name_g2', Currency.USD);
+        user.createGroup('g1', 'name_g1', Currency.USD);
+        user.createGroup('g2', 'name_g2', Currency.USD);
         groupSelectionFixture.detectChanges();
 
         const nativeElement: HTMLElement = groupSelectionFixture.nativeElement;

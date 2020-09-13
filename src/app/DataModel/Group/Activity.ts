@@ -13,11 +13,11 @@ export class Activity {
   private readonly _creationDate: Date;
 
   /**
-   * Cuntstuctor for Activity.
+   * constructor for Activity.
    * @param activityType  Type of the Activity.
    * @param subject  Subject of the Activity. can be either a transaction or a group.
    * @param actor  Contact of the person who caused the change.
-   * @param creationDate  Date when the change occured.
+   * @param creationDate  Date when the change occurred.
    */
   public constructor(activityType: ActivityType, subject: Transaction | Group, actor: Contact, creationDate: Date) {
     this._activityType = activityType;

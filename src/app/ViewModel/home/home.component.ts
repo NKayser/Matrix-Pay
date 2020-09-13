@@ -115,7 +115,6 @@ export class HomeComponent implements OnInit {
     this.zone.run(() => {
 
       const currentRec = this.recommendations[recommendationIndex];
-      console.log(currentRec);
 
       const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
         width: '350px',

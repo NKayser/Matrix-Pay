@@ -2,7 +2,6 @@ import {Component, Output, EventEmitter, OnInit, OnDestroy} from '@angular/core'
 import {FormControl, Validators} from '@angular/forms';
 import {MatrixClientService} from '../../ServerCommunication/CommunicationInterface/matrix-client.service';
 import {MatrixBasicDataService} from '../../ServerCommunication/CommunicationInterface/matrix-basic-data.service';
-import {MatrixEmergentDataService} from '../../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {DataModelService} from '../../DataModel/data-model.service';
 import {Subscription} from 'rxjs';
 
@@ -36,7 +35,6 @@ export class LoginComponent implements OnInit, OnDestroy{
   public passwordControl = new FormControl('', [Validators.required]);
 
   constructor(private clientService: MatrixClientService,
-              private emergentDataService: MatrixEmergentDataService,
               private basicDataService: MatrixBasicDataService, private dataModelService: DataModelService,
               private dialogProviderService: DialogProviderService, public dialog: MatDialog) {
   }
@@ -47,8 +45,6 @@ export class LoginComponent implements OnInit, OnDestroy{
 
     const account = localStorage.getItem('account');
     const accessToken = localStorage.getItem('accessToken');
-    console.log(account);
-    console.log(accessToken);
 
     if (account !== null && accessToken !== null){
       this.autoLogin = true;
