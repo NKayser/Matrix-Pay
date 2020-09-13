@@ -11,6 +11,10 @@
   margin-bottom: 100px;
 }
 
+.mat-card {
+  width: 100%;
+}
+
 .payed_amount {
   position: absolute;
   right: 20px;
