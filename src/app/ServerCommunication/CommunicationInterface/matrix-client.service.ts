@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 // @ts-ignore
-import {MatrixClient, IndexedDBStore, MatrixError} from 'matrix-js-sdk';
+import {MatrixClient} from 'matrix-js-sdk';
 
 import { ServerResponse } from '../Response/ServerResponse';
 import { ClientInterface } from './ClientInterface';
@@ -15,14 +15,6 @@ import {MatrixClassProviderService} from './matrix-class-provider.service';
   providedIn: 'root'
 })
 export class MatrixClientService implements ClientInterface {
-  private matrixClient: MatrixClient;
-  private roomTypeMatrixClient: MatrixClient;
-  private serverAddress: string;
-  private loginInfo: any;
-  private loggedIn: boolean = false;
-  private prepared: boolean = false;
-  private loggedInEmitter: EventEmitter<void>;
-  private logoutEmitter: EventEmitter<void>;
 
   private static readonly ACCOUNT_SEPARATOR: string = ':';
   private static readonly AUTODISCOVERY_SUCCESS: string = 'SUCCESS';
@@ -30,6 +22,17 @@ export class MatrixClientService implements ClientInterface {
   private static readonly LANGUAGE_KEY: string = 'com.matrixpay.language';
   private static readonly DEFAULT_CURRENCY: string = matrixCurrencyMap[0];
   private static readonly DEFAULT_LANGUAGE: string = 'English';
+
+  private matrixClient: MatrixClient;
+  private roomTypeMatrixClient: MatrixClient;
+  private serverAddress: string;
+  private loginInfo: any;
+  private loggedIn = false;
+  private prepared = false;
+  private loggedInEmitter: EventEmitter<void>;
+  private logoutEmitter: EventEmitter<void>;
+
+
 
   // The MatrixClassProviderService encapsules global methods of the matrix-js-sdk, which is needed in this service.
   constructor(private matrixClassProviderService: MatrixClassProviderService) {
@@ -40,16 +43,20 @@ export class MatrixClientService implements ClientInterface {
   // to login with accessToken, call: await login('@user:url', undefined, 'accessToken');
   // accessToken will be saved in localStorage under key 'accessToken'.
   public async login(account: string, password?: string, accessToken?: string): Promise<ServerResponse> {
-    if (this.loggedIn) throw new Error('already logged in');
+    if (this.loggedIn){
+      throw new Error('already logged in');
+    }
 
     // Discover Homeserver Address
     const autodiscoveryResponse = await this.autodiscovery(account);
-    if (autodiscoveryResponse instanceof UnsuccessfulResponse) return autodiscoveryResponse;
+    if (autodiscoveryResponse instanceof UnsuccessfulResponse){
+      return autodiscoveryResponse;
+    }
 
     // Create Client, Login and set Access Token
     try {
       await this.authenticate(account, password, accessToken);
-    } catch(error) {
+    } catch (error) {
       console.log(error);
       this.loggedIn = false;
       let errorMsg: string;
@@ -67,12 +74,12 @@ export class MatrixClientService implements ClientInterface {
 
     // Set prepared to true when the Client state is prepared
     const listener = async (state, prevState, res) => {
-      this.prepared = (state === "PREPARED" || state === "SYNCING");
-      console.log("Matrix Client prepared: " + this.prepared);
+      this.prepared = (state === 'PREPARED' || state === 'SYNCING');
+      console.log('Matrix Client prepared: ' + this.prepared);
       if (this.prepared) {
-        this.matrixClient.removeListener("sync", listener);
+        this.matrixClient.removeListener('sync', listener);
       }
-    }
+    };
 
     // Sync for the first time and set loggedIn to true when ready
     this.matrixClient.on('sync', listener);
@@ -94,7 +101,7 @@ export class MatrixClientService implements ClientInterface {
 
     // Discover Homeserver Address and throw Errors if not successful
     const seperatedAccount = account.split(MatrixClientService.ACCOUNT_SEPARATOR);
-    if (seperatedAccount.length != 2 || seperatedAccount[1] == '' || seperatedAccount[1] == undefined) {
+    if (seperatedAccount.length !== 2 || seperatedAccount[1] === '' || seperatedAccount[1] === undefined) {
       throw new Error('wrong user id format');
     }
     const domain = seperatedAccount[1];
@@ -102,7 +109,7 @@ export class MatrixClientService implements ClientInterface {
     // Discover base url and save it
     const config: DiscoveredClientConfig = await this.matrixClassProviderService.findClientConfig(domain);
     const configState: string = config['m.homeserver']['state'];
-    if (configState != MatrixClientService.AUTODISCOVERY_SUCCESS) {
+    if (configState !== MatrixClientService.AUTODISCOVERY_SUCCESS) {
       console.log(config);
       return new UnsuccessfulResponse(ClientError.Autodiscovery,
         config['m.homeserver']['error']);
@@ -155,23 +162,27 @@ export class MatrixClientService implements ClientInterface {
 
     try {
       currencyEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.CURRENCY_KEY);
-    } catch(error) {
+    } catch (error) {
       console.log('caught ' + error.message + ' while getting currency setting');
     }
 
     try {
       languageEventContent = await this.matrixClient.getAccountDataFromServer(MatrixClientService.LANGUAGE_KEY);
-    } catch(error) {
+    } catch (error) {
       console.log('caught ' + error.message + ' while getting language setting');
     }
 
     console.log(currencyEventContent);
 
     // Secondly: Set default settings on AccountData if previously not set.
-    if (currencyEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
-      {'currency': MatrixClientService.DEFAULT_CURRENCY});
-    if (languageEventContent === null) await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
-      {'language': MatrixClientService.DEFAULT_LANGUAGE});
+    if (currencyEventContent === null){
+      await this.matrixClient.setAccountData(MatrixClientService.CURRENCY_KEY,
+          {currency: MatrixClientService.DEFAULT_CURRENCY});
+    }
+    if (languageEventContent === null){
+      await this.matrixClient.setAccountData(MatrixClientService.LANGUAGE_KEY,
+          {language: MatrixClientService.DEFAULT_LANGUAGE});
+    }
   }
 
   public getLoggedInEmitter(): EventEmitter<void> {
@@ -200,7 +211,7 @@ export class MatrixClientService implements ClientInterface {
   }
 
   public getClient(): MatrixClient {
-    if (this.loggedIn == false) {
+    if (this.loggedIn === false) {
       throw new Error('can only get Client if logged in');
     } else if (this.matrixClient === undefined) {
       throw new Error('unknown error');

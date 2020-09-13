@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import {Router} from '@angular/router';
 import {BasicDataUpdateService} from './Update/basic-data-update.service';
-import {EmergentDataUpdateService} from './Update/emergent-data-update.service';
 
 @Component({
   selector: 'app-root',
@@ -14,8 +13,7 @@ export class AppComponent {
 
   constructor(private router: Router,
               // Don't delete update services
-              private updateBasicData: BasicDataUpdateService,
-              private updateEmergentData: EmergentDataUpdateService) { }
+              private updateBasicData: BasicDataUpdateService) { }
 
   /**
    * Manage that correct site is shown when user gets logged out

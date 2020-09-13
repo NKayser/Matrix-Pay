@@ -29,14 +29,20 @@ export class BalanceCalculatorService {
       let amount = transaction.payer.amount;
       for (const groupmember of groupmembers) {
         // TODO: filter transactions by group in observableservice instead of here. change back here afterwards.
-        if (groupmember.contact.contactId === id && groupmember.group.groupId === transaction.group.groupId) {groupmember.balance += amount; break; }
+        if (groupmember.contact.contactId === id && groupmember.group.groupId === transaction.group.groupId) {
+          groupmember.balance += amount;
+          break;
+        }
       }
       for (const recipient of transaction.recipients) {
         id = recipient.contact.contactId;
         amount = recipient.amount;
         for (const groupmember of groupmembers) {
           // TODO: filter transactions by group in observableservice instead of here. change back here afterwards.
-          if (groupmember.contact.contactId === id && groupmember.group.groupId === transaction.group.groupId) {groupmember.balance -= amount; break; }
+          if (groupmember.contact.contactId === id && groupmember.group.groupId === transaction.group.groupId) {
+            groupmember.balance -= amount;
+            break;
+          }
         }
       }
     }

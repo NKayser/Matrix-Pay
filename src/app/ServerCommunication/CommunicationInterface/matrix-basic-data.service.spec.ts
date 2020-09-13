@@ -1,14 +1,11 @@
-import { TestBed } from '@angular/core/testing';
-
 import { MatrixBasicDataService } from './matrix-basic-data.service';
-import {SettingsService} from "../SettingsCommunication/settings.service";
-import {GroupService} from "../GroupCommunication/group.service";
-import {TransactionService} from "../GroupCommunication/transaction.service";
-import {ServerResponse} from "../Response/ServerResponse";
-import {GroupError, SettingsError} from "../Response/ErrorTypes";
-import {MatrixEmergentDataService} from "./matrix-emergent-data.service";
-import {SuccessfulResponse} from "../Response/SuccessfulResponse";
-import {UnsuccessfulResponse} from "../Response/UnsuccessfulResponse";
+import {SettingsService} from '../SettingsCommunication/settings.service';
+import {GroupService} from '../GroupCommunication/group.service';
+import {TransactionService} from '../GroupCommunication/transaction.service';
+import {ServerResponse} from '../Response/ServerResponse';
+import {GroupError, SettingsError} from '../Response/ErrorTypes';
+import {SuccessfulResponse} from '../Response/SuccessfulResponse';
+import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
 
 describe('MatrixBasicDataService', () => {
   let service: MatrixBasicDataService;
@@ -20,8 +17,7 @@ describe('MatrixBasicDataService', () => {
     ['isPrepared', 'getClient']);
   const settingsService = new SettingsService(clientServiceSpy);
   const transactionService = new TransactionService(clientServiceSpy);
-  const emergentDataService = new MatrixEmergentDataService(clientServiceSpy);
-  const groupService = new GroupService(transactionService, clientServiceSpy, emergentDataService);
+  const groupService = new GroupService(transactionService, clientServiceSpy);
 
   beforeEach(() => {
     service = new MatrixBasicDataService(groupService, settingsService);
@@ -44,7 +40,7 @@ describe('MatrixBasicDataService', () => {
         expect(response.wasSuccessful()).toBe(true);
         expect(clientServiceSpy.getClient).toHaveBeenCalled();
         expect(mockedClient.setAccountData.calls.mostRecent().args).toEqual(
-          ['com.matrixpay.currency', {'currency': 'EUR'}]);
+          ['com.matrixpay.currency', {currency: 'EUR'}]);
         done();
       },
       (err) => fail('should not throw error'));
@@ -61,7 +57,7 @@ describe('MatrixBasicDataService', () => {
         expect(response.wasSuccessful()).toBe(true);
         expect(clientServiceSpy.getClient).toHaveBeenCalled();
         expect(mockedClient.setAccountData.calls.mostRecent().args).toEqual(
-          ['com.matrixpay.language', {'language': 'English'}]);
+          ['com.matrixpay.language', {language: 'English'}]);
         done();
       },
       (err) => fail('should not throw error'));
@@ -80,7 +76,7 @@ describe('MatrixBasicDataService', () => {
         expect(response.getMessage()).toBe('reason');
         expect(clientServiceSpy.getClient).toHaveBeenCalled();
         expect(mockedClient.setAccountData.calls.mostRecent().args).toEqual(
-          ['com.matrixpay.currency', {'currency': 'EUR'}]);
+          ['com.matrixpay.currency', {currency: 'EUR'}]);
         done();
       },
       (err) => fail('should not throw error'));
@@ -99,7 +95,7 @@ describe('MatrixBasicDataService', () => {
         expect(response.getMessage()).toBe('reason');
         expect(clientServiceSpy.getClient).toHaveBeenCalled();
         expect(mockedClient.setAccountData.calls.mostRecent().args).toEqual(
-          ['com.matrixpay.language', {'language': 'English'}]);
+          ['com.matrixpay.language', {language: 'English'}]);
         done();
       },
       (err) => fail('should not throw error'));
@@ -206,7 +202,7 @@ describe('MatrixBasicDataService', () => {
     );
   });
 
-  it('should confirm recommendation with valid input', async (done: DoneFn) => {
+  /* it('should confirm recommendation with valid input', async (done: DoneFn) => {
     // Mock
     const accountDataEvent = jasmine.createSpyObj('accountDataEvent', ['getOriginalContent']);
     accountDataEvent.getOriginalContent.and.returnValue(
@@ -240,7 +236,7 @@ describe('MatrixBasicDataService', () => {
         done();
       }
     );
-  });
+  }); */
 
   it('confirmPayback should throw Error if room not found', async (done: DoneFn) => {
     // Mock
@@ -345,7 +341,7 @@ describe('MatrixBasicDataService', () => {
 
   it('createGroup should be successful with valid input', async (done: DoneFn) => {
     // Mock
-    mockedClient.createRoom.and.returnValue(Promise.resolve({'room_id': 'roomId'}));
+    mockedClient.createRoom.and.returnValue(Promise.resolve({room_id: 'roomId'}));
     mockedClient.sendStateEvent.and.returnValue(Promise.resolve());
 
     await service.groupCreate('groupId', 'EUR').then(
@@ -363,7 +359,7 @@ describe('MatrixBasicDataService', () => {
 
   it('createGroup should be unsuccessful with invalid name', async (done: DoneFn) => {
     // Mock
-    mockedClient.createRoom.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'M_UNKNOWN'}}));
+    mockedClient.createRoom.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'M_UNKNOWN'}}));
 
     await service.groupCreate('groupId', 'EUR').then(
       (response: ServerResponse) => {
@@ -381,7 +377,7 @@ describe('MatrixBasicDataService', () => {
 
   it('createGroup should be unsuccessful when room in use', async (done: DoneFn) => {
     // Mock
-    mockedClient.createRoom.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'M_ROOM_IN_USE'}}));
+    mockedClient.createRoom.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'M_ROOM_IN_USE'}}));
 
     await service.groupCreate('groupId', 'EUR').then(
       (response: ServerResponse) => {
@@ -399,7 +395,7 @@ describe('MatrixBasicDataService', () => {
 
   it('createGroup should be unsuccessful with invalid input', async (done: DoneFn) => {
     // Mock
-    mockedClient.createRoom.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'foo'}}));
+    mockedClient.createRoom.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'foo'}}));
 
     await service.groupCreate('groupId', 'EUR').then(
       (response: ServerResponse) => {
@@ -417,7 +413,7 @@ describe('MatrixBasicDataService', () => {
 
   it('createGroup should be unsuccessful if setting currency fails', async (done: DoneFn) => {
     // Mock
-    mockedClient.createRoom.and.returnValue(Promise.resolve({'room_id': 'roomId'}));
+    mockedClient.createRoom.and.returnValue(Promise.resolve({room_id: 'roomId'}));
     mockedClient.sendStateEvent.and.returnValue(Promise.reject('error'));
 
     await service.groupCreate('groupId', 'EUR').then(
@@ -496,7 +492,7 @@ describe('MatrixBasicDataService', () => {
         accountData: {}
       }
     );
-    mockedClient.leave.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'M_UNKNOWN'}}));
+    mockedClient.leave.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'M_UNKNOWN'}}));
 
     await service.leaveGroup('groupId').then(
       (response: ServerResponse) => {
@@ -519,7 +515,7 @@ describe('MatrixBasicDataService', () => {
         accountData: {}
       }
     );
-    mockedClient.leave.and.returnValue(Promise.reject({'data': {'error': 'message', 'errcode': 'abc'}}));
+    mockedClient.leave.and.returnValue(Promise.reject({data: {error: 'message', errcode: 'abc'}}));
 
     await service.leaveGroup('groupId').then(
       (response: ServerResponse) => {
@@ -537,7 +533,7 @@ describe('MatrixBasicDataService', () => {
 
   it('should create transaction successfully with valid input', async (done: DoneFn) => {
     // Mock
-    mockedClient.sendEvent.and.returnValue(Promise.resolve({'event_id': 'transactionId'}));
+    mockedClient.sendEvent.and.returnValue(Promise.resolve({event_id: 'transactionId'}));
 
     await service.createTransaction('groupId', 'Description', '@id1:dsn.tm.kit.edu',
       ['@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'], [100, 200], false).then(
@@ -545,10 +541,10 @@ describe('MatrixBasicDataService', () => {
         expect(response instanceof SuccessfulResponse).toBe(true);
         expect(response.getValue()).toBe('transactionId');
         expect(mockedClient.sendEvent.calls.mostRecent().args).toEqual(['groupId', 'com.matrixpay.expense', {
-          'name': 'Description',
-          'payer': '@id1:dsn.tm.kit.edu',
-          'recipients': ['@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'],
-          'amounts': [100, 200]
+          name: 'Description',
+          payer: '@id1:dsn.tm.kit.edu',
+          recipients: ['@id2:dsn.tm.kit.edu', '@id3:dsn.tm.kit.edu'],
+          amounts: [100, 200]
         }, '']);
         done();
       },

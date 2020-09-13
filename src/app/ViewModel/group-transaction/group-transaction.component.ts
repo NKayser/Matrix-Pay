@@ -3,7 +3,6 @@ import {PaymentDialogData, PaymentModalComponent} from '../payment-modal/payment
 import {MatDialog} from '@angular/material/dialog';
 import {Transaction} from '../../DataModel/Group/Transaction';
 import {Group} from '../../DataModel/Group/Group';
-import {TransactionType} from '../../DataModel/Group/TransactionType';
 import {Contact} from '../../DataModel/Group/Contact';
 import {promiseTimeout, TIMEOUT} from '../promiseTimeout';
 import {currencyMap} from '../../DataModel/Utils/Currency';

@@ -39,8 +39,6 @@ export class PaymentViewComponent implements OnInit{
    * Close the dialog without returning the data
    */
   onCancel(): void {
-    console.log(this.data);
-    console.log('closing');
     this.dialogRef.close();
   }
 

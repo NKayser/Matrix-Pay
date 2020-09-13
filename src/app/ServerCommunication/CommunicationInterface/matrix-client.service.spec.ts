@@ -1,12 +1,11 @@
-import { TestBed } from '@angular/core/testing';
 
 import { MatrixClientService } from './matrix-client.service';
-import {MatrixClassProviderService} from "./matrix-class-provider.service";
-import {SuccessfulResponse} from "../Response/SuccessfulResponse";
-import {ServerResponse} from "../Response/ServerResponse";
-import {UnsuccessfulResponse} from "../Response/UnsuccessfulResponse";
-import {ClientError} from "../Response/ErrorTypes";
-import {EventEmitter} from "@angular/core";
+import {MatrixClassProviderService} from './matrix-class-provider.service';
+import {SuccessfulResponse} from '../Response/SuccessfulResponse';
+import {ServerResponse} from '../Response/ServerResponse';
+import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
+import {ClientError} from '../Response/ErrorTypes';
+import {EventEmitter} from '@angular/core';
 
 describe('MatrixClientServiceService', () => {
   let service: MatrixClientService;
@@ -18,22 +17,22 @@ describe('MatrixClientServiceService', () => {
 
   function setupLogin(): void {
     classProviderSpy.findClientConfig.and.returnValue(
-      {'m.homeserver': {'state': 'SUCCESS', 'base_url': 'https://matrix.dsn.scc.kit.edu'}});
+      {'m.homeserver': {state: 'SUCCESS', base_url: 'https://matrix.dsn.scc.kit.edu'}});
     mockedClient.loginWithPassword.and.returnValue(Promise.resolve({access_token: 'example_accessToken'}));
     mockedClient.loginWithToken.and.returnValue(Promise.resolve());
     mockedClient.setAccountData.and.returnValue();
     mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
-    mockedClient.on.and.callFake((key: string, listener: (state, prevState, res) => void) => {return;});
+    mockedClient.on.and.callFake((key: string, listener: (state, prevState, res) => void) => {return; } );
   }
 
   beforeEach(() => {
-    //TestBed.configureTestingModule({});
-    //service = TestBed.inject(MatrixClientService);
+    // TestBed.configureTestingModule({});
+    // service = TestBed.inject(MatrixClientService);
     service = new MatrixClientService(classProviderSpy);
     classProviderSpy.createClient.and.returnValue(mockedClient);
     // @ts-ignore
     mockedClient.clearStores.and.returnValue(null);
-    //jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    // jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
   });
 
   it('should be created', () => {
@@ -45,7 +44,7 @@ describe('MatrixClientServiceService', () => {
     setupLogin();
 
     // Actual
-    let emitted: boolean = false;
+    let emitted = false;
     service.getLoggedInEmitter().subscribe(() => emitted = true);
     const response = await service.login('@uxxxx:dsn.tm.kit.edu', 'password');
 
@@ -63,7 +62,7 @@ describe('MatrixClientServiceService', () => {
     setupLogin();
 
     // Actual
-    let emitted: boolean = false;
+    let emitted = false;
     service.getLoggedInEmitter().subscribe(() => emitted = true);
     const response = await service.login('@user:url', undefined, 'access_Token_abc');
 
@@ -115,7 +114,7 @@ describe('MatrixClientServiceService', () => {
     localStorage.clear();
     // Set up Mocks
     classProviderSpy.findClientConfig.and.returnValue(
-      {'m.homeserver': {'state': 'ERROR', 'error': 'some message', 'base_url': null}});
+      {'m.homeserver': {state: 'ERROR', error: 'some message', base_url: null}});
 
     // Login
     await service.login('@uxxxx:not.a.valid.url', 'password').then(
@@ -136,7 +135,7 @@ describe('MatrixClientServiceService', () => {
   it('login should be unsuccessful with invalid password', async (done: DoneFn) => {
     // Setup
     classProviderSpy.findClientConfig.and.returnValue(
-      {'m.homeserver': {'state': 'SUCCESS', 'base_url': 'https://matrix.dsn.scc.kit.edu'}});
+      {'m.homeserver': {state: 'SUCCESS', base_url: 'https://matrix.dsn.scc.kit.edu'}});
     mockedClient.loginWithPassword.and.returnValue(Promise.reject({data: {errcode: 'M_FORBIDDEN', error: 'Invalid password'}}));
     const invalidPasswordExamples: string[] = ['', 'invalid'];
 
@@ -218,7 +217,7 @@ describe('MatrixClientServiceService', () => {
     // Actual
     try {
       actualClient = service.getClient();
-    } catch(err) {
+    } catch (err) {
       fail('should not have thrown error');
     }
 
@@ -237,7 +236,7 @@ describe('MatrixClientServiceService', () => {
     // Actual
     try {
       actualClient = service.getRoomTypeClient();
-    } catch(err) {
+    } catch (err) {
       fail('should not have thrown error');
     }
 
@@ -250,12 +249,12 @@ describe('MatrixClientServiceService', () => {
     expect(service.isLoggedIn()).toBe(false);
 
     let actualClient;
-    let errorThrown: boolean = false;
+    let errorThrown = false;
 
     // Actual
     try {
       actualClient = service.getClient();
-    } catch(err) {
+    } catch (err) {
       errorThrown = true;
       expect(err.message).toContain('can only get Client if logged in');
     }
@@ -269,12 +268,12 @@ describe('MatrixClientServiceService', () => {
     expect(service.isLoggedIn()).toBe(false);
 
     let actualClient;
-    let errorThrown: boolean = false;
+    let errorThrown = false;
 
     // Actual
     try {
       actualClient = service.getRoomTypeClient();
-    } catch(err) {
+    } catch (err) {
       errorThrown = true;
       expect(err.message).toContain('can only get Client if logged in');
     }

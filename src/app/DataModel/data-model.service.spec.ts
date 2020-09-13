@@ -2,7 +2,6 @@ import {TestBed} from '@angular/core/testing';
 import {DataModelService} from './data-model.service';
 import {BalanceCalculatorService} from '../CalculateEmergentData/balance-calculator.service';
 import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimisation.service';
-import {MatrixEmergentDataService} from '../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
 import {Transaction} from './Group/Transaction';
@@ -16,12 +15,10 @@ describe('DataModelService', () => {
   let dataModelService: DataModelService;
   let balanceCalculatorService: jasmine.SpyObj<BalanceCalculatorService>;
   let greedyOptimisationService: jasmine.SpyObj<GreedyOptimisationService>;
-  let matrixEmergentDataService: jasmine.SpyObj<MatrixEmergentDataService>;
 
   beforeEach(() => {
     const spyCalc = jasmine.createSpyObj('BalanceCalculatorService', ['calculateBalances']);
     const spyOpt = jasmine.createSpyObj('GreedyOptimisationService', ['getValue']);
-    const spyEmerge = jasmine.createSpyObj('MatrixEmergentDataService', ['setBalances']);
 
     TestBed.configureTestingModule({
       // Provide both the service-to-test and its (spy) dependency
@@ -29,14 +26,12 @@ describe('DataModelService', () => {
         DataModelService,
         {provide: BalanceCalculatorService, useValue: spyCalc},
         {provide: GreedyOptimisationService, useValue: spyOpt},
-        {provide: MatrixEmergentDataService, useValue: spyEmerge}
       ]
     });
     // Inject both the service-to-test and its (spy) dependency
     dataModelService = TestBed.inject(DataModelService);
     balanceCalculatorService = TestBed.inject(BalanceCalculatorService) as jasmine.SpyObj<BalanceCalculatorService>;
     greedyOptimisationService = TestBed.inject(GreedyOptimisationService) as jasmine.SpyObj<GreedyOptimisationService>;
-    matrixEmergentDataService = TestBed.inject(MatrixEmergentDataService) as jasmine.SpyObj<MatrixEmergentDataService>;
   });
 
   it('check init user', () => {

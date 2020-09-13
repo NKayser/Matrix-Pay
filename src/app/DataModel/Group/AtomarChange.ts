@@ -8,7 +8,7 @@ export class AtomarChange {
   private readonly _amount: number;
 
   /**
-   * Custructor for AtomarChange
+   * constructor for AtomarChange
    * @param contact  Contact of the groupMember who's balance is to be changed.
    * @param amount  Amount by which the balance is to be changed.
    */

@@ -9,7 +9,6 @@ import {GroupService} from '../ServerCommunication/GroupCommunication/group.serv
 import {Currency, matrixCurrencyMap} from '../DataModel/Utils/Currency';
 import {SettingsService} from '../ServerCommunication/SettingsCommunication/settings.service';
 import {TransactionService} from '../ServerCommunication/GroupCommunication/transaction.service';
-import {MatrixEmergentDataService} from '../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 
 
 // create a fake Room with all functionality needed during testing
@@ -55,7 +54,6 @@ describe('Integration ObservableService ServerCommunication', () => {
     let groupService: GroupService;
     let settingsService: SettingsService;
     let transactionService: TransactionService;
-    let emergentDataService: MatrixEmergentDataService;
 
     // Mock client/clientService/LoggedInEmitter
     const mockedClient = jasmine.createSpyObj('MatrixClient',
@@ -118,8 +116,7 @@ describe('Integration ObservableService ServerCommunication', () => {
         };
         observableService = new ObservableService(clientServiceSpy);
         transactionService = new TransactionService(clientServiceSpy);
-        emergentDataService = new MatrixEmergentDataService(clientServiceSpy);
-        groupService = new GroupService(transactionService, clientServiceSpy, emergentDataService);
+        groupService = new GroupService(transactionService, clientServiceSpy);
         settingsService = new SettingsService(clientServiceSpy);
         basicDataService = new MatrixBasicDataService(groupService, settingsService);
 
