@@ -4,13 +4,21 @@
 }
 
 .spinner{
-  position: absolute;
-  top: 4px;
-  margin-left: 100px;
+  margin-left: 10px;
 }
 
 .sidenav {
   width: 200px;
+}
+
+.first {
+  float:right;
+  margin-right: 5px;
+  margin-top: 5px;
+}
+.second {
+  overflow: hidden;
+  margin-left: 150px;
 }
 
 .sidenav .mat-toolbar {
@@ -20,7 +28,7 @@
 .mat-toolbar.mat-primary {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 100;
 }
 
 .group_title {
@@ -58,6 +66,15 @@
     margin-top: auto;
     position: absolute;
     right: 10px;
+  }
+
+  .first {
+    float:left;
+    margin-right: 5px;
+    margin-top: 0px;
+  }
+  .second {
+    overflow: hidden;
   }
 }
 

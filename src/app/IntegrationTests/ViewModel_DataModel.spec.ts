@@ -18,6 +18,7 @@ import {AtomarChange} from '../DataModel/Group/AtomarChange';
 import {Transaction} from '../DataModel/Group/Transaction';
 import {TransactionType} from '../DataModel/Group/TransactionType';
 import {GroupTransactionComponent} from '../ViewModel/group-transaction/group-transaction.component';
+import {ReversePipePipe} from '../ViewModel/reverse-pipe.pipe';
 
 
 describe('ViewModel_DataModel', () => {
@@ -50,7 +51,7 @@ describe('ViewModel_DataModel', () => {
         // Components
         TestBed.configureTestingModule({
             declarations: [GroupBalanceComponent, GroupSelectionComponent, HomeComponent, LoginComponent,
-                SettingsComponent, GroupTransactionComponent],
+                SettingsComponent, GroupTransactionComponent, ReversePipePipe],
             providers: [
                 {provide: MatrixClientService, useValue: matrixClientService},
                 {provide: MatDialog, useValue: MockDialog},
@@ -171,8 +172,7 @@ describe('ViewModel_DataModel', () => {
         expect(groupTransactionComponent.group).toBe(g1);
         expect(groupTransactionComponent.transactions).toEqual([t1]);
         expect(nativeElement.querySelector('.title').textContent).toEqual(t1.name);
-        expect(nativeElement.querySelector('.description_left').textContent).toEqual('Paid by ' + t1.payer.contact.name);
-        expect(nativeElement.querySelector('.payed_amount').textContent).toBe('0.1$');
+        expect(nativeElement.querySelector('.description_left').textContent).toEqual('0.1$ paid by ' + t1.payer.contact.name);
     });
 
     // Home Component

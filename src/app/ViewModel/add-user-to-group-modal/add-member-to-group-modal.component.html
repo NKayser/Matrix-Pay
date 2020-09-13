@@ -7,8 +7,8 @@
     <mat-error *ngIf="formControlUser.invalid">{{getInvalidUserErrorMessage()}}</mat-error>
   </mat-form-field>
 
-  <button mat-raised-button (click)="onCancel()">Cancel</button>
-  <button mat-raised-button (click)="onSave()" >Add member</button>
+  <button mat-raised-button class="button_left" (click)="onCancel()">Cancel</button>
+  <button mat-raised-button class="button_right" (click)="onSave()" >Add member</button>
   <mat-error *ngIf="formControlUser.invalid">{{getInvalidUserErrorMessage()}}</mat-error>
 
 </div>

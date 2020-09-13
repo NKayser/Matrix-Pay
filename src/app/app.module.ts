@@ -41,6 +41,7 @@ import { ErrorModalComponent } from './ViewModel/error-modal/error-modal.compone
 import {MatGridListModule} from '@angular/material/grid-list';
 import {DialogProviderService} from './ViewModel/dialog-provider.service';
 import { PaymentViewComponent } from './ViewModel/payment-view/payment-view.component';
+import { ReversePipePipe } from './ViewModel/reverse-pipe.pipe';
 
 
 @NgModule({
@@ -61,7 +62,8 @@ import { PaymentViewComponent } from './ViewModel/payment-view/payment-view.comp
     AddMemberToGroupModalComponent,
     ConfirmPaybackModalComponent,
     ErrorModalComponent,
-    PaymentViewComponent
+    PaymentViewComponent,
+    ReversePipePipe
   ],
 
     imports: [

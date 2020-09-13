@@ -12,25 +12,36 @@
 
     <!--list of all transactions-->
     <mat-action-list>
-      <button mat-list-item class="transaction" *ngFor="let transaction of transactions" (click)="editExpense(transaction)">
+      <button mat-list-item class="transaction" *ngFor="let transaction of transactions | reversePipe" (click)="editExpense(transaction)">
         <mat-card>
           <!--TODO Add more info of transaction here-->
           <div>
             <mat-label class="title">{{transaction.name}}</mat-label>
+
             <div class="description">
-              <mat-label class="description_left">Paid by {{transaction.payer.contact.name}}</mat-label>
+              <mat-label class="description_left">{{transaction.payer.amount / 100}}{{currencyMap[transaction.group.currency]}} paid by {{transaction.payer.contact.name}}</mat-label>
               <mat-label>{{transaction.creationDate.toDateString()}}</mat-label>
               <!--<mat-label>{{transaction.creationDate.getDay()}}.{{transaction.creationDate.getMonth()}}.{{transaction.creationDate.getFullYear()}}</mat-label>-->
             </div>
             <mat-label class="payed_amount" [ngStyle]="{'color' : (userAmounts[transaction.transactionId] >= 0) ? 'green' : 'red'}">{{userAmounts[transaction.transactionId] / 100}}{{currencyMap[transaction.group.currency]}}</mat-label>
-            <mat-label class="description">{{transaction.payer.amount / 100}}{{currencyMap[transaction.group.currency]}}</mat-label>
-
           </div>
         </mat-card>
 
       </button>
+      <canvas width="1" height="100"></canvas>
 
     </mat-action-list>
+
+  </div>
+
+  <div>
+
+    <div class="createButtonDiv">
+      <mat-spinner class="first" *ngIf="loadingEditExpense || loadingCreateExpense" [diameter]="30"></mat-spinner>
+      <!--Button to open the create Transaction Dialog-->
+      <button (click)='createExpense()' class="second" mat-raised-button color="primary">Create Transaction</button>
+    </div>
+
 
   </div>
 

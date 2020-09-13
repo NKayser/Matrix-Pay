@@ -39,6 +39,7 @@ import {GroupBalanceComponent} from "../ViewModel/group-balance/group-balance.co
 import {EventEmitter} from "events";
 import {UnsuccessfulResponse} from "../ServerCommunication/Response/UnsuccessfulResponse";
 import {ClientError} from "../ServerCommunication/Response/ErrorTypes";
+import {ReversePipePipe} from '../ViewModel/reverse-pipe.pipe';
 
 
 describe('ViewModel_ServerCommunication', () => {
@@ -105,7 +106,7 @@ describe('ViewModel_ServerCommunication', () => {
         // Components
         TestBed.configureTestingModule({
             declarations: [ LoginComponent, GroupSelectionComponent, SettingsComponent, GroupTransactionComponent,
-            GroupBalanceComponent ],
+            GroupBalanceComponent, ReversePipePipe ],
             providers: [
                 { provide: MatrixClassProviderService, useValue: classProviderSpy },
                 { provide: DataModelService, useValue: dataModelService },
@@ -340,6 +341,7 @@ describe('ViewModel_ServerCommunication', () => {
         const data = {
             group: g1
         };
+        g1.addGroupmember(new Groupmember(c1, g1));
 
         // Spies
         const basicSpy = spyOn(matrixBasicDataService, 'leaveGroup').and.callThrough();
@@ -359,6 +361,7 @@ describe('ViewModel_ServerCommunication', () => {
 
         // Leave group
         groupFixture.detectChanges();
+        groupComponent.selectGroup(0);
         groupComponent.leaveGroup();
         leaveGroupComponent.data = data;
         leaveGroupComponent.ngOnInit();

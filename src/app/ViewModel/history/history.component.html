@@ -2,7 +2,7 @@
 
   <mat-list>
 
-    <mat-list-item *ngFor="let activity of activities" class="activity_item">
+    <mat-list-item *ngFor="let activity of activities | reversePipe" class="activity_item">
       <mat-card>
         <div class="label_div">
           <div *ngIf="activity.activityType===activityTypes.NEWPAYBACK">
