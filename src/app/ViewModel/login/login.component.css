@@ -1,11 +1,15 @@
 
 /*places the card that contains all elements in the center*/
 .center {
-
   margin: auto;
-  width: 20%;
+  max-width: 300px;
   padding: 20px;
+}
 
+.centerspinner {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
 }
 
 /*Places all elements vertically under each other*/
@@ -30,7 +34,7 @@
 /*Makes the div cover the hole screen and colors it
 TODO Remove scroll that is caused by the height:100% parameter*/
 .baseDiv {
-  padding-top: 150px;
+  padding-top: 25vh;
   background-color: lightblue;
-  height: 100%;
+  height: 75vh;
 }

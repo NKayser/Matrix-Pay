@@ -3,5 +3,4 @@ export abstract class ServerResponse {
   abstract getError(): number;
   abstract getMessage(): string;
   abstract getValue(): any;
-  abstract promise(): Promise<ServerResponse>;
 }

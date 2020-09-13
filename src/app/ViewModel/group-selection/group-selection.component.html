@@ -10,21 +10,34 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      <button
-        type="button"
-        aria-label="Toggle sidenav"
-        mat-icon-button
-        (click)="drawer.toggle()"
-        *ngIf="isHandset$ | async">
-        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-      </button>
-      <mat-label>{{currentGroup.name}}</mat-label>
-      <mat-spinner *ngIf="loadingAddGroup || loadingLeaveGroup || loadingAddMember" class="spinner" color="accent" [diameter]="30"></mat-spinner>
+    <mat-toolbar color="primary" class="toolbar">
+      <div class="group_title">
+        <button
+          type="button"
+          aria-label="Toggle sidenav"
+          mat-icon-button
+          (click)="drawer.toggle()"
+          *ngIf="isHandset$ | async">
+          <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+        </button>
+        <div class="first">
+          <mat-label>{{currentGroup.name}}</mat-label>
+        </div>
+        <div class="second">
+          <mat-spinner *ngIf="loadingAddGroup || loadingLeaveGroup || loadingAddMember" class="spinner" color="accent" [diameter]="30"></mat-spinner>
+        </div>
+
+      </div>
       <div class="buttonDiv">
-        <button mat-raised-button class = "groupButtons" (click)="leaveGroup()">Leave Group</button>
-        <button mat-raised-button class = "groupButtons" (click)="addGroup()">Create Group</button>
-        <button mat-raised-button class = "groupButtons" (click)="addMemberToGroup()">Add User to Group</button>
+        <div class = "groupButtons">
+          <button mat-raised-button  (click)="leaveGroup()">Leave Group</button>
+        </div>
+        <div class = "groupButtons">
+          <button mat-raised-button (click)="addGroup()">Create Group</button>
+        </div>
+        <div class = "groupButtons">
+          <button mat-raised-button (click)="addMemberToGroup()">Add User to Group</button>
+        </div>
       </div>
 
     </mat-toolbar>
@@ -35,6 +48,7 @@
       <mat-tab label="Balances"><app-group-balance [group]="currentGroup"></app-group-balance></mat-tab>
       <mat-tab label="History"><app-history [group]="currentGroup"></app-history></mat-tab>
     </mat-tab-group>
+
   </mat-sidenav-content>
 
 </mat-sidenav-container>

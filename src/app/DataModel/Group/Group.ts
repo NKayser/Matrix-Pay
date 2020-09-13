@@ -4,6 +4,7 @@ import {Transaction} from './Transaction';
 import {Recommendation} from './Recommendation';
 import {Activity} from './Activity';
 import {AtomarChange} from './AtomarChange';
+import {Subject} from 'rxjs';
 
 /**
  * Group which the user is part of. A group is something holding groupmembers, transactions, recommendations and activities.
@@ -11,12 +12,28 @@ import {AtomarChange} from './AtomarChange';
  */
 export class Group {
   private readonly _groupId: string;
-  private readonly _name: string;
-  private readonly _currency: Currency;
+  private _name: string;
+  private _currency: Currency;
   private _groupmembers: Groupmember[];
   private _transactions: Transaction[];
   private _recommendations: Recommendation[];
   private _activities: Activity[];
+
+  private transactionChangeEmitter: Subject<void> = new Subject<void>();
+  private activityChangeEmitter: Subject<void> = new Subject<void>();
+  private memberChangeEmitter: Subject<void> = new Subject<void>();
+
+  public getTransactionChangeEmitter(): Subject<void> {
+    return this.transactionChangeEmitter;
+  }
+
+  public getActivityChangeEmitter(): Subject<void> {
+    return this.activityChangeEmitter;
+  }
+
+  public getMemberChangeEmitter(): Subject<void> {
+    return this.memberChangeEmitter;
+  }
 
   /**
    * Constructor for Group. In addition to setting the values given by the arguments, groupmembers, transactions, recommendations and
@@ -50,10 +67,27 @@ export class Group {
   }
 
   /**
+   * Sets the name of the group.
+   * @param value  The new name.
+   */
+  public set name(value: string) {
+    this._name = value;
+    // It may be necessary to call a Change Emitter here in case the ViewModel is not updated fast enough
+  }
+
+  /**
    * Returns the currency of the group.
    */
   public get currency(): Currency {
     return this._currency;
+  }
+
+  /**
+   * Sets the currency
+   * @param value  The new currency.
+   */
+  public set currency(value: Currency) {
+    this._currency = value;
   }
 
   /**
@@ -90,6 +124,7 @@ export class Group {
    */
   public addGroupmember(groupmember: Groupmember): void { // TODO: OPTIONAL: sort array or insert in right position to ensure post-condition
     this._groupmembers.push(groupmember);
+    this.memberChangeEmitter.next();
   }
 
   /**
@@ -100,6 +135,7 @@ export class Group {
     this._groupmembers.forEach( (item, index) => {
       if (item.contact.contactId === contactId) { this._groupmembers.splice(index, 1); }
     });
+    this.memberChangeEmitter.next();
   }
 
   /**
@@ -108,6 +144,7 @@ export class Group {
    */
   public addTransaction(transaction: Transaction): void { // TODO: OPTIONAL: sort array or insert in right position to ensure post-condition
     this._transactions.push(transaction);
+    this.transactionChangeEmitter.next();
   }
 
   /**
@@ -124,6 +161,7 @@ export class Group {
       transaction.payer = payer;
       transaction.recipients = recipients;
     }
+    this.transactionChangeEmitter.next();
   }
 
   /**
@@ -176,5 +214,22 @@ export class Group {
    */
   public addActivity(activity: Activity): void { // TODO: OPTIONAL: sort array or insert in right position to ensure post-condition
     this._activities.push(activity);
+    this._activities = this._activities.sort(this.compare);
+    console.log(this._activities[0].creationDate);
+    this.activityChangeEmitter.next();
+  }
+
+  private compare(a: Activity, b: Activity): number {
+    // Use toUpperCase() to ignore character casing
+    const dateA = a.creationDate;
+    const dateB = b.creationDate;
+
+    let comparison = 0;
+    if (dateA > dateB) {
+      comparison = 1;
+    } else if (dateA < dateB) {
+      comparison = -1;
+    }
+    return comparison;
   }
 }

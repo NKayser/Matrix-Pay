@@ -7,6 +7,7 @@ import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {Contact} from '../../DataModel/Group/Contact';
 import {Group} from '../../DataModel/Group/Group';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 
 describe('ConfirmPaybackModalComponent', () => {
   let component: ConfirmPaybackModalComponent;
@@ -22,7 +23,8 @@ describe('ConfirmPaybackModalComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: spyDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: [] },
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 

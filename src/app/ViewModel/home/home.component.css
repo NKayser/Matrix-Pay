@@ -6,6 +6,11 @@
 
 }
 
+.card {
+  height: 80px;
+  width: 320px;
+}
+
 .balance{
   margin-bottom: 10px;
 }
@@ -38,7 +43,9 @@
 
 /*Controls the group label on the approve Payback cards*/
 .approve_group {
-  margin-left: 10px;
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
   color: gray;
 }
 
@@ -51,6 +58,9 @@
 /*Controls the amount label on the approve Payback cards*/
 .approve_amount {
   font-size: 300%;
+  position: absolute;
+  top: 20px;
+  left: auto;
 }
 
 /*Controls divider between the overview and the payback list*/

@@ -13,10 +13,11 @@ import {SettingsError} from '../Response/ErrorTypes';
   providedIn: 'root'
 })
 export class SettingsService {
-  private matrixClientService: ClientInterface;
 
   private static readonly CURRENCY_CONTENT_KEY: string = 'com.matrixpay.currency';
   private static readonly LANGUAGE_CONTENT_KEY: string = 'com.matrixpay.language';
+
+  private matrixClientService: ClientInterface;
 
   constructor(matrixClientService: MatrixClientService) {
     this.matrixClientService = matrixClientService;
@@ -27,17 +28,20 @@ export class SettingsService {
    * @param currency The new string value of the default currency setting of that User.
    */
   public async changeCurrency(currency: string): Promise<ServerResponse> {
-    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
-    const client: MatrixClient = await this.matrixClientService.getClient();
+    // Get Client (if prepared)
+    if (!this.matrixClientService.isPrepared()) {
+      throw new Error('Client is not prepared');
+    }
+    const client: MatrixClient = this.matrixClientService.getClient();
 
     // Set Value
-    let response: ServerResponse;
-    await client.setAccountData(SettingsService.CURRENCY_CONTENT_KEY,
-      {'currency': currency}).then(
-      () => response = new SuccessfulResponse(),
-      (err: string) => response = new UnsuccessfulResponse(SettingsError.Setter, err));
+    try {
+      await client.setAccountData(SettingsService.CURRENCY_CONTENT_KEY, {currency});
+    } catch (err) {
+      return new UnsuccessfulResponse(SettingsError.Setter, err);
+    }
 
-    return await response;
+    return new SuccessfulResponse();
 
     // Don't check if value was actually changed, because this can take a while and caused Errors.
   }
@@ -47,16 +51,18 @@ export class SettingsService {
    * @param language The new string value of the default language setting of that User.
    */
   public async changeLanguage(language: string): Promise<ServerResponse> {
-    if (!this.matrixClientService.isPrepared()) throw new Error("Client is not prepared");
-    const client: MatrixClient = await this.matrixClientService.getClient();
+    if (!this.matrixClientService.isPrepared()) {
+      throw new Error('Client is not prepared');
+    }
+    const client: MatrixClient = this.matrixClientService.getClient();
 
     // Set Value
-    let response: ServerResponse;
-    await client.setAccountData(SettingsService.LANGUAGE_CONTENT_KEY,
-      {'language': language}).then(
-      () => response = new SuccessfulResponse(),
-      (err: string) => response = new UnsuccessfulResponse(SettingsError.Setter, err));
+    try {
+      await client.setAccountData(SettingsService.LANGUAGE_CONTENT_KEY, {language});
+    } catch (err) {
+      return new UnsuccessfulResponse(SettingsError.Setter, err);
+    }
 
-    return await response;
+    return new SuccessfulResponse();
   }
 }

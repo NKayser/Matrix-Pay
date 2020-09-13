@@ -14,9 +14,32 @@
   position: sticky;
   top: 0;
   z-index: 1;
+    height: 11vh;
 }
 
 .logout{
- position: absolute;
-  right: 10px;
+    position: absolute;
+    right: 10px;
+    top: 30px;
+}
+
+.userName{
+    position: absolute;
+    right: 10px;
+    top: 2px;
+    font-size: small;
+}
+
+@media only screen and (min-width: 1200px) {
+    .userName{
+        position: relative;
+        margin-left: 20px;
+        font-size: small;
+    }
+
+    .logout{
+        position: absolute;
+        right: 10px;
+        top: auto;
+    }
 }

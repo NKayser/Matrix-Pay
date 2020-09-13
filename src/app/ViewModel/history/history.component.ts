@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnChanges} from '@angular/core';
 import {Activity} from '../../DataModel/Group/Activity';
 import {ActivityType} from '../../DataModel/Group/ActivityType';
 import {Group} from '../../DataModel/Group/Group';
@@ -15,7 +15,7 @@ export class HistoryComponent implements OnChanges {
 
   @Input() group: Group;
 
-  constructor() {
+  constructor(private ref: ChangeDetectorRef) {
   }
 
   /**
@@ -24,6 +24,8 @@ export class HistoryComponent implements OnChanges {
   ngOnChanges(): void {
 
     this.activities = this.group.activities;
+
+    this.group.getActivityChangeEmitter().subscribe(() => {this.ref.detectChanges(); });
 
     /*
     // Either check out other methods or implement a time that refreshes after a fixed time intervall

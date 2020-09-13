@@ -9,7 +9,7 @@ export class DialogProviderService {
 
   constructor() { }
 
-   openErrorModal(message: string, dialog: MatDialog){
+   openErrorModal(message: string, dialog: MatDialog): void{
     dialog.open(ErrorModalComponent, {
       width: '300px',
       data: {errorMessage: message}

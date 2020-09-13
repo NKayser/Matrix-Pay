@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, NgZone, OnChanges} from '@angular/core';
 import {Group} from '../../DataModel/Group/Group';
 import {Recommendation} from '../../DataModel/Group/Recommendation';
 import {currencyMap} from '../../DataModel/Utils/Currency';
@@ -30,6 +30,9 @@ export class GroupBalanceComponent implements OnChanges {
   public balanceData = [];
   public userContact: Contact;
 
+  public chartHeight = 0;
+  private barHeight = 75;
+
   // used to resize the gridList
   public breakpoint: number;
 
@@ -51,7 +54,8 @@ export class GroupBalanceComponent implements OnChanges {
   }
 
   constructor(public dialog: MatDialog, public matrixBasicDataService: MatrixBasicDataService,
-              private dialogProviderService: DialogProviderService, private dataModelService: DataModelService) {
+              private dialogProviderService: DialogProviderService, private dataModelService: DataModelService,
+              private ref: ChangeDetectorRef, private zone: NgZone) {
   }
 
   /**
@@ -62,17 +66,36 @@ export class GroupBalanceComponent implements OnChanges {
 
     this.userContact = this.dataModelService.getUser().contact;
     // Initializes the graph with the balances of the members
-    this.balanceData = [];
-    const groupMembers = this.group.groupmembers;
-    for (const groupMember of groupMembers){
-      this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance / 100});
-    }
+    this.initBalancesRecommendations();
+    this.dataModelService.getBalanceEmitter().subscribe(() => {this.initBalancesRecommendations(); });
 
-
-    this.recommendations = this.group.recommendations;
+    this.group.getMemberChangeEmitter().subscribe(() => {this.ref.detectChanges(); });
 
     // initialize the number of the grid list columns for the recommendations
     this.breakpoint = gridListResize(window.innerWidth, 1920, 3);
+  }
+
+  private initBalancesRecommendations(): void {
+
+    // Filter all recommendations concerning the user
+    const tempRec = [];
+    for (const rec of this.group.recommendations) {
+      if (rec.payer.contact.contactId === this.userContact.contactId || rec.recipient.contact.contactId === this.userContact.contactId) {
+        tempRec.push(rec);
+      }
+    }
+
+    this.recommendations = tempRec;
+
+    this.balanceData = [];
+    const groupMembers = this.group.groupmembers;
+    for (const groupMember of groupMembers){
+      if (groupMember.active){
+        this.balanceData.push({name: groupMember.contact.name, value: groupMember.balance / 100});
+      }
+    }
+
+    this.chartHeight = this.balanceData.length * this.barHeight;
   }
 
   /**
@@ -90,6 +113,8 @@ export class GroupBalanceComponent implements OnChanges {
    */
   public confirmPayback(recommendationIndex: number): void {
 
+    this.zone.run(() => {
+
       const currentRec = this.recommendations[recommendationIndex];
       const dialogRef = this.dialog.open(ConfirmPaybackModalComponent, {
         width: '350px',
@@ -98,28 +123,29 @@ export class GroupBalanceComponent implements OnChanges {
 
       dialogRef.afterClosed().subscribe(result => {
         this.dialogData = result;
-        if (this.dialogData !== undefined){
+        if (this.dialogData !== undefined) {
           this.loadingConfirmPayback = true;
 
           // TODO Missing recommendationId
           promiseTimeout(TIMEOUT, this.matrixBasicDataService.createTransaction(this.dialogData.recommendation.group.groupId,
-            'Payback from ' + this.dialogData.recommendation.payer.contact.name + ' to ' +
-            this.dialogData.recommendation.recipient.contact.name,
-            this.dialogData.recommendation.payer.contact.contactId, [this.dialogData.recommendation.recipient.contact.contactId],
-            [this.dialogData.recommendation.recipient.amount], true))
-            .then((data) => {
-              if (!data.wasSuccessful()){
-                this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
-              }
-              this.loadingConfirmPayback = false;
-            }, (err) => {
-              this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
-              this.loadingConfirmPayback = false;
-            });
+              'Payback from ' + this.dialogData.recommendation.payer.contact.name + ' to ' +
+              this.dialogData.recommendation.recipient.contact.name,
+              this.dialogData.recommendation.payer.contact.contactId, [this.dialogData.recommendation.recipient.contact.contactId],
+              [this.dialogData.recommendation.recipient.amount], true))
+              .then((data) => {
+                if (!data.wasSuccessful()) {
+                  this.dialogProviderService.openErrorModal('error confirm payback 1: ' + data.getMessage(), this.dialog);
+                }
+                this.loadingConfirmPayback = false;
+              }, (err) => {
+                this.dialogProviderService.openErrorModal('error confirm payback 2: ' + err, this.dialog);
+                this.loadingConfirmPayback = false;
+              });
 
 
         }
       });
+    });
   }
 
 }

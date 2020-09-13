@@ -1,35 +1,38 @@
-import { TestBed } from '@angular/core/testing';
 
 import { MatrixClientService } from './matrix-client.service';
-import {MatrixClassProviderService} from "./matrix-class-provider.service";
-import {SuccessfulResponse} from "../Response/SuccessfulResponse";
-import {ServerResponse} from "../Response/ServerResponse";
-import {UnsuccessfulResponse} from "../Response/UnsuccessfulResponse";
-import {ClientError} from "../Response/ErrorTypes";
-import {EventEmitter} from "@angular/core";
+import {MatrixClassProviderService} from './matrix-class-provider.service';
+import {SuccessfulResponse} from '../Response/SuccessfulResponse';
+import {ServerResponse} from '../Response/ServerResponse';
+import {UnsuccessfulResponse} from '../Response/UnsuccessfulResponse';
+import {ClientError} from '../Response/ErrorTypes';
+import {EventEmitter} from '@angular/core';
 
 describe('MatrixClientServiceService', () => {
   let service: MatrixClientService;
   const mockedClient = jasmine.createSpyObj('MatrixClient',
-    ['loginWithPassword', 'setAccountData', 'getAccountDataFromServer', 'on', 'logout']);
+    ['loginWithPassword', 'loginWithToken', 'setAccountData', 'getAccountDataFromServer', 'on', 'logout',
+      'clearStores']);
   const classProviderSpy = jasmine.createSpyObj('MatrixClassProviderService',
     ['createClient', 'findClientConfig']);
 
   function setupLogin(): void {
     classProviderSpy.findClientConfig.and.returnValue(
-      {'m.homeserver': {'state': 'SUCCESS', 'base_url': 'https://matrix.dsn.scc.kit.edu'}});
-    mockedClient.loginWithPassword.and.returnValue(Promise.resolve());
+      {'m.homeserver': {state: 'SUCCESS', base_url: 'https://matrix.dsn.scc.kit.edu'}});
+    mockedClient.loginWithPassword.and.returnValue(Promise.resolve({access_token: 'example_accessToken'}));
+    mockedClient.loginWithToken.and.returnValue(Promise.resolve());
     mockedClient.setAccountData.and.returnValue();
     mockedClient.getAccountDataFromServer.and.returnValue(Promise.resolve(null));
-    mockedClient.on.and.callFake((key: string, listener: (state, prevState, res) => void) => {return;});
+    mockedClient.on.and.callFake((key: string, listener: (state, prevState, res) => void) => {return; } );
   }
 
   beforeEach(() => {
-    //TestBed.configureTestingModule({});
-    //service = TestBed.inject(MatrixClientService);
+    // TestBed.configureTestingModule({});
+    // service = TestBed.inject(MatrixClientService);
     service = new MatrixClientService(classProviderSpy);
     classProviderSpy.createClient.and.returnValue(mockedClient);
-    //jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    // @ts-ignore
+    mockedClient.clearStores.and.returnValue(null);
+    // jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
   });
 
   it('should be created', () => {
@@ -41,9 +44,27 @@ describe('MatrixClientServiceService', () => {
     setupLogin();
 
     // Actual
-    let emitted: boolean = false;
+    let emitted = false;
     service.getLoggedInEmitter().subscribe(() => emitted = true);
     const response = await service.login('@uxxxx:dsn.tm.kit.edu', 'password');
+
+    // Expected
+    expect(classProviderSpy.createClient).toHaveBeenCalled();
+    expect(emitted).toBe(true);
+    expect(response).toBeDefined();
+    expect(response.wasSuccessful()).toBe(true);
+    expect(service.isLoggedIn()).toBe(true);
+    done();
+  });
+
+  it('should login with accessToken', async (done: DoneFn) => {
+    // Set up Mocks
+    setupLogin();
+
+    // Actual
+    let emitted = false;
+    service.getLoggedInEmitter().subscribe(() => emitted = true);
+    const response = await service.login('@user:url', undefined, 'access_Token_abc');
 
     // Expected
     expect(classProviderSpy.createClient).toHaveBeenCalled();
@@ -71,6 +92,7 @@ describe('MatrixClientServiceService', () => {
   });
 
   it('should throw Error on login with wrong input format', async (done: DoneFn) => {
+    localStorage.clear();
     // Setup
     const invalidUserIdExamples: string[] = ['', '@', ':', '@abc:', '@abc:def:', '@a:b:c'];
 
@@ -89,9 +111,10 @@ describe('MatrixClientServiceService', () => {
 
   it('login should be Unsuccessful when homeserver address cannot be found (AutoDiscovery)',
     async (done: DoneFn) => {
+    localStorage.clear();
     // Set up Mocks
     classProviderSpy.findClientConfig.and.returnValue(
-      {'m.homeserver': {'state': 'ERROR', 'error': 'some message', 'base_url': null}});
+      {'m.homeserver': {state: 'ERROR', error: 'some message', base_url: null}});
 
     // Login
     await service.login('@uxxxx:not.a.valid.url', 'password').then(
@@ -112,8 +135,8 @@ describe('MatrixClientServiceService', () => {
   it('login should be unsuccessful with invalid password', async (done: DoneFn) => {
     // Setup
     classProviderSpy.findClientConfig.and.returnValue(
-      {'m.homeserver': {'state': 'SUCCESS', 'base_url': 'https://matrix.dsn.scc.kit.edu'}});
-    mockedClient.loginWithPassword.and.returnValue(Promise.reject('M_FORBIDDEN: Invalid password'));
+      {'m.homeserver': {state: 'SUCCESS', base_url: 'https://matrix.dsn.scc.kit.edu'}});
+    mockedClient.loginWithPassword.and.returnValue(Promise.reject({data: {errcode: 'M_FORBIDDEN', error: 'Invalid password'}}));
     const invalidPasswordExamples: string[] = ['', 'invalid'];
 
     // Log in with wrong format
@@ -194,7 +217,26 @@ describe('MatrixClientServiceService', () => {
     // Actual
     try {
       actualClient = service.getClient();
-    } catch(err) {
+    } catch (err) {
+      fail('should not have thrown error');
+    }
+
+    // Expected
+    expect(actualClient).toBeDefined();
+    expect(actualClient).toBe(mockedClient);
+  });
+
+  it('should get RoomTypeClient if logged in', async () => {
+    // Mock and login
+    setupLogin();
+    await service.login('@uxxxx:dsn.tm.kit.edu', 'password');
+
+    let actualClient;
+
+    // Actual
+    try {
+      actualClient = service.getRoomTypeClient();
+    } catch (err) {
       fail('should not have thrown error');
     }
 
@@ -207,12 +249,31 @@ describe('MatrixClientServiceService', () => {
     expect(service.isLoggedIn()).toBe(false);
 
     let actualClient;
-    let errorThrown: boolean = false;
+    let errorThrown = false;
 
     // Actual
     try {
       actualClient = service.getClient();
-    } catch(err) {
+    } catch (err) {
+      errorThrown = true;
+      expect(err.message).toContain('can only get Client if logged in');
+    }
+
+    // Expected
+    expect(errorThrown).toBe(true);
+    expect(actualClient).not.toBeDefined();
+  });
+
+  it('get RoomTypeClient should throw error if not logged in', () => {
+    expect(service.isLoggedIn()).toBe(false);
+
+    let actualClient;
+    let errorThrown = false;
+
+    // Actual
+    try {
+      actualClient = service.getRoomTypeClient();
+    } catch (err) {
       errorThrown = true;
       expect(err.message).toContain('can only get Client if logged in');
     }

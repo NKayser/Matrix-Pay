@@ -2,7 +2,6 @@ import {TestBed} from '@angular/core/testing';
 import {DataModelService} from './data-model.service';
 import {BalanceCalculatorService} from '../CalculateEmergentData/balance-calculator.service';
 import {GreedyOptimisationService} from '../CalculateEmergentData/greedy-optimisation.service';
-import {MatrixEmergentDataService} from '../ServerCommunication/CommunicationInterface/matrix-emergent-data.service';
 import {Currency} from './Utils/Currency';
 import {Language} from './Utils/Language';
 import {Transaction} from './Group/Transaction';
@@ -16,12 +15,10 @@ describe('DataModelService', () => {
   let dataModelService: DataModelService;
   let balanceCalculatorService: jasmine.SpyObj<BalanceCalculatorService>;
   let greedyOptimisationService: jasmine.SpyObj<GreedyOptimisationService>;
-  let matrixEmergentDataService: jasmine.SpyObj<MatrixEmergentDataService>;
 
   beforeEach(() => {
     const spyCalc = jasmine.createSpyObj('BalanceCalculatorService', ['calculateBalances']);
     const spyOpt = jasmine.createSpyObj('GreedyOptimisationService', ['getValue']);
-    const spyEmerge = jasmine.createSpyObj('MatrixEmergentDataService', ['setBalances']);
 
     TestBed.configureTestingModule({
       // Provide both the service-to-test and its (spy) dependency
@@ -29,18 +26,16 @@ describe('DataModelService', () => {
         DataModelService,
         {provide: BalanceCalculatorService, useValue: spyCalc},
         {provide: GreedyOptimisationService, useValue: spyOpt},
-        {provide: MatrixEmergentDataService, useValue: spyEmerge}
       ]
     });
     // Inject both the service-to-test and its (spy) dependency
     dataModelService = TestBed.inject(DataModelService);
     balanceCalculatorService = TestBed.inject(BalanceCalculatorService) as jasmine.SpyObj<BalanceCalculatorService>;
     greedyOptimisationService = TestBed.inject(GreedyOptimisationService) as jasmine.SpyObj<GreedyOptimisationService>;
-    matrixEmergentDataService = TestBed.inject(MatrixEmergentDataService) as jasmine.SpyObj<MatrixEmergentDataService>;
   });
 
   it('check init user', () => {
-    dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     expect(dataModelService.user.contact.name).toEqual('Alice');
   });
 
@@ -52,7 +47,7 @@ describe('DataModelService', () => {
 
 
   it('check groups', () => {
-    const u1 = dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    const u1 = dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     const g1 = u1.createGroup('g1', 'name_g1', Currency.EUR);
     const g2 = u1.createGroup('g2', 'name_g2', Currency.USD);
     expect(dataModelService.getGroups().length).toBe(2);
@@ -62,7 +57,7 @@ describe('DataModelService', () => {
   });
 
   it('check transactions', () => {
-    const u1 = dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    const u1 = dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     const g1 = u1.createGroup('g1', 'name_g1', Currency.EUR);
 
     const c1 = new Contact('c1', 'Alice');
@@ -86,7 +81,7 @@ describe('DataModelService', () => {
   });
 
   it('check balance calculation', () => {
-    const u1 = dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    const u1 = dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     const g1 = u1.createGroup('g1', 'name_g1', Currency.EUR);
 
     const c1 = new Contact('c1', 'Alice');
@@ -109,13 +104,13 @@ describe('DataModelService', () => {
   });
 
   it('check status', () => {
-    dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     expect(dataModelService.getStatus()).not.toEqual(null);
   });
 
   it('check user exists', () => {
-    expect(dataModelService.userExists).toEqual(false);
-    dataModelService.initializeUserThisSession('c1', 'Alice', Currency.EUR, Language.ENGLISH);
+    expect(dataModelService.userExists).toEqual(true);
+    dataModelService.fillInUserData('c1', 'Alice', Currency.EUR, Language.ENGLISH);
     expect(dataModelService.userExists).toEqual(true);
   });
 

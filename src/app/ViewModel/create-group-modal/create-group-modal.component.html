@@ -14,8 +14,8 @@
     </mat-select>
   </mat-form-field>
 
-  <button mat-raised-button (click)="onCancel()">Cancel</button>
-  <button mat-raised-button (click)="onSave()" >Save</button>
+  <button mat-raised-button class="button_left" (click)="onCancel()">Cancel</button>
+  <button mat-raised-button class="button_right" (click)="onSave()" >Create Group</button>
   <mat-error *ngIf="formControlGroupName.invalid">{{getInvalidGroupNameErrorMessage()}}</mat-error>
 
 </div>

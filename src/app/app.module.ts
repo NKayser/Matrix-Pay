@@ -40,6 +40,8 @@ import { ConfirmPaybackModalComponent } from './ViewModel/confirm-payback-modal/
 import { ErrorModalComponent } from './ViewModel/error-modal/error-modal.component';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {DialogProviderService} from './ViewModel/dialog-provider.service';
+import { PaymentViewComponent } from './ViewModel/payment-view/payment-view.component';
+import { ReversePipePipe } from './ViewModel/reverse-pipe.pipe';
 
 
 @NgModule({
@@ -59,8 +61,11 @@ import {DialogProviderService} from './ViewModel/dialog-provider.service';
     CreateGroupModalComponent,
     AddMemberToGroupModalComponent,
     ConfirmPaybackModalComponent,
-    ErrorModalComponent
+    ErrorModalComponent,
+    PaymentViewComponent,
+    ReversePipePipe
   ],
+
     imports: [
         BrowserModule,
         BrowserAnimationsModule,

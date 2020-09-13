@@ -2,7 +2,7 @@ import {Contact} from '../Group/Contact';
 import {Currency} from '../Utils/Currency';
 import {Language} from '../Utils/Language';
 import {Group} from '../Group/Group';
-import {Groupmember} from '../Group/Groupmember';
+import {Subject} from 'rxjs';
 
 /**
  * User of the application. The user is the person using this application right now.
@@ -10,10 +10,16 @@ import {Groupmember} from '../Group/Groupmember';
  */
 export class User {
   private static _singleUser: User = null;
-  private readonly _contact: Contact;
+  private _contact: Contact;
   private _currency: Currency;
   private _language: Language;
   private _groups: Group[];
+
+  private groupChangeEmitter: Subject<void> = new Subject<void>();
+
+  public getGroupChangeEmitter(): Subject<void> {
+    return this.groupChangeEmitter;
+  }
 
   /**
    * Constructor for user. In addition to setting the values given by the arguments, groups is initialized as an empty array and the user
@@ -42,6 +48,14 @@ export class User {
    */
   get contact(): Contact {
     return this._contact;
+  }
+
+  /**
+   * Sets the user's contact.
+   * @param value  New contact.
+   */
+  set contact(value: Contact) {
+    this._contact = value;
   }
 
   /**
@@ -102,6 +116,7 @@ export class User {
     const group: Group = new Group(groupId, name, currency);
     this._groups.push(group);
     // group.addGroupmember(new Groupmember(this._contact, group));
+    this.groupChangeEmitter.next();
     return group;
   }
 
@@ -113,5 +128,13 @@ export class User {
     this._groups.forEach( (item, index) => {
       if (item.groupId === groupId) { this._groups.splice(index, 1); }
     });
+  }
+
+  public resetUserData(): void {
+    this._groups = [];
+    this._contact.contactId = '';
+    this._contact.name = '';
+    this._currency = Currency.EUR;
+    this._language = Language.ENGLISH;
   }
 }

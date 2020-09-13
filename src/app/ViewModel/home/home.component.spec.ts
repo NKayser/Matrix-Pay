@@ -13,6 +13,8 @@ import {Language} from '../../DataModel/Utils/Language';
 import {Contact} from '../../DataModel/Group/Contact';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
 import {AtomarChange} from '../../DataModel/Group/AtomarChange';
+import {CUSTOM_ELEMENTS_SCHEMA, NgZone} from '@angular/core';
+import {Subject, Subscription} from 'rxjs';
 
 describe('HomeComponentCancel', () => {
   let component: HomeComponent;
@@ -23,7 +25,7 @@ describe('HomeComponentCancel', () => {
 
   beforeEach(async(() => {
 
-    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups']);
+    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'getBalanceEmitter']);
     const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['createTransaction']);
 
     TestBed.configureTestingModule({
@@ -32,12 +34,19 @@ describe('HomeComponentCancel', () => {
         { provide: MatDialog, useValue: MockDialogCancel },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
+
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
+
+    dataModelService.getBalanceEmitter.and.returnValue({subscribe(): Subscription{ return new Subscription(); } } as Subject<void>);
 
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
@@ -133,9 +142,14 @@ describe('HomeComponentConfirm', () => {
         { provide: MatDialog, useValue: MockDialog },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
       .compileComponents();
+
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;

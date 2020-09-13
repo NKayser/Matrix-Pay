@@ -3,7 +3,7 @@
  * For that, see Groupmember.
  */
 export class Contact {
-  private readonly _contactId: string;
+  private _contactId: string;
   private _name: string;
 
   /**
@@ -21,6 +21,14 @@ export class Contact {
    */
   get contactId(): string {
     return this._contactId;
+  }
+
+  /**
+   * Sets the ID for the contact.
+   * @param value  New ID for the contact.
+   */
+  set contactId(value: string) {
+    this._contactId = value;
   }
 
   /**

@@ -2,6 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
 import {Contact} from '../../DataModel/Group/Contact';
+import {Currency} from '../../DataModel/Utils/Currency';
 
 export interface PaymentDialogData {
   // the titel of the dialog, this is not the title of the transaction
@@ -11,6 +12,7 @@ export interface PaymentDialogData {
   recipients: Contact[];
   amount: number[];
   isAdded: boolean[];
+  currency: Currency;
 }
 
 @Component({
@@ -41,7 +43,7 @@ export class PaymentModalComponent implements OnInit{
       this.formControlAmount[i] = new FormControl(this.data.amount[i] / 100, [Validators.required, Validators.pattern('[0-9]*[.]?[0-9]?[0-9]?')]);
     }
 
-    this.formControlDescription = new FormControl(this.data.description, [Validators.required]);
+    this.formControlDescription = new FormControl(this.data.description, [Validators.required, Validators.maxLength(60)]);
     // this.formControlPayer = new FormControl(this.data.payer.name, [Validators.required]);
   }
 
@@ -96,7 +98,7 @@ export class PaymentModalComponent implements OnInit{
     }
 
     return {modalTitle: this.data.modalTitle, description: newDescription, payer: newPayer, recipients: newRecipients, amount: newAmount,
-      isAdded: this.data.isAdded};
+      isAdded: this.data.isAdded, currency: this.data.currency};
 
   }
 
@@ -111,7 +113,11 @@ export class PaymentModalComponent implements OnInit{
    * Return an error message if the description is invalid
    */
   public getInvalidDescriptionErrorMessage(): string{
-    return 'Not a description';
+    if (this.formControlDescription.hasError('required')){
+      return 'Please enter a description';
+    } else {
+      return 'The description is too long';
+    }
   }
 
   /**

@@ -54,9 +54,8 @@ export interface TransactionType{
   transactionId: string;
   name: string;
   creationDate: Date;
-  groupId: string,
-  payerId: string,
-  payerAmount: number;
+  groupId: string;
+  payerId: string;
   recipientIds: string[];
   recipientAmounts: number[];
   senderId: string;

@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { GroupBalanceComponent } from './group-balance.component';
+import {GroupBalanceComponent} from './group-balance.component';
 import {MatDialog} from '@angular/material/dialog';
 import {MockDialog, MockDialogCancel} from '../_mockServices/MockDialog';
 import {Currency} from '../../DataModel/Utils/Currency';
@@ -13,6 +13,7 @@ import {Contact} from '../../DataModel/Group/Contact';
 import {User} from '../../DataModel/User/User';
 import {Language} from '../../DataModel/Utils/Language';
 import {Groupmember} from '../../DataModel/Group/Groupmember';
+import {CUSTOM_ELEMENTS_SCHEMA, EventEmitter, NgZone} from '@angular/core';
 
 describe('GroupBalanceComponent', () => {
   let component: GroupBalanceComponent;
@@ -23,7 +24,7 @@ describe('GroupBalanceComponent', () => {
 
   beforeEach(async(() => {
 
-    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups']);
+    const spyData = jasmine.createSpyObj('DataModelService', ['getUser', 'getGroups', 'getBalanceEmitter']);
     const spyMatrix = jasmine.createSpyObj('MatrixBasicDataService', ['createTransaction']);
 
     TestBed.configureTestingModule({
@@ -32,12 +33,22 @@ describe('GroupBalanceComponent', () => {
         { provide: MatDialog, useValue: MockDialogCancel },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
 
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
+
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
+    dataModelService.getBalanceEmitter.and.returnValue({
+      subscribe(): any {
+
+      }
+    } as EventEmitter<void>);
 
     fixture = TestBed.createComponent(GroupBalanceComponent);
     component = fixture.componentInstance;
@@ -45,12 +56,13 @@ describe('GroupBalanceComponent', () => {
 
   it('check for input', () => {
     const c1 = new Contact('c1', 'Alice');
+    dataModelService.getUser.and.returnValue(new User(c1, Currency.EUR, Language.ENGLISH));
     const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
     dataModelService.getUser.and.returnValue(stubValueUser);
     const g1 = new Group('1', '1', Currency.USD);
-    g1.setRecommendations([new Recommendation(g1, null, null)]);
+    g1.setRecommendations([new Recommendation(g1, new AtomarChange(c1, 5), new AtomarChange(c1, 5))]);
     const g2 = new Group('2', '2', Currency.USD);
-    g2.setRecommendations([new Recommendation(g2, null, null)]);
+    g2.setRecommendations([new Recommendation(g2,  new AtomarChange(c1, 5), new AtomarChange(c1, 5))]);
     const mg1 = new Groupmember(c1, g1);
     mg1.balance = 5;
     g1.addGroupmember(mg1);
@@ -84,7 +96,7 @@ describe('GroupBalanceComponent', () => {
     const stubValueUser = new User(c1, Currency.USD, Language.GERMAN);
     dataModelService.getUser.and.returnValue(stubValueUser);
     const g1 = new Group('1', '1', Currency.USD);
-    g1.setRecommendations([new Recommendation(g1, null, null)]);
+    g1.setRecommendations([new Recommendation(g1,  new AtomarChange(c1, 5), new AtomarChange(c1, 5))]);
     const mg1 = new Groupmember(c1, g1);
     mg1.balance = 5;
     g1.addGroupmember(mg1);
@@ -137,9 +149,14 @@ describe('GroupBalanceComponent', () => {
         { provide: MatDialog, useValue: MockDialog },
         { provide: MatrixBasicDataService, useValue: spyMatrix},
         { provide: DataModelService, useValue: spyData}
-      ]
+      ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
       .compileComponents();
+
+    const ngZone = TestBed.get(NgZone);
+
+    spyOn(ngZone, 'run').and.callFake((fn: Function) => fn());
 
     dataModelService = TestBed.inject(DataModelService) as jasmine.SpyObj<DataModelService>;
     matrixBasicDataService = TestBed.inject(MatrixBasicDataService) as jasmine.SpyObj<MatrixBasicDataService>;
