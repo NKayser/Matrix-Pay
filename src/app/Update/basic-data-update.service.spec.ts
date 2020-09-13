@@ -54,8 +54,8 @@ describe('BasicDataUpdateService and DataModel', () => {
     const groupmemberObservable: Subject<GroupMemberType> = new Subject<GroupMemberType>();
     mockedObservableService.getGroupMembershipObservable.and.returnValue(groupmemberObservable);
 
-    const transactoinsObservable: Subject<TransactionTypeInterface[]> = new Subject<TransactionTypeInterface[]>();
-    mockedObservableService.getMultipleNewTransactionsObservable.and.returnValue(transactoinsObservable);
+    const transactionsObservable: Subject<TransactionTypeInterface[]> = new Subject<TransactionTypeInterface[]>();
+    mockedObservableService.getMultipleNewTransactionsObservable.and.returnValue(transactionsObservable);
 
     const logoutObservable: Subject<void> = new Subject<void>();
     mockedObservableService.getLogoutObservable.and.returnValue(logoutObservable);
